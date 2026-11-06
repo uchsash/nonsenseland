@@ -3,7 +3,27 @@
 Last updated: 2026-11-06
 
 This file records what has been decided, what is still open, and what is needed from the owner.
-Nothing gets built until the plan is approved.
+
+## Status (2026-11-06)
+
+**Phase 1 is built and running locally** (code in `site/`, how to run it in `site/README.md`).
+Everything below works and was tested in the browser:
+- homepage sections (from the admin), video slider with filters, article slider, free books, published books, ads, newsletter
+- video pages (the Facebook/YouTube player loads only after pressing play)
+- the reader for articles and books: white/sepia/dark, 2 fonts, size, line spacing, width, progress bar, chapter list, ← → keys, remembers the place, “যেখানে থেমেছিলেন” button
+- EPUB and Word import to chapters, with warnings for missing Heading 1 and Bijoy text
+- EPUB download; Send to Kindle (switches on once email is set up)
+- paid/members chapter locking (tested: sample chapters open, the rest locked, no text leaks)
+- search (Bangla), topics, About page with contact form, sitemap, robots, draft preview
+- phone layout, dark mode, admin panel
+
+**Left for launch (phase 1):**
+1. Real content: replace the **নমুনা** (sample) videos, articles and placeholder covers; upload the two EPUBs.
+2. Owner reviews all Bangla interface text (`site/src/i18n/bn.ts`) and the About page.
+3. Deployment to Cloudflare. Needs from the owner: domain, Cloudflare account, Neon (database) account, Resend (email) account. Then: R2 storage, Turnstile keys, email DNS records (SPF/DKIM), a cron trigger for scheduled publishing, backups, uptime alert.
+4. Privacy Policy and Terms pages (draft to be written, owner approves).
+
+**Known minor issue:** the template's ESLint setup fails to load (a Next 16 / ESLint 9 template bug); type checks and the production build pass.
 
 ---
 
