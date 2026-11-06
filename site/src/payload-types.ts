@@ -360,6 +360,10 @@ export interface Book {
   subtitle?: string | null;
   role: 'writer' | 'translator';
   /**
+   * Used by the ফিকশন / নন-ফিকশন filter.
+   */
+  genre?: ('fiction' | 'nonfiction') | null;
+  /**
    * For translations.
    */
   originalAuthor?: string | null;
@@ -1132,6 +1136,7 @@ export interface BooksSelect<T extends boolean = true> {
   title?: T;
   subtitle?: T;
   role?: T;
+  genre?: T;
   originalAuthor?: T;
   originalTitle?: T;
   titleColor?: T;
@@ -1877,6 +1882,34 @@ export interface InterfaceText {
      * Default: এই অধ্যায়টি এখনো উন্মুক্ত নয়।
      */
     locked?: string | null;
+    /**
+     * Default: টীকা
+     */
+    notes?: string | null;
+    /**
+     * Default: মৌলিক
+     */
+    filterOriginal?: string | null;
+    /**
+     * Default: অনুবাদ
+     */
+    filterTranslation?: string | null;
+    /**
+     * Default: ফিকশন
+     */
+    filterFiction?: string | null;
+    /**
+     * Default: নন-ফিকশন
+     */
+    filterNonfiction?: string | null;
+    /**
+     * Default: এই ধরনের বই এখনো নেই।
+     */
+    filterEmpty?: string | null;
+    /**
+     * Default: লেখায় ফিরুন
+     */
+    backToText?: string | null;
   };
   kindle?: {
     /**
@@ -2351,6 +2384,13 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         finished?: T;
         backToBook?: T;
         locked?: T;
+        notes?: T;
+        filterOriginal?: T;
+        filterTranslation?: T;
+        filterFiction?: T;
+        filterNonfiction?: T;
+        filterEmpty?: T;
+        backToText?: T;
       };
   kindle?:
     | T

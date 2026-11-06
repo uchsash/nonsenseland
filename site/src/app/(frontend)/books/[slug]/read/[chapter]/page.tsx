@@ -3,10 +3,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Reader } from '@/components/Reader'
+import { FootnoteList } from '@/components/FootnoteList'
 import { RichText } from '@/components/RichText'
 import { getT } from '@/i18n/server'
 import { getBook, getChapterList, getReadableChapter } from '@/lib/data'
 import { bnNumber } from '@/utilities/bn'
+import { indexFootnotes } from '@/utilities/footnotes'
 import { colorClass } from '@/utilities/palette'
 
 type Props = { params: Promise<{ slug: string; chapter: string }> }
@@ -59,7 +61,10 @@ export default async function ChapterPage({ params }: Props) {
         {content === 'locked' ? (
           <p className="empty">{t.book.locked}</p>
         ) : (
-          <RichText data={content.content} />
+          <>
+            <RichText data={content.content} />
+            <FootnoteList index={indexFootnotes(content.content)} />
+          </>
         )}
 
         <nav className="chapter-nav">

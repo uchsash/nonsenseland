@@ -1,0 +1,6 @@
+
+/* Editor: paragraphs marked “No indent” (¶ menu) get a faint marker. */
+[data-nl-noindent]::before {
+  content: '⇤ ';
+  opacity: 0.35;
+}

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { AdSlot } from '@/components/AdSlot'
 import { ArticleCard, BookCard } from '@/components/Cards'
 import { Img } from '@/components/Img'
+import { FootnoteList } from '@/components/FootnoteList'
 import { Reader } from '@/components/Reader'
 import { RichText, splitRichText } from '@/components/RichText'
 import { Share } from '@/components/Share'
@@ -16,6 +17,7 @@ import { getArticle, listArticles } from '@/lib/data'
 import { docMetadata } from '@/lib/seo'
 import type { Author, Book, Category } from '@/payload-types'
 import { bnDate, bnNumber } from '@/utilities/bn'
+import { indexFootnotes } from '@/utilities/footnotes'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -35,6 +37,7 @@ export default async function ArticlePage({ params }: Props) {
   const author = article.author as Author | null
   const book = article.relatedBook as Book | null
   const [first, rest] = splitRichText(article.content)
+  const footnotes = indexFootnotes(article.content)
   const more = await listArticles({ category: category?.id, limit: 6, exclude: article.id })
 
   return (
@@ -55,13 +58,14 @@ export default async function ArticlePage({ params }: Props) {
           <Img media={article.cover} use={['card', 'og']} sizes="(max-width: 960px) 100vw, 960px" priority />
         </div>
         <div className="reading-column">
-          <RichText data={first} />
+          <RichText data={first} footnotes={footnotes} />
           {rest ? (
             <>
               <AdSlot slot="article-inline" />
-              <RichText data={rest} />
+              <RichText data={rest} footnotes={footnotes} />
             </>
           ) : null}
+          <FootnoteList index={footnotes} />
           <TopicLinks topics={article.topics} />
           <Share path={`/articles/${article.slug}`} title={article.title} />
           {book?.slug ? (

@@ -42,6 +42,16 @@ export const Books: CollectionConfig = {
             { label: 'অনুবাদক (Translator)', value: 'translator' },
           ],
         },
+        {
+          name: 'genre',
+          type: 'select',
+          label: 'Genre',
+          options: [
+            { label: 'ফিকশন (Fiction)', value: 'fiction' },
+            { label: 'নন-ফিকশন (Non-fiction)', value: 'nonfiction' },
+          ],
+          admin: { description: 'Used by the ফিকশন / নন-ফিকশন filter.' },
+        },
         { name: 'originalAuthor', type: 'text', admin: { description: 'For translations.' } },
         { name: 'originalTitle', type: 'text' },
       ],

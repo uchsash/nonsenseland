@@ -57,6 +57,13 @@ export const defaults = {
     finished: 'বইটি শেষ। পড়ার জন্য ধন্যবাদ!',
     backToBook: 'বইয়ের পাতায় ফিরুন',
     locked: 'এই অধ্যায়টি এখনো উন্মুক্ত নয়।',
+    notes: 'টীকা',
+    filterOriginal: 'মৌলিক',
+    filterTranslation: 'অনুবাদ',
+    filterFiction: 'ফিকশন',
+    filterNonfiction: 'নন-ফিকশন',
+    filterEmpty: 'এই ধরনের বই এখনো নেই।',
+    backToText: 'লেখায় ফিরুন',
   },
   kindle: {
     title: 'Kindle-এ পাঠান',

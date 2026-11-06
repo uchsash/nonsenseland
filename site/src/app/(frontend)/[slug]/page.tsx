@@ -2,10 +2,12 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { ContactForm } from '@/components/Forms'
+import { FootnoteList } from '@/components/FootnoteList'
 import { Img } from '@/components/Img'
 import { RichText } from '@/components/RichText'
 import { getPage } from '@/lib/data'
 import { docMetadata } from '@/lib/seo'
+import { indexFootnotes } from '@/utilities/footnotes'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -30,6 +32,7 @@ export default async function Page({ params }: Props) {
         </div>
       ) : null}
       <RichText data={page.content} className="prose" />
+      <FootnoteList index={indexFootnotes(page.content)} />
       {page.showContactForm ? (
         <div style={{ marginTop: 48 }}>
           <ContactForm />

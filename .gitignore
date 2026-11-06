@@ -6,3 +6,6 @@ Neometric Font-*/
 free-books/
 *.epub
 *.docx
+
+# Book covers and other content images are uploaded through the admin
+book-covers/

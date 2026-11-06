@@ -13,7 +13,7 @@ import { readStoredFile } from './files'
 type RawChapter = { title: string; html: string }
 type BookImage = { data: Buffer; name: string; mime: string }
 /** Chapters plus the images they reference (by key, through a data-nl-img attribute). */
-type Parsed = { chapters: RawChapter[]; images: Map<string, BookImage> }
+type Parsed = { chapters: RawChapter[]; images: Map<string, BookImage>; notes: string[] }
 type BookDoc = {
   id: number | string
   title: string
@@ -80,6 +80,107 @@ const cleanHtml = (html: string) => {
     if (!textOf(p) && !p.querySelector('img')) p.remove()
   })
   return doc.body.innerHTML
+}
+
+/** Footnote references become links to this address, then footnote nodes after conversion. */
+export const FOOTNOTE_MARK = 'https://nl-fn.invalid/'
+
+const NOTE_ID = /^(ftnt|fn|footnote|endnote|note)/i
+const BLOCKS = 'li, aside, p, div, section, dd'
+
+/** The last non-empty text node before `node`, inside the same paragraph. */
+function textBefore(node: Node): Text | null {
+  let current: Node | null = node
+  while (current) {
+    if (current.previousSibling) {
+      current = current.previousSibling
+      while (current.lastChild) current = current.lastChild
+      if (current.nodeType === 3 && current.textContent?.trim()) return current as Text
+      continue
+    }
+    current = current.parentNode
+    if (!current || (current as Element).matches?.('p, li, h1, h2, h3, h4, blockquote, body')) return null
+  }
+  return null
+}
+
+/**
+ * Finds footnotes (Google Docs, Word and EPUB 3 styles): each reference becomes a marked
+ * link on the word before it, and the note bodies are removed from the text.
+ * Works across files (`file` is the document's path inside the EPUB).
+ */
+function extractFootnotes(docs: { file: string; body: HTMLElement }[], notes: string[]) {
+  const byId = new Map<string, Element>()
+  for (const { file, body } of docs) body.querySelectorAll('[id]').forEach((el) => byId.set(`${file}#${el.id}`, el))
+
+  // 1. Pair references with note bodies.
+  const pairs: { ref: Element; text: string }[] = []
+  const noteBlocks = new Set<Element>()
+  for (const { file, body } of docs) {
+    for (const a of Array.from(body.querySelectorAll('a[href*="#"]'))) {
+      const [target, id] = (a.getAttribute('href') ?? '').split('#')
+      if (!id) continue
+      const el = byId.get(`${target ? resolveZipPath(file, target) : file}#${decodeURIComponent(id)}`)
+      if (!el) continue
+      const block = el.closest(BLOCKS) ?? el
+      if (block.contains(a)) continue // the back-link inside a note
+      // A note is the target element itself or starts with it ([1] …); a back-link points
+      // into the middle of a paragraph instead, so that pairing is skipped.
+      if (el !== block && !textOf(block).startsWith(textOf(el))) continue
+      const linksBack = Boolean(a.id && block.querySelector(`a[href$="#${a.id}"]`))
+      const typed =
+        /noteref/.test(a.getAttribute('epub:type') ?? '') ||
+        /footnote|endnote|note/.test(block.getAttribute('epub:type') ?? '')
+      if (!linksBack && !typed && !NOTE_ID.test(id)) continue
+      const copy = block.cloneNode(true) as Element
+      copy.querySelectorAll('a[href*="#"]').forEach((back) => {
+        if (/^\[?\s*[\d০-৯]+\s*\]?$|^[↑↩^]$/.test(back.textContent?.trim() ?? '')) back.remove()
+      })
+      const text = (copy.textContent ?? '')
+        .replace(/\s+/g, ' ')
+        .replace(/^\s*\[?[\d০-৯]+\]?[.)]?\s*/, '')
+        .trim()
+      if (!text) continue
+      pairs.push({ ref: a, text })
+      noteBlocks.add(block)
+    }
+  }
+
+  // 2. Turn each reference into a link on the preceding word.
+  for (const { ref, text } of pairs) {
+    if ([...noteBlocks].some((block) => block.contains(ref))) continue // references inside notes
+    const doc = ref.ownerDocument
+    const parent = ref.parentElement
+    const marker = parent?.tagName === 'SUP' && parent.childNodes.length === 1 ? parent : ref
+    const link = doc.createElement('a')
+    link.setAttribute('href', `${FOOTNOTE_MARK}${notes.length}`)
+    notes.push(text)
+    const before = textBefore(marker)
+    const match = before?.data.match(/(\S+)\s*$/)
+    if (before && match) {
+      before.data = before.data.slice(0, match.index)
+      link.textContent = match[1]
+      before.parentNode!.insertBefore(link, before.nextSibling)
+      marker.remove()
+    } else {
+      link.textContent = '*'
+      marker.replaceWith(link)
+    }
+  }
+
+  // 3. Remove the note bodies, containers left empty, and a trailing divider before them.
+  for (const block of noteBlocks) {
+    let parent = block.parentElement
+    block.remove()
+    while (parent && parent.tagName !== 'BODY' && !parent.textContent?.trim() && !parent.querySelector('img')) {
+      const next = parent.parentElement
+      parent.remove()
+      parent = next
+    }
+  }
+  for (const { body } of docs) {
+    while (body.lastElementChild?.tagName === 'HR') body.lastElementChild.remove()
+  }
 }
 
 /**
@@ -184,12 +285,19 @@ export async function parseEpub(buffer: Buffer, warnings: string[]): Promise<Par
   const images = new Map<string, BookImage>()
   const fallback = (indexInDocument: number) => `অধ্যায় ${bnNumber(chapters.length + indexInDocument + 1)}`
 
+  // Read every document first, so footnotes can be matched across files.
+  const notes: string[] = []
+  const docs: { file: string; body: HTMLElement }[] = []
   for (const ref of Array.from(opf.querySelectorAll('spine > itemref'))) {
     const item = manifest.get(ref.getAttribute('idref') ?? '')
     if (!item || item.props.includes('nav')) continue
     const source = await zip.file(item.href)?.async('string')
-    if (!source) continue
-    const body = parseHtml(source).body
+    if (source) docs.push({ file: item.href, body: parseHtml(source).body })
+  }
+  extractFootnotes(docs, notes)
+
+  for (const { file, body } of docs) {
+    const item = { href: file }
 
     // Read images from the EPUB and mark them so they can be uploaded later.
     for (const img of Array.from(body.querySelectorAll('img'))) {
@@ -216,7 +324,7 @@ export async function parseEpub(buffer: Buffer, warnings: string[]): Promise<Par
       'Only one chapter was found. To split the book, use Heading 1 for chapter titles (or page breaks) before making the EPUB.',
     )
   }
-  return { chapters, images }
+  return { chapters, images, notes }
 }
 
 export async function parseWord(buffer: Buffer, warnings: string[]): Promise<Parsed> {
@@ -234,7 +342,10 @@ export async function parseWord(buffer: Buffer, warnings: string[]): Promise<Par
     },
   )
   const chapters: RawChapter[] = []
-  const html = cleanHtml(value)
+  const notes: string[] = []
+  const raw = parseHtml(`<body>${value}</body>`).body
+  extractFootnotes([{ file: '', body: raw }], notes)
+  const html = cleanHtml(raw.innerHTML)
   if (!/<h1[\s>]/i.test(html)) {
     warnings.push('No “Heading 1” found, so the whole file became one chapter. Mark chapter titles as Heading 1 in Word.')
   }
@@ -250,7 +361,7 @@ export async function parseWord(buffer: Buffer, warnings: string[]): Promise<Par
     }
   }
   if (textOf(parseHtml(`<body>${current.html}</body>`).body)) chapters.push(current)
-  return { chapters, images }
+  return { chapters, images, notes }
 }
 
 /** Uploads the book's images to the media library and points the markers at them. */
@@ -274,7 +385,22 @@ async function attachImages(parsed: Parsed, book: BookDoc, req: PayloadRequest) 
   return ids.size
 }
 
-type LexicalNode = { type?: string; value?: unknown; children?: LexicalNode[] }
+type LexicalNode = {
+  type?: string
+  value?: unknown
+  fields?: Record<string, unknown>
+  children?: LexicalNode[]
+}
+
+/** Links pointing at FOOTNOTE_MARK + n become footnotes with the note text. */
+const toFootnotes = (node: LexicalNode, notes: string[]) => {
+  const url = node.type === 'link' ? String(node.fields?.url ?? '') : ''
+  if (url.startsWith(FOOTNOTE_MARK)) {
+    const note = notes[Number(url.slice(FOOTNOTE_MARK.length))] ?? ''
+    node.fields = { ...node.fields, linkType: 'footnote', note, url: '', newTab: false }
+  }
+  node.children?.forEach((child) => toFootnotes(child, notes))
+}
 
 /** Upload ids come out of HTML as strings; the database uses numbers. */
 const fixUploadIds = (node: LexicalNode) => {
@@ -334,6 +460,7 @@ export async function importBookChapters({ book, req }: { book: BookDoc; req: Pa
   for (const [index, chapter] of parsed.chapters.entries()) {
     const content = convertHTMLToLexical({ editorConfig, html: chapter.html, JSDOM })
     fixUploadIds(content.root as LexicalNode)
+    toFootnotes(content.root as LexicalNode, parsed.notes)
     const match = byTitle.get(chapter.title.trim())
     const data = { book: book.id as number, title: chapter.title, order: index + 1, content }
     try {
@@ -354,7 +481,7 @@ export async function importBookChapters({ book, req }: { book: BookDoc; req: Pa
   }
 
   return [
-    `✓ ${new Date().toLocaleString('en-GB')}: ${parsed.chapters.length} chapters (${created} new, ${updated} updated, ${byTitle.size} removed), ${imageCount} image(s).`,
+    `✓ ${new Date().toLocaleString('en-GB')}: ${parsed.chapters.length} chapters (${created} new, ${updated} updated, ${byTitle.size} removed), ${imageCount} image(s), ${parsed.notes.length} footnote(s).`,
     ...parsed.chapters.map((c, i) => `  ${i + 1}. ${c.title}`),
     ...warnings.map((w) => `⚠ ${w}`),
     'Check the chapters under Library → Chapters: you can rename, reorder or delete them.',

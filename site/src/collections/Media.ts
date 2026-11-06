@@ -22,7 +22,8 @@ export const Media: CollectionConfig = {
     imageSizes: [
       { name: 'thumb', width: 480, height: 270, position: 'centre' },
       { name: 'card', width: 960, height: 540, position: 'centre' },
-      { name: 'cover', width: 600, height: 900, position: 'centre' },
+      // Book covers: resized only, never cropped (real covers have different proportions).
+      { name: 'cover', width: 600 },
       { name: 'og', width: 1200, height: 630, position: 'centre' },
     ],
     formatOptions: { format: 'webp', options: { quality: 82 } },

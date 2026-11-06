@@ -27,6 +27,8 @@ import { Authors, Categories, Topics } from './collections/Taxonomy'
 import { Users } from './collections/Users'
 import { Videos } from './collections/Videos'
 import { LinesBlock } from './blocks/Lines'
+import { FootnoteLinkFeature } from './features/footnoteLink'
+import { ParagraphStyleFeature } from './features/paragraphStyle/feature.server'
 import { AdSettings, Homepage, InterfaceText, SiteSettings } from './globals'
 import { PALETTE } from './utilities/palette'
 import { revalidateAfterChange, revalidateAfterDelete, revalidateGlobal } from './utilities/revalidate'
@@ -90,7 +92,11 @@ export default buildConfig({
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default' }] },
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
-      ...defaultFeatures,
+      // The built-in link feature is replaced by one that also does footnotes.
+      ...defaultFeatures.filter((feature) => feature.key !== 'link'),
+      FootnoteLinkFeature,
+      // ¶ menu: space above a paragraph, and “no indent”.
+      ParagraphStyleFeature(),
       // Text colours from the logo (toolbar: “Aa” colour menu).
       TextStateFeature({
         state: {

@@ -592,10 +592,16 @@ html {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/* Every cover in a row sits in the same 2:3 frame, so tops and bottoms line up.
+   (The book's own page shows the full, uncropped cover.) */
 .book-card .card-media {
   aspect-ratio: 2 / 3;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+.book-card .card-media img {
+  object-fit: cover;
+  object-position: center;
 }
 .book-card .card-title {
   font-size: 16px;
@@ -750,8 +756,18 @@ html {
   border: 1px solid var(--line);
   padding: 6px 10px;
 }
-/* Reader options: paragraph style and alignment */
-.reading[data-align='justify'] .prose p {
+/* Reader options: paragraph style and alignment.
+   Paragraphs aligned in the editor (al-*) keep their own alignment. */
+.reading[data-align='justify'] .prose p:not([class*='al-']) {
+  text-align: justify;
+}
+.prose p.al-center {
+  text-align: center;
+}
+.prose p.al-right {
+  text-align: right;
+}
+.prose p.al-justify {
   text-align: justify;
 }
 .reading[data-paragraph='indent'] .prose p {
@@ -759,8 +775,141 @@ html {
   text-indent: 1.6em;
 }
 .reading[data-paragraph='indent'] .prose p:first-child,
-.reading[data-paragraph='indent'] .prose :is(h2, h3, h4, hr, blockquote) + p {
+.reading[data-paragraph='indent'] .prose :is(h2, h3, h4, hr, blockquote, .gap) + p,
+.prose p.no-indent {
   text-indent: 0;
+}
+
+/* Paragraph settings from the editor's ¶ menu (space above). */
+.prose p.sp-none {
+  margin-top: -1.1em; /* cancels the gap after the previous paragraph */
+}
+.reading[data-paragraph='indent'] .prose p.sp-none {
+  margin-top: 0;
+}
+.prose p.sp-more {
+  margin-top: 1.6em;
+}
+.reading[data-paragraph='indent'] .prose p.sp-more {
+  margin-top: 1.2em;
+}
+
+/* Empty lines in the editor become one fixed space, however many there are. */
+.prose .gap {
+  height: 1em;
+}
+.prose .gap + .gap {
+  display: none;
+}
+
+/* Footnotes: the word with a Bangla superscript number, and a pop-up. */
+.fn {
+  position: relative;
+}
+.fn-ref {
+  all: unset;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--muted);
+  -webkit-tap-highlight-color: transparent;
+}
+.fn-ref:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.fn-ref sup {
+  color: var(--accent);
+  font-size: 0.65em;
+  font-weight: 600;
+  margin-left: 1px;
+  line-height: 0;
+}
+.fn-pop {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  transform: translateX(var(--shift, 0));
+  z-index: 25;
+  display: flex;
+  gap: 8px;
+  width: max-content;
+  max-width: min(360px, 86vw);
+  padding: 12px 14px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.14);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: left;
+  text-indent: 0;
+  white-space: pre-line;
+}
+.fn-pop.is-open {
+  padding-right: 36px; /* room for ✕ */
+}
+.fn-num {
+  color: var(--accent);
+  font-weight: 600;
+  flex: none;
+}
+.fn-close {
+  all: unset;
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+}
+.fn-close:hover,
+.fn-close:focus-visible {
+  background: var(--surface);
+  color: var(--text);
+}
+@media (max-width: 600px) {
+  /* Phones: the note opens as a sheet at the bottom of the screen. */
+  .fn-pop {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    transform: none;
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* টীকা: all notes at the end of the text. */
+.footnotes {
+  border-top: 1px solid var(--line);
+  margin-top: 40px;
+  padding-top: 16px;
+  font-size: 0.9em;
+}
+.footnotes h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.footnotes ol {
+  list-style-type: bengali;
+  padding-left: 1.6em;
+  margin: 0;
+}
+.footnotes li {
+  margin: 0 0 6px;
+  white-space: pre-line;
+}
+.footnotes li a {
+  color: var(--accent);
+  text-decoration: none;
 }
 .reading[data-paragraph='indent'] .prose hr {
   margin: 1.2em 0;
@@ -1041,4 +1190,13 @@ html {
 .not-found p {
   color: var(--muted);
   margin: 12px 0 28px;
+}
+
+/* Book filters: a thin divider between the two chip pairs. */
+.chip-divider {
+  flex: none;
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 4px;
+  background: var(--line);
 }

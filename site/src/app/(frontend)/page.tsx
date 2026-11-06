@@ -1,7 +1,8 @@
 import Link from 'next/link'
 
 import { AdSlot } from '@/components/AdSlot'
-import { ArticleCard, BookCard } from '@/components/Cards'
+import { BookShelf } from '@/components/BookShelf'
+import { ArticleCard } from '@/components/Cards'
 import { NewsletterForm } from '@/components/Forms'
 import { Img } from '@/components/Img'
 import { Slider } from '@/components/Slider'
@@ -72,13 +73,7 @@ async function HomeSection({ section }: { section: Section }) {
     case 'published': {
       const books = await listBooks(section.blockType)
       if (!books.length) return null
-      return (
-        <Slider title={section.title} link="/books" variant="books">
-          {books.map((b) => (
-            <BookCard key={b.id} book={b} />
-          ))}
-        </Slider>
-      )
+      return <BookShelf title={section.title} books={books} layout="slider" link="/books" />
     }
     case 'ad':
       return <AdSlot slot="home" />
