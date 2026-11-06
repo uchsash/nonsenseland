@@ -95,6 +95,7 @@ The owner always prefers a **minimal** site. Every design decision follows this:
 The owner will send the EPUBs when the reader is ready to test.
 
 ### Domain
+- **Bought: nonsenseland.com** (Cloudflare Registrar, 2026-11-07). Workers Paid ($5/month) is bought only at deployment.
 - Not needed to start building. Development and testing run on a free Cloudflare test address (`*.workers.dev`).
 - **Needed before launch**, because these depend on it:
   - sending email (Kindle, password reset) from the site's own address
@@ -314,7 +315,7 @@ Editable in admin like every other page. Planned content:
 - [x] **Logo tagline:** converted to outlines (`Nonsenseland_Logo_Outlined.svg`).
 - [x] **First free books:** আ ডেড জ্বিন ইন কায়রো and কাহো (EPUBs to be sent when needed).
 - [ ] **Book rights (future books):** list further books that can be free online. Only include books the owner holds the rights to, or has written permission for. Published translations get cover + description + sample chapter + buy link.
-- [ ] **Domain:** buy before launch (not needed to start building).
+- [x] **Domain:** nonsenseland.com, bought 2026-11-07 at Cloudflare Registrar.
 - [x] **Categories:** decided (see "Categories").
 - [ ] **Topics:** a first list of topics (বিজ্ঞান, অর্থনীতি…). Optional; can be added any time.
 - [ ] **Bangla review:** correct the site's Bangla text once the first version is up.
