@@ -9,6 +9,7 @@ import { JSDOM } from 'jsdom'
 import JSZip from 'jszip'
 import { getPayload } from 'payload'
 import sharp from 'sharp'
+import { plainToRichText } from '../utilities/rich-text-plain'
 
 const payload = await getPayload({ config })
 const editorConfig = await editorConfigFactory.default({ config: payload.config })
@@ -88,7 +89,7 @@ for (const [order, [title, slug, role, originalAuthor, price]] of published.entr
       role,
       originalAuthor: originalAuthor || undefined,
       cover: await placeholder(`${title} — প্রচ্ছদ (নমুনা)`, '#e9e4dd', 600, 900),
-      description: 'বইটির বিবরণ এখানে যোগ করুন।',
+      about: plainToRichText('বইটির বিবরণ এখানে যোগ করুন।'),
       order: order + 10,
       print: { enabled: true, buyLinks: [{ store: 'রকমারি', url: ROKOMARI, price }] },
       topics: [topicIds[0]],
@@ -112,7 +113,7 @@ for (const [order, [title, slug, subtitle]] of [
       subtitle,
       role: 'translator',
       cover: await placeholder(`${title} — প্রচ্ছদ (নমুনা)`, '#f3d9c9', 600, 900),
-      description: 'বইটির বিবরণ এখানে যোগ করুন। EPUB যোগ করে “Import chapters” চালালেই বইটি পড়া যাবে।',
+      about: plainToRichText('বইটির বিবরণ এখানে যোগ করুন। EPUB যোগ করে “Import chapters” চালালেই বইটি পড়া যাবে।'),
       order,
       online: { enabled: true, access: 'free' },
       _status: 'draft',
@@ -172,7 +173,7 @@ if (!(await findBySlug('books', 'sample-book'))) {
       subtitle: 'রিডার পরীক্ষার জন্য',
       role: 'writer',
       cover: await placeholder('নমুনা বইয়ের প্রচ্ছদ', '#f6efe1', 600, 900),
-      description: 'রিডার আর ইমপোর্ট পরীক্ষার জন্য একটি নমুনা বই। চালু করার আগে মুছে ফেলুন।',
+      about: plainToRichText('রিডার আর ইমপোর্ট পরীক্ষার জন্য একটি নমুনা বই। চালু করার আগে মুছে ফেলুন।'),
       order: 5,
       online: { enabled: true, access: 'free', importFrom: 'epub', importNow: true },
       ebook: { epub: epub.id, allowDownload: true, allowKindle: true },

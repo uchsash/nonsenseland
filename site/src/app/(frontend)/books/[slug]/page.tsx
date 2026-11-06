@@ -6,6 +6,7 @@ import { AdSlot } from '@/components/AdSlot'
 import { ContinueReading } from '@/components/ContinueReading'
 import { KindleForm } from '@/components/Forms'
 import { Img } from '@/components/Img'
+import { RichText } from '@/components/RichText'
 import { Share } from '@/components/Share'
 import { TopicLinks } from '@/components/TopicLinks'
 import { getT } from '@/i18n/server'
@@ -56,7 +57,11 @@ export default async function BookPage({ params }: Props) {
               .filter(Boolean)
               .join(' · ')}
           </div>
-          <p className="desc">{book.description}</p>
+          {book.about ? (
+            <RichText data={book.about} className="prose desc" />
+          ) : (
+            <p className="desc">{book.description}</p>
+          )}
 
           <div className="book-actions">
             <ContinueReading book={book.slug!} titles={titles} />

@@ -1099,6 +1099,20 @@ html {
   margin: 20px 0 24px;
   white-space: pre-line;
 }
+/* The formatted description: site font and size, not the reader's settings. */
+.book-hero .prose.desc {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.75;
+  white-space: normal;
+}
+.book-hero .prose.desc p {
+  margin: 0 0 0.8em;
+  text-indent: 0;
+}
+.book-hero .prose.desc > :last-child {
+  margin-bottom: 0;
+}
 .book-actions {
   display: flex;
   flex-wrap: wrap;

@@ -381,9 +381,27 @@ export interface Book {
   titleColor?: ('default' | 'dark-orange' | 'orange' | 'golden') | null;
   cover: number | Media;
   /**
-   * Short description shown on the book page and when shared.
+   * Shown on the book page. Select text to make it bold, italic, a link or a colour.
    */
-  description: string;
+  about: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Optional. Shown when the book is shared on Facebook and in search results. Left empty, it is taken from the description.
+   */
+  description?: string | null;
   online?: {
     enabled?: boolean | null;
     access?: ('free' | 'members' | 'paid') | null;
@@ -1232,6 +1250,7 @@ export interface BooksSelect<T extends boolean = true> {
   originalTitle?: T;
   titleColor?: T;
   cover?: T;
+  about?: T;
   description?: T;
   online?:
     | T

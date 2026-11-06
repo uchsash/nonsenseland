@@ -4,6 +4,7 @@ import { publishedOrStaff, staffOnly } from '../access'
 import { ImportError, importBookChapters } from '../lib/book-import'
 import { colorField } from '../utilities/palette'
 import { previewAt } from '../utilities/preview'
+import { richTextToPlain, summarize } from '../utilities/rich-text-plain'
 import { slugField } from '../utilities/slug'
 
 export const Books: CollectionConfig = {
@@ -59,10 +60,22 @@ export const Books: CollectionConfig = {
     colorField('titleColor', 'Title colour'),
     { name: 'cover', type: 'upload', relationTo: 'media', required: true },
     {
+      name: 'about',
+      type: 'richText',
+      label: 'Description',
+      required: true,
+      admin: { description: 'Shown on the book page. Select text to make it bold, italic, a link or a colour.' },
+    },
+    {
       name: 'description',
       type: 'textarea',
-      required: true,
-      admin: { description: 'Short description shown on the book page and when shared.' },
+      label: 'Short summary (for sharing)',
+      admin: {
+        description: 'Optional. Shown when the book is shared on Facebook and in search results. Left empty, it is taken from the description.',
+      },
+      hooks: {
+        beforeChange: [({ value, siblingData }) => String(value ?? '').trim() || summarize(richTextToPlain(siblingData?.about))],
+      },
     },
     {
       type: 'tabs',
