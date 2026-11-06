@@ -20,20 +20,19 @@ export async function createAlap(_: PostState, form: FormData): Promise<PostStat
   const text = String(form.get('text') ?? '').trim()
   if (!text) return { ok: false, message: t.post.failed }
 
+  // Every post needs an image, so all cards in the deck have the same shape.
   const file = form.get('image')
-  let image: number | undefined
-  if (file instanceof File && file.size > 0) {
-    if (!file.type.startsWith('image/')) return { ok: false, message: t.post.failed }
-    if (file.size > MAX_IMAGE) return { ok: false, message: t.post.tooBig }
-    const data = Buffer.from(await file.arrayBuffer())
-    const media = await payload.create({
-      collection: 'media',
-      data: { alt: text.replace(/\s+/g, ' ').slice(0, 80) },
-      file: { data, mimetype: file.type, name: file.name || 'alap.jpg', size: data.length },
-      user,
-    })
-    image = media.id
-  }
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: t.post.needImage }
+  if (!file.type.startsWith('image/')) return { ok: false, message: t.post.failed }
+  if (file.size > MAX_IMAGE) return { ok: false, message: t.post.tooBig }
+  const data = Buffer.from(await file.arrayBuffer())
+  const media = await payload.create({
+    collection: 'media',
+    data: { alt: text.replace(/\s+/g, ' ').slice(0, 80) },
+    file: { data, mimetype: file.type, name: file.name || 'alap.jpg', size: data.length },
+    user,
+  })
+  const image = media.id
 
   try {
     await payload.create({

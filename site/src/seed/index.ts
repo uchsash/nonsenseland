@@ -302,7 +302,7 @@ if (!settings.introButtons?.length && sectionId('videos') && sectionId('library'
 if (!(await payload.count({ collection: 'alap' })).totalDocs) {
   const samples = [
     ['নমুনা আলাপ ১: এখানে ছোট একটা ভাবনা বা খবর লেখা থাকবে, ছবির সঙ্গে।', '#f3d9c9'],
-    ['নমুনা আলাপ ২: ছবি ছাড়াও শুধু লেখা দিয়ে পোস্ট করা যায়।\nনতুন লাইনও রাখা যায়।', null],
+    ['নমুনা আলাপ ২: প্রতিটা আলাপে একটা ছবি থাকে, তাই সব কার্ড একই মাপের।\nনতুন লাইনও রাখা যায়।', '#e8e1d3'],
     ['নমুনা আলাপ ৩: শেষটার পর আবার প্রথমটা ফিরে আসবে।', '#d9e2e6'],
   ] as const
   for (const [i, [text, color]] of samples.entries()) {
@@ -310,7 +310,7 @@ if (!(await payload.count({ collection: 'alap' })).totalDocs) {
       collection: 'alap',
       data: {
         text,
-        image: color ? await placeholder(`নমুনা আলাপের ছবি ${i + 1}`, color, 1080, 1080) : undefined,
+        image: await placeholder(`নমুনা আলাপের ছবি ${i + 1}`, color, 1080, 1080),
         publishedAt: new Date(Date.now() - i * 3600_000).toISOString(),
       },
     })

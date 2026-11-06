@@ -63,6 +63,7 @@ export function PostForm() {
           className="input"
           type="file"
           accept="image/*"
+          required
           onChange={async (e) => {
             const file = e.target.files?.[0]
             photo.current = file ? await shrink(file) : null

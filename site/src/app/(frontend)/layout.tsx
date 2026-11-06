@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 import { Hind_Siliguri, Noto_Serif_Bengali } from 'next/font/google'
 import Link from 'next/link'
 import Script from 'next/script'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 import { HeaderNav } from '@/components/HeaderNav'
+import { NavigationLoader } from '@/components/NavigationLoader'
 import { UiTextProvider } from '@/i18n/client'
 import { getT } from '@/i18n/server'
 import { getSettings } from '@/lib/data'
@@ -88,6 +89,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </header>
         <main>{children}</main>
+        <Suspense fallback={null}>
+          <NavigationLoader />
+        </Suspense>
         <footer className="site-footer">
           <div className="wrap">
             <span>

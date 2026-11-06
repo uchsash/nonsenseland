@@ -1271,11 +1271,43 @@ html {
   object-fit: cover;
   pointer-events: none; /* lets the swipe start on the image */
 }
+/* Fixed text box (6 lines) so every card has the same height; “আরও পড়ুন” expands it. */
 .deck-text {
   margin: 0;
   white-space: pre-line;
   font-size: 17px;
   line-height: 1.7;
+  height: calc(1.7em * 6);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+}
+.deck-text.is-expanded {
+  height: auto;
+  display: block;
+}
+.deck-more,
+.deck-more-space {
+  display: block;
+  height: 28px;
+  margin-top: 6px;
+}
+.deck-more {
+  all: unset;
+  display: block;
+  height: 28px;
+  margin-top: 6px;
+  color: var(--accent);
+  font-size: 15px;
+  cursor: pointer;
+}
+.deck-image-empty {
+  width: 40%;
+  height: 40%;
+  margin: 30%;
+  object-fit: contain;
+  opacity: 0.5;
 }
 .deck-date {
   display: block;
@@ -1329,18 +1361,6 @@ html {
 .intro-deck .deck-wrap {
   max-width: 400px;
   margin: 0 0 0 auto;
-}
-.deck-text.clamp {
-  display: -webkit-box;
-  -webkit-line-clamp: 7;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.deck-more {
-  display: inline-block;
-  margin-top: 8px;
-  color: var(--accent);
-  font-size: 15px;
 }
 @media (max-width: 760px) {
   /* Phones: the deck comes after the heading and the buttons. */
@@ -1437,4 +1457,16 @@ html {
   .ld-play {
     animation: ld-pulse 1.6s ease-in-out infinite alternate;
   }
+}
+
+/* Loader shown while moving between pages (covers the content, header stays). */
+.nav-loader {
+  position: fixed;
+  inset: 64px 0 0;
+  z-index: 15;
+  background: var(--bg);
+}
+.nav-loader .loader {
+  opacity: 1;
+  animation: none;
 }

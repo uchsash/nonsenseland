@@ -147,7 +147,7 @@ async function Intro({ sections }: { sections: Section[] }) {
       </div>
       {deck.length ? (
         <div className="intro-art intro-deck">
-          <AlapDeck items={deck} compact />
+          <AlapDeck items={deck} />
         </div>
       ) : (
         <div className="intro-art">

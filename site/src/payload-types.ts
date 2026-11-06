@@ -576,9 +576,9 @@ export interface Alap {
   id: number;
   text: string;
   /**
-   * Optional. Square works best.
+   * Required, so every card in the deck has the same shape. Square works best.
    */
-  image?: (number | null) | Media;
+  image: number | Media;
   /**
    * Untick to hide it from the site.
    */
@@ -2257,9 +2257,13 @@ export interface InterfaceText {
      */
     hint?: string | null;
     /**
-     * Default: পুরোটা পড়ুন
+     * Default: আরও পড়ুন
      */
     readMore?: string | null;
+    /**
+     * Default: কম দেখান
+     */
+    readLess?: string | null;
     /**
      * Default: এখনো কোনো আলাপ নেই।
      */
@@ -2275,9 +2279,13 @@ export interface InterfaceText {
      */
     text?: string | null;
     /**
-     * Default: ছবি (ঐচ্ছিক)
+     * Default: ছবি
      */
     image?: string | null;
+    /**
+     * Default: একটা ছবি দিন — প্রতিটা আলাপে ছবি লাগবে।
+     */
+    needImage?: string | null;
     /**
      * Default: পোস্ট করুন
      */
@@ -2661,6 +2669,7 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         previous?: T;
         hint?: T;
         readMore?: T;
+        readLess?: T;
         empty?: T;
       };
   post?:
@@ -2669,6 +2678,7 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         title?: T;
         text?: T;
         image?: T;
+        needImage?: T;
         submit?: T;
         posting?: T;
         done?: T;

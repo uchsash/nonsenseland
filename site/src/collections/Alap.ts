@@ -21,7 +21,13 @@ export const Alap: CollectionConfig = {
   },
   fields: [
     { name: 'text', type: 'textarea', required: true, maxLength: 3000, admin: { rows: 6 } },
-    { name: 'image', type: 'upload', relationTo: 'media', admin: { description: 'Optional. Square works best.' } },
+    {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      admin: { description: 'Required, so every card in the deck has the same shape. Square works best.' },
+    },
     {
       name: 'published',
       type: 'checkbox',
