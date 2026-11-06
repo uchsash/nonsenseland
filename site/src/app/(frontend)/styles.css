@@ -1,6 +1,7 @@
 /* ---------- Tokens ---------- */
 :root {
   --bg: #ffffff;
+  --card: #ffffff;
   --surface: #f7f6f4;
   --text: #1c1b1a;
   --muted: #6e6a66;
@@ -17,21 +18,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #131211;
-    --surface: #1c1b19;
-    --text: #ece8e3;
-    --muted: #9b958e;
-    --line: #2a2826;
+    --bg: #18191a;
+    --card: #242526;
+    --surface: #242526;
+    --text: #e4e6eb;
+    --muted: #b0b3b8;
+    --line: #3e4042;
     --accent: #f47335;
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --bg: #131211;
-  --surface: #1c1b19;
-  --text: #ece8e3;
-  --muted: #9b958e;
-  --line: #2a2826;
+  --bg: #18191a;
+  --card: #242526;
+  --surface: #242526;
+  --text: #e4e6eb;
+  --muted: #b0b3b8;
+  --line: #3e4042;
   --accent: #f47335;
   color-scheme: dark;
 }
@@ -39,6 +42,7 @@
 /* Reader page themes override the site theme while reading. */
 :root[data-reader='light'] {
   --bg: #ffffff;
+  --card: #ffffff;
   --surface: #f7f6f4;
   --text: #1c1b1a;
   --muted: #6e6a66;
@@ -47,6 +51,7 @@
 }
 :root[data-reader='sepia'] {
   --bg: #f6efe1;
+  --card: #fbf6ec;
   --surface: #efe5d2;
   --text: #3b3024;
   --muted: #7d6b57;
@@ -54,11 +59,12 @@
   color-scheme: light;
 }
 :root[data-reader='dark'] {
-  --bg: #131211;
-  --surface: #1c1b19;
-  --text: #dcd7d0;
-  --muted: #9b958e;
-  --line: #2a2826;
+  --bg: #18191a;
+  --card: #242526;
+  --surface: #242526;
+  --text: #e4e6eb;
+  --muted: #b0b3b8;
+  --line: #3e4042;
   color-scheme: dark;
 }
 
@@ -834,7 +840,7 @@ html {
   width: max-content;
   max-width: min(360px, 86vw);
   padding: 12px 14px;
-  background: var(--bg);
+  background: var(--card);
   color: var(--text);
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -979,7 +985,7 @@ html {
   height: 48px;
   border-radius: 50%;
   border: 1px solid var(--line);
-  background: var(--bg);
+  background: var(--card);
   box-shadow: 0 2px 10px rgb(0 0 0 / 0.08);
   cursor: pointer;
   font-weight: 600;
@@ -992,7 +998,7 @@ html {
   width: min(340px, calc(100vw - 32px));
   max-height: calc(100vh - 120px);
   overflow-y: auto;
-  background: var(--bg);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: 16px;
   box-shadow: 0 12px 40px rgb(0 0 0 / 0.14);
@@ -1040,8 +1046,8 @@ html {
   color: #3b3024;
 }
 .swatch-dark {
-  background: #131211 !important;
-  color: #dcd7d0;
+  background: #18191a !important;
+  color: #e4e6eb;
 }
 .swatch-light {
   background: #fff !important;
@@ -1218,7 +1224,7 @@ html {
 .deck-back {
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: var(--bg);
+  background: var(--card);
 }
 .deck-back {
   position: absolute;
