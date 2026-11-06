@@ -782,6 +782,9 @@ html {
 }
 .reading[data-paragraph='indent'] .prose p:first-child,
 .reading[data-paragraph='indent'] .prose :is(h2, h3, h4, hr, blockquote, .gap) + p,
+/* “No indent” from the ¶ menu (and centred/right-aligned lines). As specific as the
+   indent rule above, and after it, so it always wins. */
+.reading[data-paragraph='indent'] .prose p.no-indent,
 .prose p.no-indent {
   text-indent: 0;
 }
