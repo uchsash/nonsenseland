@@ -31,6 +31,15 @@ export function NavigationLoader() {
   const [visible, setVisible] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // The new page has arrived: hide the loader (React's pattern for resetting state when
+  // the address changes, done during render instead of in an effect).
+  const page = `${pathname}?${search}`
+  const [shownOn, setShownOn] = useState(page)
+  if (shownOn !== page) {
+    setShownOn(page)
+    setVisible(false)
+  }
+
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null
@@ -44,12 +53,11 @@ export function NavigationLoader() {
     return () => document.removeEventListener('click', onClick, true)
   }, [])
 
-  // The new page has arrived.
+  // A page that arrives before the delay must not show the loader afterwards.
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current)
     timer.current = null
-    setVisible(false)
-  }, [pathname, search])
+  }, [page])
 
   if (!visible) return null
   return (

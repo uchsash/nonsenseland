@@ -3,6 +3,7 @@
 import { headers } from 'next/headers'
 
 import { getT } from '@/i18n/server'
+import { ALAP_MAX_CHARS } from '@/collections/Alap'
 import { payloadClient } from '@/lib/data'
 
 export type PostState = { ok?: boolean; message?: string }
@@ -19,6 +20,7 @@ export async function createAlap(_: PostState, form: FormData): Promise<PostStat
 
   const text = String(form.get('text') ?? '').trim()
   if (!text) return { ok: false, message: t.post.failed }
+  if (text.length > ALAP_MAX_CHARS) return { ok: false, message: t.post.tooLong }
 
   // Every post needs an image, so all cards in the deck have the same shape.
   const file = form.get('image')

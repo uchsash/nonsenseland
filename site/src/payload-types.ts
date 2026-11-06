@@ -574,6 +574,9 @@ export interface Video {
  */
 export interface Alap {
   id: number;
+  /**
+   * At most 320 characters, so cards stay short.
+   */
   text: string;
   /**
    * Required, so every card in the deck has the same shape. Square works best.
@@ -2287,6 +2290,10 @@ export interface InterfaceText {
      */
     needImage?: string | null;
     /**
+     * Default: লেখা ৩২০ অক্ষরের মধ্যে রাখুন।
+     */
+    tooLong?: string | null;
+    /**
      * Default: পোস্ট করুন
      */
     submit?: string | null;
@@ -2679,6 +2686,7 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         text?: T;
         image?: T;
         needImage?: T;
+        tooLong?: T;
         submit?: T;
         posting?: T;
         done?: T;

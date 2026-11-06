@@ -4,6 +4,10 @@ import Link from 'next/link'
 import { useActionState, useRef, useState } from 'react'
 
 import { useT } from '@/i18n/client'
+import { bnNumber } from '@/utilities/bn'
+
+/** Same limit as the খুচরো আলাপ collection (kept here so this browser file stays light). */
+const MAX = 320
 
 import { createAlap, type PostState } from './actions'
 
@@ -24,6 +28,7 @@ async function shrink(file: File): Promise<File> {
 export function PostForm() {
   const t = useT()
   const [preview, setPreview] = useState<string | null>(null)
+  const [count, setCount] = useState(0)
   const photo = useRef<File | null>(null)
   const [state, action, pending] = useActionState(async (prev: PostState, form: FormData) => {
     if (photo.current) form.set('image', photo.current)
@@ -55,7 +60,18 @@ export function PostForm() {
     <form action={action} className="post-form">
       <label className="field">
         <span className="sr-only">{t.post.text}</span>
-        <textarea className="input" name="text" required rows={6} placeholder={t.post.text} />
+        <textarea
+          className="input"
+          name="text"
+          required
+          rows={6}
+          maxLength={MAX}
+          placeholder={t.post.text}
+          onChange={(e) => setCount(e.target.value.length)}
+        />
+        <span className={`char-count${count > MAX - 20 ? ' is-near' : ''}`} aria-live="polite">
+          {bnNumber(count)} / {bnNumber(MAX)}
+        </span>
       </label>
       <label className="field">
         {t.post.image}

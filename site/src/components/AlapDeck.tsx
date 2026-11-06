@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { useT } from '@/i18n/client'
 import type { Alap } from '@/payload-types'
@@ -24,15 +24,24 @@ export function AlapDeck({ items }: { items: Alap[] }) {
   const [flying, setFlying] = useState<0 | 1 | -1>(0)
   const start = useRef<{ x: number; y: number; id: number; horizontal: boolean | null } | null>(null)
   // Every card has the same height: the text box shows 6 lines; longer posts can be expanded.
-  const textRef = useRef<HTMLParagraphElement>(null)
   const [overflows, setOverflows] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  // “Expanded” belongs to one card, so moving to another card collapses it automatically.
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
+  const expanded = expandedIndex === index
+  const setExpanded = (open: boolean) => setExpandedIndex(open ? index : null)
 
-  useLayoutEffect(() => {
-    setExpanded(false)
-    const el = textRef.current
-    setOverflows(Boolean(el && el.scrollHeight > el.clientHeight + 2))
-  }, [index, items])
+  // Does the text need “আরও পড়ুন”? Measured when each card appears (the card is
+  // re-created per post) and again whenever its size changes, e.g. on phone rotation.
+  const textRef = useCallback((el: HTMLParagraphElement | null) => {
+    if (!el) return
+    const check = () => {
+      if (!el.classList.contains('is-expanded')) setOverflows(el.scrollHeight > el.clientHeight + 2)
+    }
+    check()
+    const observer = new ResizeObserver(check)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   if (!items.length) return <p className="empty">{t.alap.empty}</p>
   const n = items.length

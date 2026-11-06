@@ -1470,3 +1470,14 @@ html {
   opacity: 1;
   animation: none;
 }
+
+/* Character counter on the quick-post page */
+.char-count {
+  justify-self: end;
+  font-size: 13px;
+  color: var(--muted);
+}
+.char-count.is-near {
+  color: var(--accent);
+  font-weight: 600;
+}

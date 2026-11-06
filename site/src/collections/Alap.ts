@@ -2,7 +2,10 @@ import type { CollectionConfig, Where } from 'payload'
 
 import { isStaff, staffOnly } from '../access'
 
-/** খুচরো আলাপ: short posts (text + optional square image), posted quickly from the phone at /post. */
+/** Longest খুচরো আলাপ post, in characters. */
+export const ALAP_MAX_CHARS = 320
+
+/** খুচরো আলাপ: short posts (text + a square image), posted quickly from the phone at /post. */
 export const Alap: CollectionConfig = {
   slug: 'alap',
   labels: { singular: 'খুচরো আলাপ', plural: 'খুচরো আলাপ' },
@@ -20,7 +23,13 @@ export const Alap: CollectionConfig = {
     delete: staffOnly,
   },
   fields: [
-    { name: 'text', type: 'textarea', required: true, maxLength: 3000, admin: { rows: 6 } },
+    {
+      name: 'text',
+      type: 'textarea',
+      required: true,
+      maxLength: ALAP_MAX_CHARS,
+      admin: { rows: 6, description: `At most ${ALAP_MAX_CHARS} characters, so cards stay short.` },
+    },
     {
       name: 'image',
       type: 'upload',
