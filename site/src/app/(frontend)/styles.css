@@ -1209,7 +1209,7 @@ html {
 
 /* ---------- খুচরো আলাপ deck ---------- */
 .deck-wrap {
-  max-width: 360px;
+  max-width: 440px;
   margin: 0 auto;
 }
 .deck {
@@ -1243,7 +1243,8 @@ html {
 .deck-card {
   position: relative;
   z-index: 1;
-  padding: 14px;
+  padding: 18px; /* the card's frame around photo and text */
+  border-width: 2px;
   box-shadow: 0 6px 24px rgb(0 0 0 / 0.08);
   touch-action: pan-y; /* vertical scrolling stays with the page */
   user-select: none;
@@ -1365,7 +1366,7 @@ html {
 
 /* খুচরো আলাপ deck beside the intro */
 .intro-deck .deck-wrap {
-  max-width: 340px;
+  max-width: 420px;
   margin: 0 0 0 auto;
 }
 @media (max-width: 760px) {
