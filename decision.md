@@ -25,6 +25,8 @@ Everything below works and was tested in the browser:
 
 **Hosting stays Cloudflare Workers at $5/month (decided 2026-11-06).** The `sharp` image library used locally does not run on Workers, so at deployment: (1) automatic title-card thumbnails are drawn in the admin's browser when a video is saved, then uploaded; (2) image sizes come from Cloudflare Image Resizing (free allowance of 5,000 unique images/month); (3) YouTube thumbnails are fetched by the server as now. No extra hosting cost. Free servers were rejected: Oracle Always Free reclaims idle machines, Render free sleeps (~50 s first load), Vercel Hobby forbids commercial use.
 
+**Design templates (2026-11-06).** Video title card: cream background, a short orange dash with the category, the headline big in orange, a dark second line, a small muted line, the icon bottom-left, and the caricature on its orange waves (cut from the Facebook cover) on the right; the lines can be set per video under "Title card text", otherwise the title is split by itself. Book card in খুচরো আলাপ: a poster template (book standing on the brand's orange waves, small outlined circles, "— নতুন বই", the icon) in three colourways chosen per card: orange, dark, cream.
+
 **Automatic video thumbnails:** a video saved without a thumbnail gets YouTube's own thumbnail (YouTube links) or a title card made from the logo, category, Bangla title and the caricature (`site/src/assets/caricature.png`, taken from the Facebook cover). An uploaded thumbnail always wins. Facebook's own video frames need the Facebook Graph API (Page token) — not set up yet.
 
 **Code repository:** https://github.com/uchsash/nonsenseland (public). Not in git: `.env` (secrets), uploaded images and book files, `free-books/`, licensed fonts.

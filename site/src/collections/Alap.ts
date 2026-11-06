@@ -54,6 +54,20 @@ export const Alap: CollectionConfig = {
         isBookCard(siblingData) && !value ? 'Choose the book for this card.' : true,
     },
     {
+      name: 'theme',
+      type: 'select',
+      defaultValue: 'sunset',
+      options: [
+        { label: 'Orange (sunset)', value: 'sunset' },
+        { label: 'Dark (night)', value: 'night' },
+        { label: 'Cream (paper)', value: 'paper' },
+      ],
+      admin: {
+        condition: (_, sibling) => isBookCard(sibling),
+        description: 'The poster design around the book. Pick the one that suits the cover.',
+      },
+    },
+    {
       name: 'text',
       type: 'textarea',
       required: true,

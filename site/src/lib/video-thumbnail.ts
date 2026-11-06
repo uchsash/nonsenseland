@@ -25,12 +25,13 @@ type VideoData = {
   category?: unknown
   thumbnail?: unknown
   thumbnailSource?: ThumbnailSource | null
+  card?: { highlight?: string | null; line2?: string | null; subline?: string | null } | null
 }
 
 /**
  * Fills in a video's thumbnail when none is given: YouTube's thumbnail for YouTube links,
- * otherwise a title card (logo, category, title, caricature). An uploaded thumbnail always
- * wins. An automatic title card is remade when the title or category changes.
+ * otherwise a title card (title, category, the caricature scene, icon). An uploaded thumbnail always
+ * wins. An automatic title card is remade when its wording or category changes.
  * (The replaced automatic image is removed by the Videos afterChange hook.)
  */
 export async function fillVideoThumbnail(
@@ -49,8 +50,8 @@ export async function fillVideoThumbnail(
   }
   if (current && previousSource === 'own') return
 
-  const titleOrCategoryChanged =
-    data.title !== original?.title || idOf(data.category) !== idOf(original?.category)
+  const cardText = (d?: VideoData) => JSON.stringify([d?.title, idOf(d?.category), d?.card?.highlight, d?.card?.line2, d?.card?.subline])
+  const titleOrCategoryChanged = cardText(data) !== cardText(original)
   const needsNew = !current || (previousSource === 'card' && titleOrCategoryChanged)
   if (!needsNew || !data.title) return
 
@@ -65,11 +66,7 @@ export async function fillVideoThumbnail(
     const category = categoryId
       ? await req.payload.findByID({ collection: 'categories', id: categoryId, depth: 0, req }).catch(() => null)
       : null
-    file = await renderTitleCard({
-      title: data.title,
-      category: category?.name,
-      colorIndex: category?.order ?? categoryId ?? 0,
-    })
+    file = await renderTitleCard({ title: data.title, category: category?.name, ...data.card })
   }
 
   const media = await req.payload.create({

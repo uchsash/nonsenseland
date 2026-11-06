@@ -542,6 +542,14 @@ export interface Video {
    */
   thumbnail?: (number | null) | Media;
   thumbnailSource?: ('own' | 'youtube' | 'card') | null;
+  /**
+   * Optional. Leave empty and the title is split by itself (anything after “—” or “:” becomes the small line).
+   */
+  card?: {
+    highlight?: string | null;
+    line2?: string | null;
+    subline?: string | null;
+  };
   description?: string | null;
   /**
    * e.g. 12:40
@@ -580,6 +588,10 @@ export interface Alap {
    * The card shows this book’s cover as a mockup, its name and a “বইটি পড়ুন” link.
    */
   book?: (number | null) | Book;
+  /**
+   * The poster design around the book. Pick the one that suits the cover.
+   */
+  theme?: ('sunset' | 'night' | 'paper') | null;
   /**
    * At most 220 characters, so cards stay short. For a book card this is the headline.
    */
@@ -1108,6 +1120,13 @@ export interface VideosSelect<T extends boolean = true> {
   platform?: T;
   thumbnail?: T;
   thumbnailSource?: T;
+  card?:
+    | T
+    | {
+        highlight?: T;
+        line2?: T;
+        subline?: T;
+      };
   description?: T;
   duration?: T;
   category?: T;
@@ -1133,6 +1152,7 @@ export interface VideosSelect<T extends boolean = true> {
 export interface AlapSelect<T extends boolean = true> {
   kind?: T;
   book?: T;
+  theme?: T;
   text?: T;
   image?: T;
   pinned?: T;
@@ -2291,6 +2311,10 @@ export interface InterfaceText {
      */
     readBook?: string | null;
     /**
+     * Default: নতুন বই
+     */
+    newBook?: string | null;
+    /**
      * Default: সব খুচরো আলাপ দেখুন
      */
     seeAll?: string | null;
@@ -2709,6 +2733,7 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         readMore?: T;
         readLess?: T;
         readBook?: T;
+        newBook?: T;
         seeAll?: T;
         olderPosts?: T;
         empty?: T;

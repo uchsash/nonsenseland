@@ -135,6 +135,7 @@ export const defaults = {
     readMore: 'আরও পড়ুন',
     readLess: 'কম দেখান',
     readBook: 'বইটি পড়ুন',
+    newBook: 'নতুন বই',
     seeAll: 'সব খুচরো আলাপ দেখুন',
     olderPosts: 'আরও পুরোনো আলাপ',
     empty: 'এখনো কোনো আলাপ নেই।',

@@ -56,6 +56,22 @@ export const Videos: CollectionConfig = {
       options: ['own', 'youtube', 'card'].map((v) => ({ label: v, value: v })),
       admin: { hidden: true },
     },
+    {
+      // Wording for the automatic title card. Empty lines are taken from the title.
+      name: 'card',
+      type: 'group',
+      label: 'Title card text',
+      admin: {
+        condition: (data) => data?.thumbnailSource !== 'own' && data?.thumbnailSource !== 'youtube',
+        description:
+          'Optional. Leave empty and the title is split by itself (anything after “—” or “:” becomes the small line).',
+      },
+      fields: [
+        { name: 'highlight', type: 'text', label: 'Big orange line', admin: { placeholder: 'হ্যারি পটার' } },
+        { name: 'line2', type: 'text', label: 'Second line', admin: { placeholder: 'এখন বাংলায়' } },
+        { name: 'subline', type: 'text', label: 'Small line', admin: { placeholder: 'রেগুলার ও ইলাস্ট্রেটেড এডিশন' } },
+      ],
+    },
     { name: 'description', type: 'textarea' },
     {
       name: 'duration',

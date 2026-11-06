@@ -1493,17 +1493,101 @@ html {
 }
 
 /* ---------- খুচরো আলাপ: book card (mockup) ---------- */
+/* The poster: one template in three colourways (chosen per card in the admin). */
 .book-mock {
+  --poster-bg: #fdf8f4;
+  --wave-1: #f9a03f;
+  --wave-2: #f15a24;
+  --poster-circle: #f47335;
+  --poster-circle-2: #f19224;
+  --poster-text: #f15a24;
+  position: relative;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at 50% 45%, var(--card) 0%, var(--surface) 100%);
+  background: var(--poster-bg);
   perspective: 1100px;
+  isolation: isolate;
+}
+.book-theme-night {
+  --poster-bg: radial-gradient(circle at 50% 40%, #34323a 0%, #1d1c21 80%);
+  --poster-circle: #f47335;
+  --poster-circle-2: #f19224;
+}
+.book-theme-paper {
+  --poster-bg: #fffaf4;
+  --wave-1: #fde0c8;
+  --wave-2: #f8b48a;
+}
+.book-poster-waves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+/* Small outlined circles, as scattered on the Facebook cover. */
+.book-poster-circle {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid var(--poster-circle);
+  z-index: -1;
+}
+.book-poster-circle.is-a {
+  width: 7%;
+  top: 9%;
+  right: 9%;
+}
+.book-poster-circle.is-b {
+  width: 4.5%;
+  top: 44%;
+  left: 12%;
+  border-color: var(--poster-circle-2);
+}
+.book-poster-circle.is-c {
+  width: 3.5%;
+  top: 30%;
+  right: 16%;
+  border-color: var(--poster-circle-2);
+}
+/* “নতুন বই” with the short dash, as on the video thumbnails. */
+.book-poster-badge {
+  position: absolute;
+  top: 7%;
+  left: 7%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--poster-text);
+  font-weight: 700;
+  font-size: 18px;
+}
+.book-poster-badge::before {
+  content: '';
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.book-mock .book-poster-icon {
+  position: absolute;
+  left: 7%;
+  bottom: 6%;
+  width: 11%;
+  height: auto;
+  object-fit: contain;
+}
+.book-theme-sunset .book-poster-icon,
+.book-theme-night .book-poster-icon {
+  /* white on the orange waves */
+  filter: brightness(0) invert(1);
 }
 /* A hardcover in 3D: front cover, page block on the right, spine crease, floor shadow. */
 .book-3d {
   position: relative;
-  width: 46%;
+  width: 39%;
   transform-style: preserve-3d;
+  margin-top: 7%;
   transform: rotateY(-28deg) rotateX(2deg);
 }
 .book-3d::after {
