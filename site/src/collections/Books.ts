@@ -1,7 +1,7 @@
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
-import { importBookChapters } from '../lib/book-import'
+import { ImportError, importBookChapters } from '../lib/book-import'
 import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 
@@ -237,8 +237,16 @@ export const Books: CollectionConfig = {
     afterChange: [
       async ({ doc, req, context }) => {
         if (context.skipImport || !doc.online?.importNow) return doc
-        const report = await importBookChapters({ book: doc, req })
-        await req.payload.update({
+        let report: string
+        try {
+          report = await importBookChapters({ book: doc, req })
+        } catch (error) {
+          // Shown as an error when saving; the whole save (book + chapters) is rolled back.
+          if (error instanceof ImportError) throw new APIError(`Chapters not imported: ${error.message}`, 400, undefined, true)
+          throw error
+        }
+        // Return the updated book so the admin shows the new report straight after saving.
+        return req.payload.update({
           collection: 'books',
           id: doc.id,
           data: { online: { ...doc.online, importNow: false, importReport: report } },
@@ -246,7 +254,6 @@ export const Books: CollectionConfig = {
           context: { skipImport: true },
           draft: doc._status !== 'published',
         })
-        return doc
       },
     ],
   },

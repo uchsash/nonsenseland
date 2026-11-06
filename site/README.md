@@ -35,7 +35,12 @@ Sample items are named **নমুনা** — delete them before launch (or sta
 2. **EPUB & Kindle** tab: upload the EPUB.
 3. **Read online** tab: tick *Readable on the site*, open *Import chapters*, tick *Import chapters when I save*.
 4. Save. The import report shows the chapters found and any warnings (missing Heading 1, Bijoy text…).
-5. Check the chapters under **Chapters**, then **Publish**.
+   If the import fails, saving shows a red error with the reason and nothing is changed.
+5. Check the chapters under **Chapters** (rename e.g. “অধ্যায় ৪”, reorder or delete), then **Publish**.
+
+How chapters are found: at **Heading 1/Heading 2** if the book has them; otherwise at **page breaks**
+(EPUBs made from Google Docs). A short first line such as “উৎসর্গ” becomes the chapter title.
+Images are imported, empty spacer lines removed, `***` shown as a scene break, Google redirect links unwrapped.
 
 ## Access rules (summary)
 

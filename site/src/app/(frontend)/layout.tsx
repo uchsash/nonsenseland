@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Hind_Siliguri, Noto_Serif_Bengali } from 'next/font/google'
 import Link from 'next/link'
+import Script from 'next/script'
 import React from 'react'
 
 import { HeaderNav } from '@/components/HeaderNav'
@@ -62,7 +63,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="bn" className={`${ui.variable} ${serif.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script id="theme" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
       </head>
       {/* Browser extensions (e.g. ColorZilla, Grammarly) add attributes to <body> before React loads. */}
       <body suppressHydrationWarning>
