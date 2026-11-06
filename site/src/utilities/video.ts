@@ -6,7 +6,7 @@ export const detectPlatform = (url: string): Platform | undefined => {
   return undefined
 }
 
-const youtubeId = (url: string) =>
+export const youtubeId = (url: string) =>
   url.match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/)?.[1]
 
 /** Player URL for an iframe. Only requested after the visitor presses play. */

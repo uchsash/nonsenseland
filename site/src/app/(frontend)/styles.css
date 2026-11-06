@@ -1496,22 +1496,65 @@ html {
 .book-mock {
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 14%, var(--surface)), var(--surface));
-  perspective: 900px;
+  background: radial-gradient(circle at 50% 45%, var(--card) 0%, var(--surface) 100%);
+  perspective: 1100px;
 }
-.book-mock-cover {
-  width: 52%;
-  border-radius: 2px 6px 6px 2px;
+/* A hardcover in 3D: front cover, page block on the right, spine crease, floor shadow. */
+.book-3d {
+  position: relative;
+  width: 46%;
+  transform-style: preserve-3d;
+  transform: rotateY(-28deg) rotateX(2deg);
+}
+.book-3d::after {
+  /* floor shadow */
+  content: '';
+  position: absolute;
+  left: 6%;
+  right: -14%;
+  bottom: -5%;
+  height: 8%;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0.35), transparent 70%);
+  filter: blur(6px);
+  transform: translateZ(-30px);
+}
+.book-front {
+  position: relative;
+  border-radius: 1px 4px 4px 1px;
   overflow: hidden;
-  transform: rotateY(-18deg) rotateZ(-1.5deg);
-  box-shadow:
-    -6px 0 0 -2px color-mix(in srgb, var(--text) 25%, transparent),
-    14px 18px 28px rgb(0 0 0 / 0.28);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.15);
 }
-.book-mock-cover img {
+.book-front img {
+  display: block;
   width: 100%;
   height: auto;
-  object-fit: contain;
+}
+.book-front::before {
+  /* spine crease and a soft highlight near the hinge */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.35) 0%,
+    rgb(255 255 255 / 0.18) 2.5%,
+    rgb(0 0 0 / 0.12) 5%,
+    transparent 9%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+.book-pages {
+  /* the white page block, turned 90° away from the front */
+  position: absolute;
+  top: 1.2%;
+  bottom: 1.2%;
+  left: 100%;
+  width: 26%;
+  transform-origin: left center;
+  transform: rotateY(90deg);
+  background: repeating-linear-gradient(90deg, #f4f1ea 0 2px, #dcd6cb 2px 3px);
+  box-shadow: inset 6px 0 10px rgb(0 0 0 / 0.18);
 }
 .book-card-text {
   display: flex;

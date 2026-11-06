@@ -23,6 +23,10 @@ Everything below works and was tested in the browser:
 3. Deployment to Cloudflare. Needs from the owner: domain, Cloudflare account, Neon (database) account, Resend (email) account. Then: R2 storage, Turnstile keys, email DNS records (SPF/DKIM), a cron trigger for scheduled publishing, backups, uptime alert.
 4. Privacy Policy and Terms pages (draft to be written, owner approves).
 
+**Hosting needs a re-check before deployment (2026-11-06):** image resizing, cover sizes and the automatic video thumbnails use the `sharp` image library, which does not run on Cloudflare Workers. Deploy to a host that runs Node.js normally instead (e.g. Cloudflare Containers, Railway, Render, Fly.io or a small VPS, roughly $5–7/month), keeping Cloudflare R2 for files and Cloudflare in front for speed and spam protection.
+
+**Automatic video thumbnails:** a video saved without a thumbnail gets YouTube's own thumbnail (YouTube links) or a title card made from the logo, category, Bangla title and the caricature (`site/src/assets/caricature.png`, taken from the Facebook cover). An uploaded thumbnail always wins. Facebook's own video frames need the Facebook Graph API (Page token) — not set up yet.
+
 **Code repository:** https://github.com/uchsash/nonsenseland (public). Not in git: `.env` (secrets), uploaded images and book files, `free-books/`, licensed fonts.
 
 **Quality checks (all passing):** ESLint (0 problems), TypeScript, production build, and 16 automated tests (`npm run test:int`), including access-rule tests: visitors cannot read users, subscribers, messages, Kindle logs, orders, chapter text or book files; cannot create accounts or change settings; cannot see drafts.

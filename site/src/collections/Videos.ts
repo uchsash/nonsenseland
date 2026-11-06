@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
+import { fillVideoThumbnail, idOf } from '../lib/video-thumbnail'
 import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 import { detectPlatform } from '../utilities/video'
@@ -43,8 +44,17 @@ export const Videos: CollectionConfig = {
       name: 'thumbnail',
       type: 'upload',
       relationTo: 'media',
-      required: true,
-      admin: { description: '16:9 image shown before the video plays.' },
+      admin: {
+        description:
+          'Optional. Leave empty and one is made when you save: YouTube’s thumbnail for YouTube links, otherwise a title card with the caricature. Uploading your own always wins.',
+      },
+    },
+    {
+      // Where the thumbnail came from: 'own' (uploaded), 'youtube' or 'card' (automatic).
+      name: 'thumbnailSource',
+      type: 'select',
+      options: ['own', 'youtube', 'card'].map((v) => ({ label: v, value: v })),
+      admin: { hidden: true },
     },
     { name: 'description', type: 'textarea' },
     {
@@ -71,10 +81,31 @@ export const Videos: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      ({ data }) => {
+      async ({ data, originalDoc, req }) => {
         if (data.url) data.platform = detectPlatform(data.url)
         if (data._status === 'published' && !data.publishedAt) data.publishedAt = new Date().toISOString()
+        // Automatic thumbnail (YouTube's, or a title card) when none is given.
+        await fillVideoThumbnail(data, originalDoc, req)
         return data
+      },
+    ],
+    afterChange: [
+      // An automatic thumbnail that was replaced is removed, so the media library stays tidy.
+      async ({ doc, previousDoc, req }) => {
+        const before = idOf(previousDoc?.thumbnail)
+        if (!before || before === idOf(doc.thumbnail) || previousDoc?.thumbnailSource === 'own') return
+        if (!previousDoc?.thumbnailSource) return // older videos: their thumbnail was uploaded by hand
+        await req.payload
+          .delete({ collection: 'media', id: before, req })
+          .catch((err) => req.payload.logger.warn({ err }, 'Could not remove the old automatic thumbnail'))
+      },
+    ],
+    afterDelete: [
+      // Deleting a video also removes its automatic thumbnail (never one you uploaded).
+      async ({ doc, req }) => {
+        const id = idOf(doc.thumbnail)
+        if (!id || !doc.thumbnailSource || doc.thumbnailSource === 'own') return
+        await req.payload.delete({ collection: 'media', id, req }).catch(() => null)
       },
     ],
   },

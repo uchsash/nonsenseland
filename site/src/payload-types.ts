@@ -538,9 +538,10 @@ export interface Video {
    */
   platform?: ('facebook' | 'youtube') | null;
   /**
-   * 16:9 image shown before the video plays.
+   * Optional. Leave empty and one is made when you save: YouTube’s thumbnail for YouTube links, otherwise a title card with the caricature. Uploading your own always wins.
    */
-  thumbnail: number | Media;
+  thumbnail?: (number | null) | Media;
+  thumbnailSource?: ('own' | 'youtube' | 'card') | null;
   description?: string | null;
   /**
    * e.g. 12:40
@@ -1106,6 +1107,7 @@ export interface VideosSelect<T extends boolean = true> {
   url?: T;
   platform?: T;
   thumbnail?: T;
+  thumbnailSource?: T;
   description?: T;
   duration?: T;
   category?: T;

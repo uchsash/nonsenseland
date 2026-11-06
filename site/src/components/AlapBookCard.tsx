@@ -24,8 +24,12 @@ export function AlapBookCard({ item }: { item: Alap }) {
   return (
     <>
       <div className="deck-image book-mock">
-        <div className="book-mock-cover">
-          <Img media={book.cover} use={['cover']} sizes="240px" />
+        {/* A hardcover in 3D: the cover turned slightly, the page block on the right, a floor shadow. */}
+        <div className="book-3d">
+          <div className="book-front">
+            <Img media={book.cover} use={['cover']} sizes="240px" />
+          </div>
+          <div className="book-pages" aria-hidden="true" />
         </div>
       </div>
       <div className="deck-text book-card-text">
