@@ -2,32 +2,44 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 
 import { t } from '@/i18n/bn'
 
 import { CloseIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from './icons'
+import { setStored } from './useStored'
 
 type Item = { label: string; href: string }
 
+const DARK = '(prefers-color-scheme: dark)'
+
+const subscribeTheme = (onChange: () => void) => {
+  const media = matchMedia(DARK)
+  media.addEventListener('change', onChange)
+  window.addEventListener('nl-storage', onChange)
+  return () => {
+    media.removeEventListener('change', onChange)
+    window.removeEventListener('nl-storage', onChange)
+  }
+}
+
+/** Dark if chosen explicitly, otherwise following the device. Unknown (null) on the server. */
+const isDark = () => {
+  const chosen = document.documentElement.dataset.theme
+  return chosen ? chosen === 'dark' : matchMedia(DARK).matches
+}
+
 export function HeaderNav({ items }: { items: Item[] }) {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
-  const [dark, setDark] = useState<boolean | null>(null)
-
-  useEffect(() => setOpen(false), [pathname])
-  useEffect(() => {
-    const explicit = document.documentElement.dataset.theme
-    setDark(explicit ? explicit === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches)
-  }, [])
+  // The menu is open only for the page it was opened on, so it closes after navigating.
+  const [openOn, setOpenOn] = useState<string | null>(null)
+  const open = openOn === pathname
+  const dark = useSyncExternalStore(subscribeTheme, isDark, () => null)
 
   const toggleTheme = () => {
-    const next = !dark
-    setDark(next)
-    document.documentElement.dataset.theme = next ? 'dark' : 'light'
-    try {
-      localStorage.setItem('nl-theme', next ? 'dark' : 'light')
-    } catch {}
+    const next = dark ? 'light' : 'dark'
+    document.documentElement.dataset.theme = next
+    setStored('nl-theme', next)
   }
 
   const isCurrent = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href))
@@ -56,7 +68,7 @@ export function HeaderNav({ items }: { items: Item[] }) {
         <button
           type="button"
           className="icon-btn menu-toggle"
-          onClick={() => setOpen(!open)}
+          onClick={() => setOpenOn(open ? null : pathname)}
           aria-expanded={open}
           aria-label={open ? t.nav.close : t.nav.menu}
         >

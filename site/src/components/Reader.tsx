@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { t } from '@/i18n/bn'
 import { bnNumber } from '@/utilities/bn'
 
 import { CloseIcon, ListIcon } from './icons'
+import { parseStored, setStored, useStored } from './useStored'
 
 type Theme = 'auto' | 'light' | 'sepia' | 'dark'
 type Settings = {
@@ -23,12 +24,33 @@ const LINE = { tight: 1.6, normal: 1.85, loose: 2.1 }
 const WIDTH = { narrow: '580px', normal: '680px', wide: '820px' }
 const STORE = 'nl-reader'
 
-const load = (): Settings => {
-  try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORE) ?? '{}') }
-  } catch {
-    return DEFAULTS
-  }
+type Option<V> = { value: V; label: string; className?: string }
+
+/** A row of mutually exclusive buttons (e.g. white / sepia / dark). */
+function Seg<V extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: V
+  options: Option<V>[]
+  onChange: (value: V) => void
+}) {
+  return (
+    <div className="seg">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          className={o.className}
+          aria-pressed={value === o.value}
+          onClick={() => onChange(o.value)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 export type TocItem = { title: string; href: string; current?: boolean }
@@ -52,20 +74,13 @@ export function Reader({
   position?: { book: string; chapter: number }
 }) {
   const router = useRouter()
-  const [settings, setSettings] = useState<Settings>(DEFAULTS)
+  const raw = useStored(STORE)
+  const settings = useMemo<Settings>(() => ({ ...DEFAULTS, ...parseStored<Partial<Settings>>(raw, {}) }), [raw])
   const [panel, setPanel] = useState<'settings' | 'toc' | null>(null)
   const [progress, setProgress] = useState(0)
   const body = useRef<HTMLDivElement>(null)
 
-  useEffect(() => setSettings(load()), [])
-
-  const update = (patch: Partial<Settings>) => {
-    const next = { ...settings, ...patch }
-    setSettings(next)
-    try {
-      localStorage.setItem(STORE, JSON.stringify(next))
-    } catch {}
-  }
+  const update = (patch: Partial<Settings>) => setStored(STORE, JSON.stringify({ ...settings, ...patch }))
 
   // The reader theme temporarily overrides the site theme.
   useEffect(() => {
@@ -139,28 +154,6 @@ export function Reader({
     '--r-width': WIDTH[settings.width],
   } as React.CSSProperties
 
-  const Seg = <K extends keyof Settings>({
-    name,
-    options,
-  }: {
-    name: K
-    options: { value: Settings[K]; label: string; className?: string }[]
-  }) => (
-    <div className="seg">
-      {options.map((o) => (
-        <button
-          key={String(o.value)}
-          type="button"
-          className={o.className}
-          aria-pressed={settings[name] === o.value}
-          onClick={() => update({ [name]: o.value } as Partial<Settings>)}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  )
-
   return (
     <div className="reading" style={style}>
       <div className="progress" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
@@ -216,7 +209,8 @@ export function Reader({
               <div className="panel-row">
                 <span>{t.reader.theme}</span>
                 <Seg
-                  name="theme"
+                  value={settings.theme}
+                  onChange={(theme) => update({ theme })}
                   options={[
                     { value: 'light', label: t.reader.themes.light, className: 'swatch-light' },
                     { value: 'sepia', label: t.reader.themes.sepia, className: 'swatch-sepia' },
@@ -227,7 +221,8 @@ export function Reader({
               <div className="panel-row">
                 <span>{t.reader.font}</span>
                 <Seg
-                  name="font"
+                  value={settings.font}
+                  onChange={(font) => update({ font })}
                   options={[
                     { value: 'serif', label: t.reader.fonts.serif },
                     { value: 'sans', label: t.reader.fonts.sans },
@@ -258,7 +253,8 @@ export function Reader({
               <div className="panel-row">
                 <span>{t.reader.spacing}</span>
                 <Seg
-                  name="spacing"
+                  value={settings.spacing}
+                  onChange={(spacing) => update({ spacing })}
                   options={[
                     { value: 'tight', label: t.reader.spacings.tight },
                     { value: 'normal', label: t.reader.spacings.normal },
@@ -269,7 +265,8 @@ export function Reader({
               <div className="panel-row">
                 <span>{t.reader.width}</span>
                 <Seg
-                  name="width"
+                  value={settings.width}
+                  onChange={(width) => update({ width })}
                   options={[
                     { value: 'narrow', label: t.reader.widths.narrow },
                     { value: 'normal', label: t.reader.widths.normal },
@@ -281,12 +278,7 @@ export function Reader({
                 type="button"
                 className="btn ghost"
                 style={{ width: '100%' }}
-                onClick={() => {
-                  setSettings(DEFAULTS)
-                  try {
-                    localStorage.removeItem(STORE)
-                  } catch {}
-                }}
+                onClick={() => setStored(STORE, null)}
               >
                 {t.reader.reset}
               </button>

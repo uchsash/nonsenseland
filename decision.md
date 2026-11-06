@@ -23,7 +23,9 @@ Everything below works and was tested in the browser:
 3. Deployment to Cloudflare. Needs from the owner: domain, Cloudflare account, Neon (database) account, Resend (email) account. Then: R2 storage, Turnstile keys, email DNS records (SPF/DKIM), a cron trigger for scheduled publishing, backups, uptime alert.
 4. Privacy Policy and Terms pages (draft to be written, owner approves).
 
-**Known minor issue:** the template's ESLint setup fails to load (a Next 16 / ESLint 9 template bug); type checks and the production build pass.
+**Quality checks (all passing):** ESLint (0 problems), TypeScript, production build, and 16 automated tests (`npm run test:int`), including access-rule tests: visitors cannot read users, subscribers, messages, Kindle logs, orders, chapter text or book files; cannot create accounts or change settings; cannot see drafts.
+
+**Hydration warning (fixed 2026-11-06):** caused by the ColorZilla browser extension adding an attribute to `<body>`; the site now ignores extension-added body attributes. Reader, theme and “continue reading” now read browser storage in the hydration-safe way.
 
 ---
 

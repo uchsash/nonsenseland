@@ -1,19 +1,18 @@
 import Script from 'next/script'
 
 import { t } from '@/i18n/bn'
-import { getAdSettings, getAdsFor } from '@/lib/data'
+import { getAdSettings, pickAd } from '@/lib/data'
 import type { Book } from '@/payload-types'
 
 import { Img } from './Img'
 
 /**
  * One ad position. Shows nothing when ads are switched off or no ad is active,
- * so the page simply closes up. When several ads share a slot, one is picked per request.
+ * so the page simply closes up.
  */
 export async function AdSlot({ slot }: { slot: string }) {
-  const ads = await getAdsFor(slot)
-  if (!ads.length) return null
-  const ad = ads[Math.floor(Math.random() * ads.length)]
+  const ad = await pickAd(slot)
+  if (!ad) return null
 
   if (ad.mode === 'house' && typeof ad.image === 'object' && ad.image) {
     const book = ad.book as Book | null

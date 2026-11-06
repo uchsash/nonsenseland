@@ -64,7 +64,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>
+      {/* Browser extensions (e.g. ColorZilla, Grammarly) add attributes to <body> before React loads. */}
+      <body suppressHydrationWarning>
         {s.announcementOn && s.announcementText ? (
           <div className="announce">
             {s.announcementLink ? (

@@ -147,6 +147,12 @@ export async function getAdsFor(slot: string) {
   return res.docs
 }
 
+/** One of the active ads for a slot; when several share a slot they take turns at random. */
+export async function pickAd(slot: string) {
+  const ads = await getAdsFor(slot)
+  return ads.length ? ads[Math.floor(Math.random() * ads.length)] : null
+}
+
 export async function searchAll(q: string) {
   const payload = await payloadClient()
   const where = (fields: string[]): Where => ({
