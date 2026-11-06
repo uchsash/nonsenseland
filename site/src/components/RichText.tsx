@@ -21,6 +21,22 @@ type Paragraph = {
   $?: { space?: 'none' | 'more'; noIndent?: boolean }
 }
 
+type InternalDoc = { relationTo?: string; value?: number | { slug?: string | null } | null } | null | undefined
+
+/** Where an internal link goes: each collection's page on the site. */
+const ROUTES: Record<string, string> = {
+  articles: '/articles/',
+  books: '/books/',
+  videos: '/videos/',
+  topics: '/topics/',
+  pages: '/',
+}
+const internalHref = (doc: InternalDoc) => {
+  const slug = typeof doc?.value === 'object' ? doc.value?.slug : null
+  const base = doc?.relationTo ? ROUTES[doc.relationTo] : undefined
+  return slug && base ? `${base}${slug}` : '#'
+}
+
 /** Payload's own text renderer (bold, italic…), wrapped below to add colours. */
 const renderText = TextJSXConverter.text as (args: unknown) => React.ReactNode
 
@@ -67,6 +83,15 @@ const makeConverters =
           <Footnote n={footnotes.numbers.get(node) ?? 0} note={fields.note ?? ''}>
             {nodesToJSX({ nodes: node.children })}
           </Footnote>
+        )
+      }
+      if (node.fields.linkType === 'internal') {
+        // A link to a page on this site, chosen in the editor's “Internal link” list.
+        const href = internalHref(node.fields.doc as InternalDoc)
+        return (
+          <a href={href} target={node.fields.newTab ? '_blank' : undefined} rel={node.fields.newTab ? 'noopener noreferrer' : undefined}>
+            {nodesToJSX({ nodes: node.children })}
+          </a>
         )
       }
       const link = defaultConverters.link as (a: typeof args) => React.ReactNode

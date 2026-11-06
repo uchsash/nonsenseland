@@ -6,6 +6,8 @@ import type { Field, FieldAffectingData, TextFieldSingleValidation } from 'paylo
  * the link button, choose টীকা and write the note. No URL is needed for footnotes.
  */
 export const FootnoteLinkFeature = LinkFeature({
+  // “Internal link” lists only things that have a page on the site.
+  enabledCollections: ['articles', 'books', 'videos', 'topics', 'pages'],
   fields: ({ defaultFields }) => {
     const fields: (Field | FieldAffectingData)[] = defaultFields.map((field) => {
       if (field.name === 'linkType' && field.type === 'radio') {
