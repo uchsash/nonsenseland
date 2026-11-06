@@ -18,23 +18,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #18191a;
-    --card: #242526;
-    --surface: #242526;
+    --bg: #242526;
+    --card: #3a3b3c;
+    --surface: #3a3b3c;
     --text: #e4e6eb;
     --muted: #b0b3b8;
-    --line: #3e4042;
+    --line: #4b4d50;
     --accent: #f47335;
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --bg: #18191a;
-  --card: #242526;
-  --surface: #242526;
+  --bg: #242526;
+  --card: #3a3b3c;
+  --surface: #3a3b3c;
   --text: #e4e6eb;
   --muted: #b0b3b8;
-  --line: #3e4042;
+  --line: #4b4d50;
   --accent: #f47335;
   color-scheme: dark;
 }
@@ -59,12 +59,12 @@
   color-scheme: light;
 }
 :root[data-reader='dark'] {
-  --bg: #18191a;
-  --card: #242526;
-  --surface: #242526;
+  --bg: #242526;
+  --card: #3a3b3c;
+  --surface: #3a3b3c;
   --text: #e4e6eb;
   --muted: #b0b3b8;
-  --line: #3e4042;
+  --line: #4b4d50;
   color-scheme: dark;
 }
 
@@ -1046,7 +1046,7 @@ html {
   color: #3b3024;
 }
 .swatch-dark {
-  background: #18191a !important;
+  background: #242526 !important;
   color: #e4e6eb;
 }
 .swatch-light {
@@ -1209,7 +1209,7 @@ html {
 
 /* ---------- খুচরো আলাপ deck ---------- */
 .deck-wrap {
-  max-width: 480px;
+  max-width: 360px;
   margin: 0 auto;
 }
 .deck {
@@ -1243,7 +1243,7 @@ html {
 .deck-card {
   position: relative;
   z-index: 1;
-  padding: 16px;
+  padding: 14px;
   box-shadow: 0 6px 24px rgb(0 0 0 / 0.08);
   touch-action: pan-y; /* vertical scrolling stays with the page */
   user-select: none;
@@ -1281,9 +1281,9 @@ html {
 .deck-text {
   margin: 0;
   white-space: pre-line;
-  font-size: 17px;
-  line-height: 1.7;
-  height: calc(1.7em * 6);
+  font-size: 16px;
+  line-height: 1.65;
+  height: calc(1.65em * 6);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 6;
@@ -1365,7 +1365,7 @@ html {
 
 /* খুচরো আলাপ deck beside the intro */
 .intro-deck .deck-wrap {
-  max-width: 400px;
+  max-width: 340px;
   margin: 0 0 0 auto;
 }
 @media (max-width: 760px) {

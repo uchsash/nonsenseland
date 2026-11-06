@@ -3,7 +3,7 @@ import type { CollectionConfig, Where } from 'payload'
 import { isStaff, staffOnly } from '../access'
 
 /** Longest খুচরো আলাপ post, in characters. */
-export const ALAP_MAX_CHARS = 320
+export const ALAP_MAX_CHARS = 220
 
 /** খুচরো আলাপ: short posts (text + a square image), posted quickly from the phone at /post. */
 export const Alap: CollectionConfig = {

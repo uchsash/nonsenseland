@@ -575,7 +575,7 @@ export interface Video {
 export interface Alap {
   id: number;
   /**
-   * At most 320 characters, so cards stay short.
+   * At most 220 characters, so cards stay short.
    */
   text: string;
   /**
@@ -2290,7 +2290,7 @@ export interface InterfaceText {
      */
     needImage?: string | null;
     /**
-     * Default: লেখা ৩২০ অক্ষরের মধ্যে রাখুন।
+     * Default: লেখা ২২০ অক্ষরের মধ্যে রাখুন।
      */
     tooLong?: string | null;
     /**

@@ -7,7 +7,7 @@ import { useT } from '@/i18n/client'
 import { bnNumber } from '@/utilities/bn'
 
 /** Same limit as the খুচরো আলাপ collection (kept here so this browser file stays light). */
-const MAX = 320
+const MAX = 220
 
 import { createAlap, type PostState } from './actions'
 
