@@ -1,0 +1,16 @@
+# Local development database only. The app itself runs with `npm run dev`.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nonsense
+      POSTGRES_PASSWORD: nonsense
+      POSTGRES_DB: nonsenseland
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
