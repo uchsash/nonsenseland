@@ -29,6 +29,13 @@ export const SiteSettings: GlobalConfig = {
             { name: 'siteName', type: 'text', required: true, defaultValue: 'ননসেন্সল্যান্ড' },
             { name: 'tagline', type: 'text', defaultValue: 'Talk. Anything and Everything.' },
             {
+              name: 'ownerName',
+              type: 'text',
+              required: true,
+              defaultValue: 'উচ্ছ্বাস তৌসিফ',
+              admin: { description: 'Shown as writer/translator on book pages.' },
+            },
+            {
               name: 'logo',
               type: 'upload',
               relationTo: 'media',

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
+import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 import { detectPlatform } from '../utilities/video'
 
@@ -11,6 +12,7 @@ export const Videos: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'platform', 'publishedAt', '_status'],
     group: 'Content',
+    preview: previewAt('/videos'),
   },
   defaultSort: '-publishedAt',
   versions: { drafts: { schedulePublish: true }, maxPerDoc: 10 },

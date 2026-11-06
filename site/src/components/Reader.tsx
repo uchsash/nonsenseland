@@ -1,0 +1,299 @@
+'use client'
+
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { t } from '@/i18n/bn'
+import { bnNumber } from '@/utilities/bn'
+
+import { CloseIcon, ListIcon } from './icons'
+
+type Theme = 'auto' | 'light' | 'sepia' | 'dark'
+type Settings = {
+  theme: Theme
+  font: 'serif' | 'sans'
+  size: number
+  spacing: 'tight' | 'normal' | 'loose'
+  width: 'narrow' | 'normal' | 'wide'
+}
+
+const DEFAULTS: Settings = { theme: 'auto', font: 'serif', size: 19, spacing: 'normal', width: 'normal' }
+const LINE = { tight: 1.6, normal: 1.85, loose: 2.1 }
+const WIDTH = { narrow: '580px', normal: '680px', wide: '820px' }
+const STORE = 'nl-reader'
+
+const load = (): Settings => {
+  try {
+    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORE) ?? '{}') }
+  } catch {
+    return DEFAULTS
+  }
+}
+
+export type TocItem = { title: string; href: string; current?: boolean }
+
+/**
+ * Wraps an article or chapter: reading settings behind one “Aa” button, a progress
+ * bar, chapter list, arrow-key navigation and (for books) remembering the place.
+ */
+export function Reader({
+  children,
+  toc,
+  prevHref,
+  nextHref,
+  position,
+}: {
+  children: React.ReactNode
+  toc?: TocItem[]
+  prevHref?: string
+  nextHref?: string
+  /** For books: where to remember the reading place. */
+  position?: { book: string; chapter: number }
+}) {
+  const router = useRouter()
+  const [settings, setSettings] = useState<Settings>(DEFAULTS)
+  const [panel, setPanel] = useState<'settings' | 'toc' | null>(null)
+  const [progress, setProgress] = useState(0)
+  const body = useRef<HTMLDivElement>(null)
+
+  useEffect(() => setSettings(load()), [])
+
+  const update = (patch: Partial<Settings>) => {
+    const next = { ...settings, ...patch }
+    setSettings(next)
+    try {
+      localStorage.setItem(STORE, JSON.stringify(next))
+    } catch {}
+  }
+
+  // The reader theme temporarily overrides the site theme.
+  useEffect(() => {
+    const root = document.documentElement
+    if (settings.theme === 'auto') delete root.dataset.reader
+    else root.dataset.reader = settings.theme
+    return () => {
+      delete root.dataset.reader
+    }
+  }, [settings.theme])
+
+  // Progress bar and remembering the place.
+  const posKey = position ? `nl-pos-${position.book}` : null
+  const lastSave = useRef(0)
+  const onScroll = useCallback(() => {
+    const el = body.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const total = rect.height - window.innerHeight
+    const ratio = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 1
+    setProgress(ratio)
+    // Save the place at most twice a second.
+    if (posKey && position && Date.now() - lastSave.current > 500) {
+      lastSave.current = Date.now()
+      try {
+        localStorage.setItem(posKey, JSON.stringify({ chapter: position.chapter, ratio, at: Date.now() }))
+      } catch {}
+    }
+  }, [posKey, position])
+
+  useEffect(() => {
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [onScroll])
+
+  // Return to the saved place when reopening the same chapter.
+  useEffect(() => {
+    if (!posKey || !position || location.hash) return
+    try {
+      const saved = JSON.parse(localStorage.getItem(posKey) ?? 'null')
+      if (saved?.chapter === position.chapter && saved.ratio > 0.02 && saved.ratio < 0.98) {
+        const el = body.current
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY
+          window.scrollTo({ top: top + saved.ratio * (el.offsetHeight - window.innerHeight) })
+        }
+      }
+    } catch {}
+    // Only on first open of this chapter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posKey, position?.chapter])
+
+  // ← → keys move between chapters.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('input, textarea, select, [contenteditable]') || e.altKey || e.metaKey || e.ctrlKey) return
+      if (e.key === 'ArrowRight' && nextHref) router.push(nextHref)
+      if (e.key === 'ArrowLeft' && prevHref) router.push(prevHref)
+      if (e.key === 'Escape') setPanel(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [nextHref, prevHref, router])
+
+  const style = {
+    '--r-font': settings.font === 'serif' ? 'var(--serif)' : 'var(--ui)',
+    '--r-size': `${settings.size}px`,
+    '--r-line': LINE[settings.spacing],
+    '--r-width': WIDTH[settings.width],
+  } as React.CSSProperties
+
+  const Seg = <K extends keyof Settings>({
+    name,
+    options,
+  }: {
+    name: K
+    options: { value: Settings[K]; label: string; className?: string }[]
+  }) => (
+    <div className="seg">
+      {options.map((o) => (
+        <button
+          key={String(o.value)}
+          type="button"
+          className={o.className}
+          aria-pressed={settings[name] === o.value}
+          onClick={() => update({ [name]: o.value } as Partial<Settings>)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+
+  return (
+    <div className="reading" style={style}>
+      <div className="progress" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
+      <div ref={body}>{children}</div>
+
+      <div className="reader-tools">
+        {toc?.length ? (
+          <button
+            type="button"
+            onClick={() => setPanel(panel === 'toc' ? null : 'toc')}
+            aria-label={t.book.contents}
+            aria-expanded={panel === 'toc'}
+          >
+            <ListIcon />
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => setPanel(panel === 'settings' ? null : 'settings')}
+          aria-label={t.reader.settings}
+          aria-expanded={panel === 'settings'}
+        >
+          Aa
+        </button>
+      </div>
+
+      {panel ? (
+        <div className="panel" role="dialog" aria-label={panel === 'toc' ? t.book.contents : t.reader.settings}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3>{panel === 'toc' ? t.book.contents : t.reader.settings}</h3>
+            <button type="button" className="icon-btn" onClick={() => setPanel(null)} aria-label={t.nav.close}>
+              <CloseIcon size={18} />
+            </button>
+          </div>
+
+          {panel === 'toc' ? (
+            <ol className="toc">
+              {toc!.map((item, i) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={item.current ? 'page' : undefined}
+                    onClick={() => setPanel(null)}
+                  >
+                    <span className="num">{bnNumber(i + 1)}</span>
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <>
+              <div className="panel-row">
+                <span>{t.reader.theme}</span>
+                <Seg
+                  name="theme"
+                  options={[
+                    { value: 'light', label: t.reader.themes.light, className: 'swatch-light' },
+                    { value: 'sepia', label: t.reader.themes.sepia, className: 'swatch-sepia' },
+                    { value: 'dark', label: t.reader.themes.dark, className: 'swatch-dark' },
+                  ]}
+                />
+              </div>
+              <div className="panel-row">
+                <span>{t.reader.font}</span>
+                <Seg
+                  name="font"
+                  options={[
+                    { value: 'serif', label: t.reader.fonts.serif },
+                    { value: 'sans', label: t.reader.fonts.sans },
+                  ]}
+                />
+              </div>
+              <div className="panel-row">
+                <span>
+                  {t.reader.size} · {bnNumber(settings.size)}
+                </span>
+                <div className="seg">
+                  <button
+                    type="button"
+                    onClick={() => update({ size: Math.max(15, settings.size - 1) })}
+                    aria-label={t.reader.smaller}
+                  >
+                    অ−
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => update({ size: Math.min(28, settings.size + 1) })}
+                    aria-label={t.reader.larger}
+                  >
+                    অ+
+                  </button>
+                </div>
+              </div>
+              <div className="panel-row">
+                <span>{t.reader.spacing}</span>
+                <Seg
+                  name="spacing"
+                  options={[
+                    { value: 'tight', label: t.reader.spacings.tight },
+                    { value: 'normal', label: t.reader.spacings.normal },
+                    { value: 'loose', label: t.reader.spacings.loose },
+                  ]}
+                />
+              </div>
+              <div className="panel-row">
+                <span>{t.reader.width}</span>
+                <Seg
+                  name="width"
+                  options={[
+                    { value: 'narrow', label: t.reader.widths.narrow },
+                    { value: 'normal', label: t.reader.widths.normal },
+                    { value: 'wide', label: t.reader.widths.wide },
+                  ]}
+                />
+              </div>
+              <button
+                type="button"
+                className="btn ghost"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  setSettings(DEFAULTS)
+                  try {
+                    localStorage.removeItem(STORE)
+                  } catch {}
+                }}
+              >
+                {t.reader.reset}
+              </button>
+            </>
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
+}

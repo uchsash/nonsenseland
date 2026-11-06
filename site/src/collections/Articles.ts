@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
 import { readingMinutes } from '../utilities/lexical'
+import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 
 export const Articles: CollectionConfig = {
@@ -11,6 +12,7 @@ export const Articles: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'publishedAt', '_status'],
     group: 'Content',
+    preview: previewAt('/articles'),
   },
   defaultSort: '-publishedAt',
   versions: { drafts: { schedulePublish: true }, maxPerDoc: 20 },

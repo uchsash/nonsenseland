@@ -76,8 +76,8 @@ export interface Config {
     books: Book;
     chapters: Chapter;
     media: Media;
-    'book-files': BookFile;
     ads: Ad;
+    'book-files': BookFile;
     subscribers: Subscriber;
     messages: Message;
     'kindle-sends': KindleSend;
@@ -103,8 +103,8 @@ export interface Config {
     books: BooksSelect<false> | BooksSelect<true>;
     chapters: ChaptersSelect<false> | ChaptersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'book-files': BookFilesSelect<false> | BookFilesSelect<true>;
     ads: AdsSelect<false> | AdsSelect<true>;
+    'book-files': BookFilesSelect<false> | BookFilesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     messages: MessagesSelect<false> | MessagesSelect<true>;
     'kindle-sends': KindleSendsSelect<false> | KindleSendsSelect<true>;
@@ -921,12 +921,12 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'book-files';
-        value: number | BookFile;
-      } | null)
-    | ({
         relationTo: 'ads';
         value: number | Ad;
+      } | null)
+    | ({
+        relationTo: 'book-files';
+        value: number | BookFile;
       } | null)
     | ({
         relationTo: 'subscribers';
@@ -1265,24 +1265,6 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "book-files_select".
- */
-export interface BookFilesSelect<T extends boolean = true> {
-  note?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ads_select".
  */
 export interface AdsSelect<T extends boolean = true> {
@@ -1299,6 +1281,24 @@ export interface AdsSelect<T extends boolean = true> {
   endAt?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-files_select".
+ */
+export interface BookFilesSelect<T extends boolean = true> {
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1511,6 +1511,10 @@ export interface SiteSetting {
   siteName: string;
   tagline?: string | null;
   /**
+   * Shown as writer/translator on book pages.
+   */
+  ownerName: string;
+  /**
    * Optional. Leave empty to use the built-in logo.
    */
   logo?: (number | null) | Media;
@@ -1661,6 +1665,7 @@ export interface AdSetting {
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
   tagline?: T;
+  ownerName?: T;
   logo?: T;
   icon?: T;
   shareImage?: T;

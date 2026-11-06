@@ -1,4 +1,3 @@
-import fs from 'fs/promises'
 import path from 'path'
 
 import { convertHTMLToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
@@ -6,6 +5,8 @@ import { JSDOM } from 'jsdom'
 import JSZip from 'jszip'
 import mammoth from 'mammoth'
 import type { PayloadRequest } from 'payload'
+
+import { readStoredFile } from './files'
 
 type RawChapter = { title: string; html: string }
 type BookDoc = {
@@ -18,19 +19,10 @@ type BookDoc = {
 const BANGLA = /[ঀ-৿]/g
 const LATIN = /[A-Za-z]/g
 
-/** Reads an uploaded file, from local disk in development or from its URL in production. */
 const readUpload = async (req: PayloadRequest, ref: unknown): Promise<Buffer> => {
   const id = typeof ref === 'object' && ref ? (ref as { id: number }).id : ref
-  const file = await req.payload.findByID({ collection: 'book-files', id: id as number, req })
-  const local = path.resolve(process.cwd(), 'book-files', file.filename ?? '')
-  try {
-    return await fs.readFile(local)
-  } catch {
-    const base = process.env.NEXT_PUBLIC_SERVER_URL ?? ''
-    const res = await fetch(new URL(file.url ?? '', base))
-    if (!res.ok) throw new Error(`Could not download ${file.filename}`)
-    return Buffer.from(await res.arrayBuffer())
-  }
+  const file = await req.payload.findByID({ collection: 'book-files', id: id as number, req, overrideAccess: true })
+  return readStoredFile('book-files', file.filename ?? '')
 }
 
 const parseXml = (xml: string) => new JSDOM(xml, { contentType: 'application/xml' }).window.document

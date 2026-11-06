@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, publishedOrStaff, staffOnly } from '../access'
+import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 
 export const Pages: CollectionConfig = {
@@ -10,6 +11,7 @@ export const Pages: CollectionConfig = {
     useAsTitle: 'title',
     group: 'Content',
     description: 'About, Privacy Policy, Terms, Refund Policy…',
+    preview: previewAt(''),
   },
   versions: { drafts: true },
   access: { read: publishedOrStaff, create: staffOnly, update: staffOnly, delete: staffOnly },
@@ -102,7 +104,8 @@ export const Ads: CollectionConfig = {
   ],
 }
 
-const formOnly = { read: staffOnly, create: anyone, update: staffOnly, delete: staffOnly }
+// Created only by the site's own forms (server actions, which run the spam check).
+const formOnly = { read: staffOnly, create: staffOnly, update: staffOnly, delete: staffOnly }
 
 export const Subscribers: CollectionConfig = {
   slug: 'subscribers',

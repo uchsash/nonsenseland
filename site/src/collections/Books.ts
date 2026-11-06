@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
 import { importBookChapters } from '../lib/book-import'
+import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 
 export const Books: CollectionConfig = {
@@ -13,6 +14,7 @@ export const Books: CollectionConfig = {
     group: 'Library',
     description:
       'One entry per book. A book can be readable on the site, downloadable as EPUB, sold in print — or any mix.',
+    preview: previewAt('/books'),
   },
   defaultSort: 'order',
   versions: { drafts: true, maxPerDoc: 10 },

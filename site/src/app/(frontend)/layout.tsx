@@ -1,18 +1,119 @@
+import type { Metadata } from 'next'
+import { Hind_Siliguri, Noto_Serif_Bengali } from 'next/font/google'
+import Link from 'next/link'
 import React from 'react'
+
+import { HeaderNav } from '@/components/HeaderNav'
+import { t } from '@/i18n/bn'
+import { getSettings } from '@/lib/data'
+import type { Media } from '@/payload-types'
+
 import './styles.css'
 
-export const metadata = {
-  description: 'A blank template using Payload in a Next.js app.',
-  title: 'Payload Blank Template',
+const ui = Hind_Siliguri({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-ui',
+  display: 'swap',
+})
+const serif = Noto_Serif_Bengali({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '600'],
+  variable: '--font-serif',
+  display: 'swap',
+})
+
+const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const s = await getSettings()
+  const share = s.shareImage as Media | null
+  const icon = s.icon as Media | null
+  return {
+    metadataBase: new URL(siteUrl),
+    title: { default: s.siteName, template: `%s · ${s.siteName}` },
+    description: s.introText ?? s.tagline ?? undefined,
+    openGraph: {
+      siteName: s.siteName,
+      locale: 'bn_BD',
+      type: 'website',
+      images: share?.sizes?.og?.url ? [share.sizes.og.url] : undefined,
+    },
+    icons: icon?.url ? { icon: icon.url } : undefined,
+  }
 }
 
-export default async function RootLayout(props: { children: React.ReactNode }) {
-  const { children } = props
+const defaultMenu = [
+  { label: t.nav.videos, href: '/videos' },
+  { label: t.nav.articles, href: '/articles' },
+  { label: t.nav.books, href: '/books' },
+  { label: t.nav.about, href: '/about' },
+]
+
+/** Applies the saved light/dark choice before paint to avoid a flash. */
+const themeScript = `try{var t=localStorage.getItem('nl-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}`
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const s = await getSettings()
+  const logo = s.logo as Media | null
+  const menu = s.menu?.length ? s.menu.map(({ label, href }) => ({ label, href })) : defaultMenu
+  const social = s.social ?? []
 
   return (
-    <html lang="en">
+    <html lang="bn" className={`${ui.variable} ${serif.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
+        {s.announcementOn && s.announcementText ? (
+          <div className="announce">
+            {s.announcementLink ? (
+              <Link href={s.announcementLink}>{s.announcementText}</Link>
+            ) : (
+              s.announcementText
+            )}
+          </div>
+        ) : null}
+        <header className="site-header">
+          <div className="wrap">
+            <Link href="/" className="logo" aria-label={`${s.siteName} — ${t.nav.home}`}>
+              <img src={logo?.url ?? '/brand/logo.svg'} alt={s.siteName} width={82} height={36} />
+            </Link>
+            <HeaderNav items={menu} />
+          </div>
+        </header>
         <main>{children}</main>
+        <footer className="site-footer">
+          <div className="wrap">
+            <span>
+              © {new Intl.NumberFormat('bn-BD', { useGrouping: false }).format(new Date().getFullYear())}{' '}
+              {s.footerText || s.siteName}
+            </span>
+            {s.footerLinks?.length ? (
+              <nav className="footer-links">
+                {s.footerLinks.map((l) => (
+                  <Link key={l.href} href={l.href}>
+                    {l.label}
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
+            {social.length ? (
+              <div className="social">
+                {social.map((item) => (
+                  <a
+                    key={item.url}
+                    href={item.network === 'email' ? `mailto:${item.url.replace(/^mailto:/, '')}` : item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {{ facebook: 'Facebook', instagram: 'Instagram', youtube: 'YouTube', email: 'Email' }[item.network]}
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </footer>
       </body>
     </html>
   )
