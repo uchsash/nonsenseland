@@ -1,6 +1,8 @@
 import type { Block, Field, GlobalConfig } from 'payload'
 
 import { anyone, staffOnly } from '../access'
+import { defaults } from '../i18n/bn'
+import { colorField } from '../utilities/palette'
 
 const globalAccess = { read: anyone, update: staffOnly }
 
@@ -58,11 +60,33 @@ export const SiteSettings: GlobalConfig = {
         {
           label: 'Intro',
           fields: [
-            { name: 'introTitle', type: 'text', required: true, defaultValue: 'যা কিছু কথা, সব কথা' },
+            {
+              name: 'introTitle',
+              type: 'textarea',
+              required: true,
+              defaultValue: 'যা কিছু কথা, সব কথা',
+              admin: { rows: 2, description: 'Press Enter to start a new line.' },
+            },
+            colorField('introTitleColor', 'Title colour'),
             {
               name: 'introText',
               type: 'textarea',
               defaultValue: 'ভিডিও, লেখা আর বই — ননসেন্সল্যান্ডে সব কথার আসর।',
+              admin: {
+                rows: 4,
+                description: 'Enter = new line (no gap). An empty line between = new paragraph (with a gap).',
+              },
+            },
+            {
+              name: 'introSpacing',
+              type: 'select',
+              label: 'Line spacing',
+              defaultValue: 'normal',
+              options: [
+                { label: 'Compact', value: 'compact' },
+                { label: 'Normal', value: 'normal' },
+                { label: 'Loose', value: 'loose' },
+              ],
             },
             {
               name: 'introImage',
@@ -70,7 +94,36 @@ export const SiteSettings: GlobalConfig = {
               relationTo: 'media',
               admin: { description: 'The sketch or a photo. Leave empty to show the icon.' },
             },
-            { name: 'introButtons', type: 'array', maxRows: 2, fields: linkFields },
+            {
+              name: 'introButtons',
+              type: 'array',
+              maxRows: 3,
+              labels: { singular: 'Button', plural: 'Buttons' },
+              admin: {
+                description:
+                  'Each button jumps to a section further down the homepage. The first button is filled orange.',
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'label', type: 'text', required: true, admin: { width: '40%' } },
+                    {
+                      name: 'section',
+                      type: 'text',
+                      label: 'Goes to',
+                      admin: { width: '60%', components: { Field: '/components/admin/SectionSelect#SectionSelect' } },
+                    },
+                  ],
+                },
+                {
+                  name: 'href',
+                  type: 'text',
+                  label: 'Or a link instead',
+                  admin: { description: 'Optional, e.g. /about. Only used when no section is chosen.' },
+                },
+              ],
+            },
           ],
         },
         {
@@ -173,4 +226,58 @@ export const AdSettings: GlobalConfig = {
       admin: { description: 'e.g. ca-pub-1234567890. Only needed once AdSense is approved.' },
     },
   ],
+}
+
+const SECTION_LABELS: Record<string, string> = {
+  nav: 'Menu & header',
+  common: 'General',
+  video: 'Videos',
+  article: 'Articles',
+  book: 'Books',
+  kindle: 'Send to Kindle',
+  reader: 'Reader settings (Aa panel)',
+  share: 'Share buttons',
+  search: 'Search',
+  newsletter: 'Newsletter',
+  contact: 'Contact form',
+  ad: 'Ads',
+  notFound: 'Page not found',
+}
+
+const humanize = (key: string) =>
+  key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase())
+
+/** One text field per interface label, pre-filled with the current text; groups mirror i18n/bn.ts. */
+const textFields = (values: Record<string, unknown>): Field[] =>
+  Object.entries(values).map(([key, value]): Field => {
+    if (typeof value === 'string') {
+      return {
+        name: key,
+        type: 'text',
+        label: humanize(key),
+        defaultValue: value,
+        admin: {
+          placeholder: value,
+          description: value.includes('{') ? `Default: ${value} — keep {n} where the number goes.` : `Default: ${value}`,
+        },
+      }
+    }
+    return {
+      name: key,
+      type: 'group',
+      label: SECTION_LABELS[key] ?? humanize(key),
+      fields: textFields(value as Record<string, unknown>),
+    }
+  })
+
+export const InterfaceText: GlobalConfig = {
+  slug: 'interface-text',
+  label: 'Interface text',
+  admin: {
+    group: 'Settings',
+    description:
+      'Every button, label and message on the site. Change the wording here; empty a field to go back to the default.',
+  },
+  access: globalAccess,
+  fields: textFields(defaults),
 }

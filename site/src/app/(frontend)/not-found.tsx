@@ -1,8 +1,9 @@
 import Link from 'next/link'
 
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getT()
   return (
     <div className="wrap not-found">
       <h1>{t.notFound.title}</h1>

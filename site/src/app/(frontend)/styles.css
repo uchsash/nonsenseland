@@ -385,12 +385,48 @@ textarea.input {
 }
 .intro h1 {
   font-size: clamp(32px, 6vw, 52px);
+  white-space: pre-line; /* keeps the line breaks typed in the admin */
 }
-.intro p {
+.intro-text {
   color: var(--muted);
   font-size: 19px;
   max-width: 34em;
   margin: 16px 0 28px;
+}
+.intro-text p {
+  margin: 0 0 0.7em;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+.intro-text p:last-child {
+  margin-bottom: 0;
+}
+/* Line spacing chosen in Site settings → Intro */
+.intro.spacing-compact h1 {
+  line-height: 1.15;
+}
+.intro.spacing-compact .intro-text p {
+  line-height: 1.35;
+  margin-bottom: 0.35em;
+}
+.intro.spacing-loose h1 {
+  line-height: 1.45;
+}
+.intro.spacing-loose .intro-text p {
+  line-height: 1.95;
+  margin-bottom: 1em;
+}
+/* Intro buttons scroll to homepage sections, stopping below the sticky header. */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+.anchor {
+  scroll-margin-top: 72px;
 }
 .intro .actions {
   display: flex;
@@ -714,6 +750,43 @@ textarea.input {
   border: 1px solid var(--line);
   padding: 6px 10px;
 }
+/* Reader options: paragraph style and alignment */
+.reading[data-align='justify'] .prose p {
+  text-align: justify;
+}
+.reading[data-paragraph='indent'] .prose p {
+  margin: 0;
+  text-indent: 1.6em;
+}
+.reading[data-paragraph='indent'] .prose p:first-child,
+.reading[data-paragraph='indent'] .prose :is(h2, h3, h4, hr, blockquote) + p {
+  text-indent: 0;
+}
+.reading[data-paragraph='indent'] .prose hr {
+  margin: 1.2em 0;
+}
+/* “Lines without gaps” block: never indented or justified */
+.prose p.lines,
+.reading .prose p.lines {
+  margin: 0 0 1.1em;
+  text-indent: 0;
+  text-align: left;
+}
+.reading[data-paragraph='indent'] .prose p.lines {
+  margin: 0.8em 0;
+}
+
+/* Logo colours for titles and text */
+.tc-dark-orange {
+  color: #f15a24;
+}
+.tc-orange {
+  color: #f47335;
+}
+.tc-golden {
+  color: #f19224;
+}
+
 .reading-end {
   border-top: 1px solid var(--line);
   margin-top: 48px;

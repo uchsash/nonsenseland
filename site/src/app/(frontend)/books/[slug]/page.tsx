@@ -8,12 +8,13 @@ import { KindleForm } from '@/components/Forms'
 import { Img } from '@/components/Img'
 import { Share } from '@/components/Share'
 import { TopicLinks } from '@/components/TopicLinks'
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { getBook, getChapterList, getSettings } from '@/lib/data'
 import { emailConfigured } from '@/lib/email'
 import { docMetadata } from '@/lib/seo'
 import type { BookFile } from '@/payload-types'
 import { bnNumber } from '@/utilities/bn'
+import { colorClass } from '@/utilities/palette'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BookPage({ params }: Props) {
+  const t = await getT()
   const { slug } = await params
   const [book, settings] = await Promise.all([getBook(slug), getSettings()])
   if (!book) notFound()
@@ -44,7 +46,7 @@ export default async function BookPage({ params }: Props) {
           <Img media={book.cover} use={['cover']} sizes="260px" priority />
         </div>
         <div>
-          <h1>{book.title}</h1>
+          <h1 className={colorClass(book.titleColor)}>{book.title}</h1>
           <div className="sub">
             {[
               book.subtitle,

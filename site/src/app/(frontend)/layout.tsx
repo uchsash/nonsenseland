@@ -5,7 +5,8 @@ import Script from 'next/script'
 import React from 'react'
 
 import { HeaderNav } from '@/components/HeaderNav'
-import { t } from '@/i18n/bn'
+import { UiTextProvider } from '@/i18n/client'
+import { getT } from '@/i18n/server'
 import { getSettings } from '@/lib/data'
 import type { Media } from '@/payload-types'
 
@@ -44,19 +45,18 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const defaultMenu = [
-  { label: t.nav.videos, href: '/videos' },
-  { label: t.nav.articles, href: '/articles' },
-  { label: t.nav.books, href: '/books' },
-  { label: t.nav.about, href: '/about' },
-]
-
 /** Applies the saved light/dark choice before paint to avoid a flash. */
 const themeScript = `try{var t=localStorage.getItem('nl-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}`
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const s = await getSettings()
+  const [s, t] = await Promise.all([getSettings(), getT()])
   const logo = s.logo as Media | null
+  const defaultMenu = [
+    { label: t.nav.videos, href: '/videos' },
+    { label: t.nav.articles, href: '/articles' },
+    { label: t.nav.books, href: '/books' },
+    { label: t.nav.about, href: '/about' },
+  ]
   const menu = s.menu?.length ? s.menu.map(({ label, href }) => ({ label, href })) : defaultMenu
   const social = s.social ?? []
 
@@ -69,6 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       {/* Browser extensions (e.g. ColorZilla, Grammarly) add attributes to <body> before React loads. */}
       <body suppressHydrationWarning>
+        <UiTextProvider value={t}>
         {s.announcementOn && s.announcementText ? (
           <div className="announce">
             {s.announcementLink ? (
@@ -118,6 +119,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             ) : null}
           </div>
         </footer>
+        </UiTextProvider>
       </body>
     </html>
   )

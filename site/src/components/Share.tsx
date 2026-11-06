@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 
-import { t } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 
 export function Share({ path, title }: { path: string; title: string }) {
+  const t = useT()
   const [copied, setCopied] = useState(false)
   const url = `${process.env.NEXT_PUBLIC_SERVER_URL ?? ''}${path}`
   const u = encodeURIComponent(url)

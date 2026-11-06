@@ -1,12 +1,16 @@
 import type { Metadata } from 'next'
 
 import { BookCard } from '@/components/Cards'
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { listBooks } from '@/lib/data'
 
-export const metadata: Metadata = { title: t.nav.books }
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t.nav.books }
+}
 
 export default async function BooksPage() {
+  const t = await getT()
   const [library, published] = await Promise.all([listBooks('library'), listBooks('published')])
 
   return (

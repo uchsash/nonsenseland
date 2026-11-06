@@ -10,7 +10,8 @@ import { RichText, splitRichText } from '@/components/RichText'
 import { Share } from '@/components/Share'
 import { Slider } from '@/components/Slider'
 import { TopicLinks } from '@/components/TopicLinks'
-import { t } from '@/i18n/bn'
+import { fill } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { getArticle, listArticles } from '@/lib/data'
 import { docMetadata } from '@/lib/seo'
 import type { Author, Book, Category } from '@/payload-types'
@@ -26,6 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ArticlePage({ params }: Props) {
+  const t = await getT()
   const { slug } = await params
   const article = await getArticle(slug)
   if (!article) notFound()
@@ -46,7 +48,7 @@ export default async function ArticlePage({ params }: Props) {
           <div className="meta">
             {author ? `${author.name} · ` : ''}
             {article.publishedAt ? bnDate(article.publishedAt) : ''}
-            {article.readingTime ? ` · ${t.common.minRead(bnNumber(article.readingTime))}` : ''}
+            {article.readingTime ? ` · ${fill(t.common.minRead, { n: bnNumber(article.readingTime) })}` : ''}
           </div>
         </header>
         <div className="reading-cover wrap">

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useSyncExternalStore } from 'react'
 
-import { t } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 
 import { CloseIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from './icons'
 import { setStored } from './useStored'
@@ -30,6 +30,7 @@ const isDark = () => {
 }
 
 export function HeaderNav({ items }: { items: Item[] }) {
+  const t = useT()
   const pathname = usePathname()
   // The menu is open only for the page it was opened on, so it closes after navigating.
   const [openOn, setOpenOn] = useState<string | null>(null)

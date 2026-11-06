@@ -9,7 +9,7 @@ import { Share } from '@/components/Share'
 import { Slider } from '@/components/Slider'
 import { TopicLinks } from '@/components/TopicLinks'
 import { VideoPlayer } from '@/components/VideoPlayer'
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { getVideo, listVideos } from '@/lib/data'
 import { docMetadata } from '@/lib/seo'
 import type { Category } from '@/payload-types'
@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function VideoPage({ params }: Props) {
+  const t = await getT()
   const { slug } = await params
   const video = await getVideo(slug)
   if (!video) notFound()
@@ -51,7 +52,7 @@ export default async function VideoPage({ params }: Props) {
       <TopicLinks topics={video.topics} />
       <p>
         <a href={video.url} target="_blank" rel="noopener noreferrer" className="muted" style={{ textDecoration: 'underline' }}>
-          {t.video.watchOn(video.platform ?? 'facebook')}
+          {video.platform === 'youtube' ? t.video.watchOnYoutube : t.video.watchOnFacebook}
         </a>
       </p>
       <Share path={`/videos/${video.slug}`} title={video.title} />

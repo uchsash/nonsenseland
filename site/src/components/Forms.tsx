@@ -4,7 +4,7 @@ import Script from 'next/script'
 import { useActionState } from 'react'
 
 import { type FormState, sendMessage, sendToKindle, subscribe } from '@/app/(frontend)/actions'
-import { t } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 
 const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
@@ -27,6 +27,7 @@ const Note = ({ state }: { state: FormState }) =>
   ) : null
 
 export function NewsletterForm() {
+  const t = useT()
   const [state, action, pending] = useActionState(subscribe, {})
   return (
     <form action={action}>
@@ -54,6 +55,7 @@ export function NewsletterForm() {
 }
 
 export function ContactForm() {
+  const t = useT()
   const [state, action, pending] = useActionState(sendMessage, {})
   if (state.ok) return <Note state={state} />
   return (
@@ -82,6 +84,7 @@ export function ContactForm() {
 }
 
 export function KindleForm({ bookId, sender }: { bookId: number; sender: string }) {
+  const t = useT()
   const [state, action, pending] = useActionState(sendToKindle, {})
   return (
     <form action={action} className="kindle-box">

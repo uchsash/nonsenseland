@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 
-import { t } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 
 import { PlayIcon } from './icons'
 
 /** Shows the thumbnail first; the Facebook/YouTube player loads only after a click. */
 export function VideoPlayer({ embed, title, poster }: { embed?: string; title: string; poster: React.ReactNode }) {
+  const t = useT()
   const [playing, setPlaying] = useState(false)
   return (
     <div className="player">

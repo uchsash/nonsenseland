@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { t } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 import { bnNumber } from '@/utilities/bn'
 
 import { CloseIcon, ListIcon } from './icons'
@@ -17,9 +17,19 @@ type Settings = {
   size: number
   spacing: 'tight' | 'normal' | 'loose'
   width: 'narrow' | 'normal' | 'wide'
+  paragraph: 'gap' | 'indent'
+  align: 'justify' | 'left'
 }
 
-const DEFAULTS: Settings = { theme: 'auto', font: 'serif', size: 19, spacing: 'normal', width: 'normal' }
+const DEFAULTS: Settings = {
+  theme: 'auto',
+  font: 'serif',
+  size: 19,
+  spacing: 'normal',
+  width: 'normal',
+  paragraph: 'gap',
+  align: 'justify',
+}
 const LINE = { tight: 1.6, normal: 1.85, loose: 2.1 }
 const WIDTH = { narrow: '580px', normal: '680px', wide: '820px' }
 const STORE = 'nl-reader'
@@ -73,6 +83,7 @@ export function Reader({
   /** For books: where to remember the reading place. */
   position?: { book: string; chapter: number }
 }) {
+  const t = useT()
   const router = useRouter()
   const raw = useStored(STORE)
   const settings = useMemo<Settings>(() => ({ ...DEFAULTS, ...parseStored<Partial<Settings>>(raw, {}) }), [raw])
@@ -155,7 +166,7 @@ export function Reader({
   } as React.CSSProperties
 
   return (
-    <div className="reading" style={style}>
+    <div className="reading" style={style} data-paragraph={settings.paragraph} data-align={settings.align}>
       <div className="progress" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
       <div ref={body}>{children}</div>
 
@@ -271,6 +282,28 @@ export function Reader({
                     { value: 'narrow', label: t.reader.widths.narrow },
                     { value: 'normal', label: t.reader.widths.normal },
                     { value: 'wide', label: t.reader.widths.wide },
+                  ]}
+                />
+              </div>
+              <div className="panel-row">
+                <span>{t.reader.paragraph}</span>
+                <Seg
+                  value={settings.paragraph}
+                  onChange={(paragraph) => update({ paragraph })}
+                  options={[
+                    { value: 'gap', label: t.reader.paragraphs.gap },
+                    { value: 'indent', label: t.reader.paragraphs.indent },
+                  ]}
+                />
+              </div>
+              <div className="panel-row">
+                <span>{t.reader.align}</span>
+                <Seg
+                  value={settings.align}
+                  onChange={(align) => update({ align })}
+                  options={[
+                    { value: 'justify', label: t.reader.aligns.justify },
+                    { value: 'left', label: t.reader.aligns.left },
                   ]}
                 />
               </div>

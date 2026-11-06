@@ -1,10 +1,10 @@
 import Link from 'next/link'
 
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import type { Category } from '@/payload-types'
 import { bnNumber } from '@/utilities/bn'
 
-export function CategoryChips({
+export async function CategoryChips({
   base,
   categories,
   active,
@@ -13,6 +13,7 @@ export function CategoryChips({
   categories: Category[]
   active?: string
 }) {
+  const t = await getT()
   if (categories.length < 2) return null
   return (
     <nav className="chips" aria-label={t.common.topics} style={{ marginBottom: 32 }}>
@@ -33,7 +34,8 @@ export function CategoryChips({
   )
 }
 
-export function Pager({ page, totalPages, href }: { page: number; totalPages: number; href: (p: number) => string }) {
+export async function Pager({ page, totalPages, href }: { page: number; totalPages: number; href: (p: number) => string }) {
+  const t = await getT()
   if (totalPages < 2) return null
   return (
     <nav className="pager">

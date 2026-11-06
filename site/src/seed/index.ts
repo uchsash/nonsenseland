@@ -251,17 +251,20 @@ if (!(await findBySlug('pages', 'about'))) {
   })
 }
 
-// ---- Settings ----
-await payload.updateGlobal({
-  slug: 'site-settings',
-  data: {
-    social: [
-      { network: 'facebook', url: 'https://www.facebook.com/nonsenseAtoZ' },
-      { network: 'instagram', url: 'https://instagram.com/nonsenseatoz' },
-      { network: 'email', url: 'nonsensesland@gmail.com' },
-    ],
-  },
-})
+// ---- Settings (only filled when empty, so the owner's edits are never overwritten) ----
+const settings = await payload.findGlobal({ slug: 'site-settings' })
+if (!settings.social?.length) {
+  await payload.updateGlobal({
+    slug: 'site-settings',
+    data: {
+      social: [
+        { network: 'facebook', url: 'https://www.facebook.com/nonsenseAtoZ' },
+        { network: 'instagram', url: 'https://instagram.com/nonsenseatoz' },
+        { network: 'email', url: 'nonsensesland@gmail.com' },
+      ],
+    },
+  })
+}
 const home = await payload.findGlobal({ slug: 'homepage' })
 if (!home.sections?.length) {
   await payload.updateGlobal({
@@ -275,6 +278,21 @@ if (!home.sections?.length) {
         { blockType: 'library', enabled: true, title: 'বিনামূল্যে পড়ুন' },
         { blockType: 'published', enabled: true, title: 'আমার প্রকাশিত বই' },
         { blockType: 'newsletter', enabled: true, title: 'নতুন লেখা আর ভিডিওর খবর পেতে', text: 'মাসে এক-দুইবার, এর বেশি নয়।' },
+      ],
+    },
+  })
+}
+
+// Intro buttons jump to homepage sections: videos and the free books row.
+const homeNow = await payload.findGlobal({ slug: 'homepage' })
+const sectionId = (type: string) => homeNow.sections?.find((x) => x.blockType === type)?.id
+if (!settings.introButtons?.length && sectionId('videos') && sectionId('library')) {
+  await payload.updateGlobal({
+    slug: 'site-settings',
+    data: {
+      introButtons: [
+        { label: 'ভিডিও', section: sectionId('videos') },
+        { label: 'বিনামূল্যে পড়ুন', section: sectionId('library') },
       ],
     },
   })

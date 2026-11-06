@@ -92,7 +92,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    books: {
+      chapters: 'chapters';
+    };
+  };
   collectionsSelect: {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     videos: VideosSelect<false> | VideosSelect<true>;
@@ -127,11 +131,13 @@ export interface Config {
     'site-settings': SiteSetting;
     homepage: Homepage;
     'ad-settings': AdSetting;
+    'interface-text': InterfaceText;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
     'ad-settings': AdSettingsSelect<false> | AdSettingsSelect<true>;
+    'interface-text': InterfaceTextSelect<false> | InterfaceTextSelect<true>;
   };
   locale: null;
   widgets: {
@@ -358,6 +364,7 @@ export interface Book {
    */
   originalAuthor?: string | null;
   originalTitle?: string | null;
+  titleColor?: ('default' | 'dark-orange' | 'orange' | 'golden') | null;
   cover: number | Media;
   /**
    * Short description shown on the book page and when shared.
@@ -383,6 +390,11 @@ export interface Book {
      * Result of the last import.
      */
     importReport?: string | null;
+  };
+  chapters?: {
+    docs?: (number | Chapter)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
   };
   ebook?: {
     epub?: (number | null) | BookFile;
@@ -466,6 +478,35 @@ export interface BookFile {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chapters".
+ */
+export interface Chapter {
+  id: number;
+  book: number | Book;
+  title: string;
+  order: number;
+  wordCount?: number | null;
+  titleColor?: ('default' | 'dark-orange' | 'orange' | 'golden') | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -555,36 +596,6 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * Filter by book to see, rename or reorder its chapters.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "chapters".
- */
-export interface Chapter {
-  id: number;
-  book: number | Book;
-  title: string;
-  order: number;
-  wordCount?: number | null;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * House ads for your books now; Google AdSense or other code later. Master switch: Ad settings.
@@ -1123,6 +1134,7 @@ export interface BooksSelect<T extends boolean = true> {
   role?: T;
   originalAuthor?: T;
   originalTitle?: T;
+  titleColor?: T;
   cover?: T;
   description?: T;
   online?:
@@ -1136,6 +1148,7 @@ export interface BooksSelect<T extends boolean = true> {
         importNow?: T;
         importReport?: T;
       };
+  chapters?: T;
   ebook?:
     | T
     | {
@@ -1197,6 +1210,7 @@ export interface ChaptersSelect<T extends boolean = true> {
   title?: T;
   order?: T;
   wordCount?: T;
+  titleColor?: T;
   content?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1526,19 +1540,31 @@ export interface SiteSetting {
    * Default image when a page is shared on Facebook (1200×630).
    */
   shareImage?: (number | null) | Media;
+  /**
+   * Press Enter to start a new line.
+   */
   introTitle: string;
+  introTitleColor?: ('default' | 'dark-orange' | 'orange' | 'golden') | null;
+  /**
+   * Enter = new line (no gap). An empty line between = new paragraph (with a gap).
+   */
   introText?: string | null;
+  introSpacing?: ('compact' | 'normal' | 'loose') | null;
   /**
    * The sketch or a photo. Leave empty to show the icon.
    */
   introImage?: (number | null) | Media;
+  /**
+   * Each button jumps to a section further down the homepage. The first button is filled orange.
+   */
   introButtons?:
     | {
         label: string;
+        section?: string | null;
         /**
-         * e.g. /videos, /articles, /books, /about or a full https:// link
+         * Optional, e.g. /about. Only used when no section is chosen.
          */
-        href: string;
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1659,6 +1685,471 @@ export interface AdSetting {
   createdAt?: string | null;
 }
 /**
+ * Every button, label and message on the site. Change the wording here; empty a field to go back to the default.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "interface-text".
+ */
+export interface InterfaceText {
+  id: number;
+  nav?: {
+    /**
+     * Default: ভিডিও
+     */
+    videos?: string | null;
+    /**
+     * Default: লেখা
+     */
+    articles?: string | null;
+    /**
+     * Default: বই
+     */
+    books?: string | null;
+    /**
+     * Default: পরিচিতি
+     */
+    about?: string | null;
+    /**
+     * Default: খুঁজুন
+     */
+    search?: string | null;
+    /**
+     * Default: মেনু
+     */
+    menu?: string | null;
+    /**
+     * Default: বন্ধ করুন
+     */
+    close?: string | null;
+    /**
+     * Default: আলো
+     */
+    themeLight?: string | null;
+    /**
+     * Default: অন্ধকার
+     */
+    themeDark?: string | null;
+    /**
+     * Default: প্রথম পাতা
+     */
+    home?: string | null;
+  };
+  common?: {
+    /**
+     * Default: সব
+     */
+    all?: string | null;
+    /**
+     * Default: সব দেখুন
+     */
+    seeAll?: string | null;
+    /**
+     * Default: পড়ুন
+     */
+    readMore?: string | null;
+    /**
+     * Default: {n} মিনিটের পড়া — keep {n} where the number goes.
+     */
+    minRead?: string | null;
+    /**
+     * Default: আগেরটা
+     */
+    previous?: string | null;
+    /**
+     * Default: পরেরটা
+     */
+    next?: string | null;
+    /**
+     * Default: ফিরে যান
+     */
+    back?: string | null;
+    /**
+     * Default: এখানে এখনো কিছু নেই।
+     */
+    empty?: string | null;
+    /**
+     * Default: বিষয়
+     */
+    topics?: string | null;
+  };
+  video?: {
+    /**
+     * Default: ভিডিও চালান
+     */
+    play?: string | null;
+    /**
+     * Default: ফেসবুকে দেখুন
+     */
+    watchOnFacebook?: string | null;
+    /**
+     * Default: ইউটিউবে দেখুন
+     */
+    watchOnYoutube?: string | null;
+    /**
+     * Default: আরও ভিডিও
+     */
+    related?: string | null;
+  };
+  article?: {
+    /**
+     * Default: লিখেছেন
+     */
+    by?: string | null;
+    /**
+     * Default: আরও লেখা
+     */
+    related?: string | null;
+    /**
+     * Default: এই লেখা ভালো লাগলে পড়ে দেখতে পারেন
+     */
+    bookPromo?: string | null;
+  };
+  book?: {
+    /**
+     * Default: বিনামূল্যে পড়ুন
+     */
+    free?: string | null;
+    /**
+     * Default: আমার প্রকাশিত বই
+     */
+    published?: string | null;
+    /**
+     * Default: পড়া শুরু করুন
+     */
+    startReading?: string | null;
+    /**
+     * Default: যেখানে থেমেছিলেন
+     */
+    continueReading?: string | null;
+    /**
+     * Default: অধ্যায়সমূহ
+     */
+    chapters?: string | null;
+    /**
+     * Default: অধ্যায়
+     */
+    chapter?: string | null;
+    /**
+     * Default: EPUB ডাউনলোড
+     */
+    download?: string | null;
+    /**
+     * Default: Kindle-এ পাঠান
+     */
+    kindle?: string | null;
+    /**
+     * Default: কিনুন
+     */
+    buyFrom?: string | null;
+    /**
+     * Default: লেখক
+     */
+    writer?: string | null;
+    /**
+     * Default: অনুবাদক
+     */
+    translator?: string | null;
+    /**
+     * Default: মূল লেখক
+     */
+    originalAuthor?: string | null;
+    /**
+     * Default: প্রকাশক
+     */
+    publisher?: string | null;
+    /**
+     * Default: পৃষ্ঠা
+     */
+    pages?: string | null;
+    /**
+     * Default: সূচিপত্র
+     */
+    contents?: string | null;
+    /**
+     * Default: বইটি শেষ। পড়ার জন্য ধন্যবাদ!
+     */
+    finished?: string | null;
+    /**
+     * Default: বইয়ের পাতায় ফিরুন
+     */
+    backToBook?: string | null;
+    /**
+     * Default: এই অধ্যায়টি এখনো উন্মুক্ত নয়।
+     */
+    locked?: string | null;
+  };
+  kindle?: {
+    /**
+     * Default: Kindle-এ পাঠান
+     */
+    title?: string | null;
+    /**
+     * Default: আপনার Kindle-এর ইমেইল ঠিকানা লিখুন (…@kindle.com)।
+     */
+    intro?: string | null;
+    /**
+     * Default: প্রথমবার পাঠানোর আগে Amazon-এ গিয়ে “Approved Personal Document E-mail List”-এ এই ঠিকানাটি যোগ করুন:
+     */
+    step?: string | null;
+    /**
+     * Default: কীভাবে করবেন?
+     */
+    help?: string | null;
+    /**
+     * Default: yourname@kindle.com
+     */
+    placeholder?: string | null;
+    /**
+     * Default: পাঠান
+     */
+    send?: string | null;
+    /**
+     * Default: পাঠানো হচ্ছে…
+     */
+    sending?: string | null;
+    /**
+     * Default: পাঠানো হয়েছে! কয়েক মিনিটের মধ্যে Kindle-এ বইটি চলে আসবে।
+     */
+    sent?: string | null;
+    /**
+     * Default: সঠিক Kindle ঠিকানা দিন (…@kindle.com)।
+     */
+    invalid?: string | null;
+    /**
+     * Default: অনেকবার চেষ্টা করা হয়েছে। এক ঘণ্টা পর আবার চেষ্টা করুন।
+     */
+    limited?: string | null;
+    /**
+     * Default: পাঠানো যায়নি। একটু পরে আবার চেষ্টা করুন।
+     */
+    failed?: string | null;
+    /**
+     * Default: Kindle-এ পাঠানো এখনো চালু হয়নি।
+     */
+    notConfigured?: string | null;
+  };
+  reader?: {
+    /**
+     * Default: পড়ার সেটিংস
+     */
+    settings?: string | null;
+    /**
+     * Default: পটভূমি
+     */
+    theme?: string | null;
+    themes?: {
+      /**
+       * Default: সাদা
+       */
+      light?: string | null;
+      /**
+       * Default: সেপিয়া
+       */
+      sepia?: string | null;
+      /**
+       * Default: কালো
+       */
+      dark?: string | null;
+    };
+    /**
+     * Default: হরফ
+     */
+    font?: string | null;
+    fonts?: {
+      /**
+       * Default: সেরিফ
+       */
+      serif?: string | null;
+      /**
+       * Default: সাধারণ
+       */
+      sans?: string | null;
+    };
+    /**
+     * Default: অক্ষরের আকার
+     */
+    size?: string | null;
+    /**
+     * Default: লাইনের ফাঁক
+     */
+    spacing?: string | null;
+    spacings?: {
+      /**
+       * Default: কম
+       */
+      tight?: string | null;
+      /**
+       * Default: মাঝারি
+       */
+      normal?: string | null;
+      /**
+       * Default: বেশি
+       */
+      loose?: string | null;
+    };
+    /**
+     * Default: পাতার চওড়া
+     */
+    width?: string | null;
+    widths?: {
+      /**
+       * Default: সরু
+       */
+      narrow?: string | null;
+      /**
+       * Default: মাঝারি
+       */
+      normal?: string | null;
+      /**
+       * Default: চওড়া
+       */
+      wide?: string | null;
+    };
+    /**
+     * Default: অনুচ্ছেদ
+     */
+    paragraph?: string | null;
+    paragraphs?: {
+      /**
+       * Default: ফাঁক রেখে
+       */
+      gap?: string | null;
+      /**
+       * Default: ইনডেন্ট
+       */
+      indent?: string | null;
+    };
+    /**
+     * Default: লেখা সাজানো
+     */
+    align?: string | null;
+    aligns?: {
+      /**
+       * Default: দুই পাশ সমান
+       */
+      justify?: string | null;
+      /**
+       * Default: বাম দিকে
+       */
+      left?: string | null;
+    };
+    /**
+     * Default: ছোট
+     */
+    smaller?: string | null;
+    /**
+     * Default: বড়
+     */
+    larger?: string | null;
+    /**
+     * Default: আগের মতো
+     */
+    reset?: string | null;
+  };
+  share?: {
+    /**
+     * Default: শেয়ার করুন
+     */
+    title?: string | null;
+    /**
+     * Default: লিংক কপি
+     */
+    copy?: string | null;
+    /**
+     * Default: কপি হয়েছে
+     */
+    copied?: string | null;
+  };
+  search?: {
+    /**
+     * Default: খুঁজুন
+     */
+    title?: string | null;
+    /**
+     * Default: লেখা, ভিডিও বা বই খুঁজুন…
+     */
+    placeholder?: string | null;
+    /**
+     * Default: {n}টি ফলাফল — keep {n} where the number goes.
+     */
+    results?: string | null;
+    /**
+     * Default: কিছু পাওয়া যায়নি।
+     */
+    none?: string | null;
+  };
+  newsletter?: {
+    /**
+     * Default: আপনার ইমেইল
+     */
+    placeholder?: string | null;
+    /**
+     * Default: যুক্ত হোন
+     */
+    button?: string | null;
+    /**
+     * Default: ধন্যবাদ! আপনি যুক্ত হয়েছেন।
+     */
+    done?: string | null;
+    /**
+     * Default: এই ইমেইল আগেই যুক্ত আছে।
+     */
+    already?: string | null;
+    /**
+     * Default: সঠিক ইমেইল দিন।
+     */
+    invalid?: string | null;
+  };
+  contact?: {
+    /**
+     * Default: নাম
+     */
+    name?: string | null;
+    /**
+     * Default: ইমেইল
+     */
+    email?: string | null;
+    /**
+     * Default: বার্তা
+     */
+    message?: string | null;
+    /**
+     * Default: পাঠান
+     */
+    send?: string | null;
+    /**
+     * Default: বার্তা পৌঁছেছে। ধন্যবাদ!
+     */
+    done?: string | null;
+    /**
+     * Default: পাঠানো যায়নি। আবার চেষ্টা করুন।
+     */
+    failed?: string | null;
+  };
+  ad?: {
+    /**
+     * Default: বিজ্ঞাপন
+     */
+    label?: string | null;
+  };
+  notFound?: {
+    /**
+     * Default: পাতাটি খুঁজে পাওয়া যায়নি
+     */
+    title?: string | null;
+    /**
+     * Default: হয়তো ঠিকানা বদলেছে, অথবা পাতাটি আর নেই।
+     */
+    text?: string | null;
+    /**
+     * Default: প্রথম পাতায় ফিরুন
+     */
+    home?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -1670,12 +2161,15 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   icon?: T;
   shareImage?: T;
   introTitle?: T;
+  introTitleColor?: T;
   introText?: T;
+  introSpacing?: T;
   introImage?: T;
   introButtons?:
     | T
     | {
         label?: T;
+        section?: T;
         href?: T;
         id?: T;
       };
@@ -1785,6 +2279,195 @@ export interface HomepageSelect<T extends boolean = true> {
 export interface AdSettingsSelect<T extends boolean = true> {
   enabled?: T;
   adsenseClient?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "interface-text_select".
+ */
+export interface InterfaceTextSelect<T extends boolean = true> {
+  nav?:
+    | T
+    | {
+        videos?: T;
+        articles?: T;
+        books?: T;
+        about?: T;
+        search?: T;
+        menu?: T;
+        close?: T;
+        themeLight?: T;
+        themeDark?: T;
+        home?: T;
+      };
+  common?:
+    | T
+    | {
+        all?: T;
+        seeAll?: T;
+        readMore?: T;
+        minRead?: T;
+        previous?: T;
+        next?: T;
+        back?: T;
+        empty?: T;
+        topics?: T;
+      };
+  video?:
+    | T
+    | {
+        play?: T;
+        watchOnFacebook?: T;
+        watchOnYoutube?: T;
+        related?: T;
+      };
+  article?:
+    | T
+    | {
+        by?: T;
+        related?: T;
+        bookPromo?: T;
+      };
+  book?:
+    | T
+    | {
+        free?: T;
+        published?: T;
+        startReading?: T;
+        continueReading?: T;
+        chapters?: T;
+        chapter?: T;
+        download?: T;
+        kindle?: T;
+        buyFrom?: T;
+        writer?: T;
+        translator?: T;
+        originalAuthor?: T;
+        publisher?: T;
+        pages?: T;
+        contents?: T;
+        finished?: T;
+        backToBook?: T;
+        locked?: T;
+      };
+  kindle?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        step?: T;
+        help?: T;
+        placeholder?: T;
+        send?: T;
+        sending?: T;
+        sent?: T;
+        invalid?: T;
+        limited?: T;
+        failed?: T;
+        notConfigured?: T;
+      };
+  reader?:
+    | T
+    | {
+        settings?: T;
+        theme?: T;
+        themes?:
+          | T
+          | {
+              light?: T;
+              sepia?: T;
+              dark?: T;
+            };
+        font?: T;
+        fonts?:
+          | T
+          | {
+              serif?: T;
+              sans?: T;
+            };
+        size?: T;
+        spacing?: T;
+        spacings?:
+          | T
+          | {
+              tight?: T;
+              normal?: T;
+              loose?: T;
+            };
+        width?: T;
+        widths?:
+          | T
+          | {
+              narrow?: T;
+              normal?: T;
+              wide?: T;
+            };
+        paragraph?: T;
+        paragraphs?:
+          | T
+          | {
+              gap?: T;
+              indent?: T;
+            };
+        align?: T;
+        aligns?:
+          | T
+          | {
+              justify?: T;
+              left?: T;
+            };
+        smaller?: T;
+        larger?: T;
+        reset?: T;
+      };
+  share?:
+    | T
+    | {
+        title?: T;
+        copy?: T;
+        copied?: T;
+      };
+  search?:
+    | T
+    | {
+        title?: T;
+        placeholder?: T;
+        results?: T;
+        none?: T;
+      };
+  newsletter?:
+    | T
+    | {
+        placeholder?: T;
+        button?: T;
+        done?: T;
+        already?: T;
+        invalid?: T;
+      };
+  contact?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+        message?: T;
+        send?: T;
+        done?: T;
+        failed?: T;
+      };
+  ad?:
+    | T
+    | {
+        label?: T;
+      };
+  notFound?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        home?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

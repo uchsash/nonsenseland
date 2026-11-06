@@ -1,13 +1,18 @@
 import type { Metadata } from 'next'
 
 import { ArticleCard, BookCard, VideoCard } from '@/components/Cards'
-import { t } from '@/i18n/bn'
+import { fill } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { searchAll } from '@/lib/data'
 import { bnNumber } from '@/utilities/bn'
 
-export const metadata: Metadata = { title: t.search.title, robots: { index: false } }
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t.search.title, robots: { index: false } }
+}
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const t = await getT()
   const q = ((await searchParams).q ?? '').trim().slice(0, 100)
   const results = q ? await searchAll(q) : null
   const count = results ? results.articles.length + results.videos.length + results.books.length : 0
@@ -27,7 +32,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
       {results ? (
         <>
-          <p className="muted">{count ? t.search.results(bnNumber(count)) : t.search.none}</p>
+          <p className="muted">{count ? fill(t.search.results, { n: bnNumber(count) }) : t.search.none}</p>
           {results.articles.length ? (
             <section className="result-group">
               <h2>{t.nav.articles}</h2>

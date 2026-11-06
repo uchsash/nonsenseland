@@ -2,7 +2,7 @@
 
 import { useRef } from 'react'
 
-import { t } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 
 import { ArrowLeft, ArrowRight } from './icons'
 
@@ -10,7 +10,7 @@ import { ArrowLeft, ArrowRight } from './icons'
 export function Slider({
   title,
   link,
-  linkLabel = t.common.seeAll,
+  linkLabel,
   variant,
   toolbar,
   children,
@@ -22,6 +22,7 @@ export function Slider({
   toolbar?: React.ReactNode
   children: React.ReactNode
 }) {
+  const t = useT()
   const track = useRef<HTMLDivElement>(null)
   const scroll = (dir: 1 | -1) => {
     const el = track.current
@@ -33,7 +34,7 @@ export function Slider({
       <div className="section-head">
         <h2>{title}</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {link ? <a href={link}>{linkLabel}</a> : null}
+          {link ? <a href={link}>{linkLabel ?? t.common.seeAll}</a> : null}
           <div className="slider-nav">
             <button type="button" className="icon-btn" onClick={() => scroll(-1)} aria-label={t.common.previous}>
               <ArrowLeft />

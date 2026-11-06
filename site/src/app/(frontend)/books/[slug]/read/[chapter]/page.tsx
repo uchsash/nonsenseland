@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation'
 
 import { Reader } from '@/components/Reader'
 import { RichText } from '@/components/RichText'
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { getBook, getChapterList, getReadableChapter } from '@/lib/data'
 import { bnNumber } from '@/utilities/bn'
+import { colorClass } from '@/utilities/palette'
 
 type Props = { params: Promise<{ slug: string; chapter: string }> }
 
@@ -23,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ChapterPage({ params }: Props) {
+  const t = await getT()
   const { slug, chapter } = await params
   const order = Number(chapter)
   const book = await getBook(slug)
@@ -51,7 +53,7 @@ export default async function ChapterPage({ params }: Props) {
             <Link href={`/books/${book.slug}`}>{book.title}</Link> · {t.book.chapter} {bnNumber(index + 1)}/
             {bnNumber(list.length)}
           </div>
-          <h1>{title}</h1>
+          <h1 className={content === 'locked' ? undefined : colorClass(content.titleColor)}>{title}</h1>
         </header>
 
         {content === 'locked' ? (

@@ -1,8 +1,9 @@
 /**
- * All interface text in one place. Content (articles, intro, About…) is edited in
- * the admin panel; these are the fixed labels. Draft wording, to be corrected by the owner.
+ * Default interface text (buttons, labels, messages). Every entry can be changed in the
+ * admin under Settings → Interface text; an empty field there falls back to the text here.
+ * Placeholders like {n} are filled in by the site (e.g. {n} = number of minutes).
  */
-export const t = {
+export const defaults = {
   nav: {
     videos: 'ভিডিও',
     articles: 'লেখা',
@@ -19,7 +20,7 @@ export const t = {
     all: 'সব',
     seeAll: 'সব দেখুন',
     readMore: 'পড়ুন',
-    minRead: (n: string) => `${n} মিনিটের পড়া`,
+    minRead: '{n} মিনিটের পড়া',
     previous: 'আগেরটা',
     next: 'পরেরটা',
     back: 'ফিরে যান',
@@ -28,7 +29,8 @@ export const t = {
   },
   video: {
     play: 'ভিডিও চালান',
-    watchOn: (p: string) => (p === 'facebook' ? 'ফেসবুকে দেখুন' : 'ইউটিউবে দেখুন'),
+    watchOnFacebook: 'ফেসবুকে দেখুন',
+    watchOnYoutube: 'ইউটিউবে দেখুন',
     related: 'আরও ভিডিও',
   },
   article: {
@@ -82,6 +84,10 @@ export const t = {
     spacings: { tight: 'কম', normal: 'মাঝারি', loose: 'বেশি' },
     width: 'পাতার চওড়া',
     widths: { narrow: 'সরু', normal: 'মাঝারি', wide: 'চওড়া' },
+    paragraph: 'অনুচ্ছেদ',
+    paragraphs: { gap: 'ফাঁক রেখে', indent: 'ইনডেন্ট' },
+    align: 'লেখা সাজানো',
+    aligns: { justify: 'দুই পাশ সমান', left: 'বাম দিকে' },
     smaller: 'ছোট',
     larger: 'বড়',
     reset: 'আগের মতো',
@@ -94,7 +100,7 @@ export const t = {
   search: {
     title: 'খুঁজুন',
     placeholder: 'লেখা, ভিডিও বা বই খুঁজুন…',
-    results: (n: string) => `${n}টি ফলাফল`,
+    results: '{n}টি ফলাফল',
     none: 'কিছু পাওয়া যায়নি।',
   },
   newsletter: {
@@ -118,4 +124,26 @@ export const t = {
     text: 'হয়তো ঠিকানা বদলেছে, অথবা পাতাটি আর নেই।',
     home: 'প্রথম পাতায় ফিরুন',
   },
+}
+
+type Widen<T> = { [K in keyof T]: T[K] extends string ? string : Widen<T[K]> }
+export type UiText = Widen<typeof defaults>
+
+/** Fills placeholders: fill('{n} মিনিটের পড়া', { n: '৫' }) → '৫ মিনিটের পড়া' */
+export const fill = (template: string, values: Record<string, string>) =>
+  template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match)
+
+/** Saved admin texts on top of the defaults; empty fields keep the default. */
+export function mergeUiText<T extends Record<string, unknown>>(base: T, saved: unknown): T {
+  const out: Record<string, unknown> = {}
+  const source = (saved && typeof saved === 'object' ? saved : {}) as Record<string, unknown>
+  for (const [key, value] of Object.entries(base)) {
+    const custom = source[key]
+    if (typeof value === 'string') {
+      out[key] = typeof custom === 'string' && custom.trim() ? custom.trim() : value
+    } else {
+      out[key] = mergeUiText(value as Record<string, unknown>, custom)
+    }
+  }
+  return out as T
 }

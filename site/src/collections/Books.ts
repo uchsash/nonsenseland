@@ -2,6 +2,7 @@ import { APIError, type CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
 import { ImportError, importBookChapters } from '../lib/book-import'
+import { colorField } from '../utilities/palette'
 import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 
@@ -45,6 +46,7 @@ export const Books: CollectionConfig = {
         { name: 'originalTitle', type: 'text' },
       ],
     },
+    colorField('titleColor', 'Title colour'),
     { name: 'cover', type: 'upload', relationTo: 'media', required: true },
     {
       name: 'description',
@@ -125,6 +127,21 @@ export const Books: CollectionConfig = {
                   admin: { readOnly: true, description: 'Result of the last import.' },
                 },
               ],
+            },
+          ],
+        },
+        {
+          label: 'Chapters',
+          description: 'This book’s chapters in reading order. Click one to edit it; “Order” sets the position.',
+          fields: [
+            {
+              name: 'chapters',
+              type: 'join',
+              collection: 'chapters',
+              on: 'book',
+              defaultSort: 'order',
+              defaultLimit: 200,
+              admin: { defaultColumns: ['order', 'title', 'wordCount'], allowCreate: true },
             },
           ],
         },

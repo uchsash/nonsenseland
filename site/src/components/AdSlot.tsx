@@ -1,6 +1,6 @@
 import Script from 'next/script'
 
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { getAdSettings, pickAd } from '@/lib/data'
 import type { Book } from '@/payload-types'
 
@@ -11,6 +11,7 @@ import { Img } from './Img'
  * so the page simply closes up.
  */
 export async function AdSlot({ slot }: { slot: string }) {
+  const t = await getT()
   const ad = await pickAd(slot)
   if (!ad) return null
 

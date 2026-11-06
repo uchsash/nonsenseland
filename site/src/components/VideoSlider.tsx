@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { t } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 import type { Category, Video } from '@/payload-types'
 
 import { VideoCard } from './Cards'
@@ -20,6 +20,7 @@ export function VideoSlider({
   categories: Category[]
   showFilters: boolean
 }) {
+  const t = useT()
   const [active, setActive] = useState<number | null>(null)
   const used = categories.filter((c) =>
     videos.some((v) => (typeof v.category === 'object' ? v.category?.id : v.category) === c.id),

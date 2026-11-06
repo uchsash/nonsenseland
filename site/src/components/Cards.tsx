@@ -1,6 +1,9 @@
+'use client'
+
 import Link from 'next/link'
 
-import { t } from '@/i18n/bn'
+import { fill } from '@/i18n/bn'
+import { useT } from '@/i18n/client'
 import type { Article, Book, Category, Video } from '@/payload-types'
 import { bnDate, bnNumber } from '@/utilities/bn'
 
@@ -27,6 +30,7 @@ export function VideoCard({ video }: { video: Video }) {
 
 /** Lists fetch articles without their body, so cards don't need `content`. */
 export function ArticleCard({ article }: { article: Omit<Article, 'content'> }) {
+  const t = useT()
   return (
     <Link href={`/articles/${article.slug}`} className="card">
       <div className="card-media">
@@ -34,7 +38,7 @@ export function ArticleCard({ article }: { article: Omit<Article, 'content'> }) 
       </div>
       <div className="card-meta">
         {categoryName(article.category)}
-        {article.readingTime ? ` · ${t.common.minRead(bnNumber(article.readingTime))}` : ''}
+        {article.readingTime ? ` · ${fill(t.common.minRead, { n: bnNumber(article.readingTime) })}` : ''}
       </div>
       <h3 className="card-title">{article.title}</h3>
       {article.excerpt ? <p className="card-text">{article.excerpt}</p> : null}

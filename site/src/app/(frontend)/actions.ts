@@ -1,6 +1,6 @@
 'use server'
 
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { payloadClient } from '@/lib/data'
 import { emailConfigured, sendEmail } from '@/lib/email'
 import { readStoredFile } from '@/lib/files'
@@ -14,6 +14,7 @@ const KINDLE = /^[^\s@]+@(free\.)?kindle\.(com|cn)$/i
 const KINDLE_PER_HOUR = 3
 
 export async function subscribe(_: FormState, form: FormData): Promise<FormState> {
+  const t = await getT()
   const email = String(form.get('email') ?? '').trim().toLowerCase()
   if (!EMAIL.test(email)) return { ok: false, message: t.newsletter.invalid }
   if (!(await verifyHuman(form.get('cf-turnstile-response')))) return { ok: false, message: t.contact.failed }
@@ -25,6 +26,7 @@ export async function subscribe(_: FormState, form: FormData): Promise<FormState
 }
 
 export async function sendMessage(_: FormState, form: FormData): Promise<FormState> {
+  const t = await getT()
   const name = String(form.get('name') ?? '').trim().slice(0, 120)
   const email = String(form.get('email') ?? '').trim()
   const message = String(form.get('message') ?? '').trim().slice(0, 5000)
@@ -43,6 +45,7 @@ export async function sendMessage(_: FormState, form: FormData): Promise<FormSta
 }
 
 export async function sendToKindle(_: FormState, form: FormData): Promise<FormState> {
+  const t = await getT()
   const to = String(form.get('kindle') ?? '').trim()
   const bookId = Number(form.get('book'))
   if (!KINDLE.test(to)) return { ok: false, message: t.kindle.invalid }

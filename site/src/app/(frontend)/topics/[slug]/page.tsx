@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { ArticleCard, VideoCard } from '@/components/Cards'
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { getTopic, listArticles, listVideos } from '@/lib/data'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function TopicPage({ params }: Props) {
+  const t = await getT()
   const topic = await getTopic((await params).slug)
   if (!topic) notFound()
   const [articles, videos] = await Promise.all([

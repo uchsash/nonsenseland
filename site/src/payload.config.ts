@@ -1,6 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor, TextStateFeature } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import path from 'path'
 import { buildConfig, type CollectionConfig } from 'payload'
@@ -26,7 +26,9 @@ import {
 import { Authors, Categories, Topics } from './collections/Taxonomy'
 import { Users } from './collections/Users'
 import { Videos } from './collections/Videos'
-import { AdSettings, Homepage, SiteSettings } from './globals'
+import { LinesBlock } from './blocks/Lines'
+import { AdSettings, Homepage, InterfaceText, SiteSettings } from './globals'
+import { PALETTE } from './utilities/palette'
 import { revalidateAfterChange, revalidateAfterDelete, revalidateGlobal } from './utilities/revalidate'
 
 /** Collections shown on the public site refresh its cache when they change. */
@@ -79,14 +81,28 @@ export default buildConfig({
     ReadingProgress,
     Users,
   ],
-  globals: [SiteSettings, Homepage, AdSettings].map((g) => ({
+  globals: [SiteSettings, Homepage, AdSettings, InterfaceText].map((g) => ({
     ...g,
     hooks: { ...g.hooks, afterChange: [...(g.hooks?.afterChange ?? []), revalidateGlobal] },
   })),
   // Runs scheduled publishing every minute while the server runs.
   // On Cloudflare a Cron Trigger calls /api/payload-jobs/run instead (set up at deployment).
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default' }] },
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      // Text colours from the logo (toolbar: “Aa” colour menu).
+      TextStateFeature({
+        state: {
+          color: Object.fromEntries(
+            Object.entries(PALETTE).map(([key, { label, hex }]) => [key, { label, css: { color: hex } }]),
+          ),
+        },
+      }),
+      // “Lines without gaps” block (toolbar: + → Lines without gaps).
+      BlocksFeature({ blocks: [LinesBlock] }),
+    ],
+  }),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   db: postgresAdapter({

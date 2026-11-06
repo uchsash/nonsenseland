@@ -2,16 +2,20 @@ import type { Metadata } from 'next'
 
 import { VideoCard } from '@/components/Cards'
 import { CategoryChips, Pager, pageHref } from '@/components/ListPage'
-import { t } from '@/i18n/bn'
+import { getT } from '@/i18n/server'
 import { getCategories, listVideos } from '@/lib/data'
 
-export const metadata: Metadata = { title: t.nav.videos }
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t.nav.videos }
+}
 
 export default async function VideosPage({
   searchParams,
 }: {
   searchParams: Promise<{ category?: string; page?: string }>
 }) {
+  const t = await getT()
   const { category, page } = await searchParams
   const categories = await getCategories('video')
   const active = categories.find((c) => c.slug === category)
