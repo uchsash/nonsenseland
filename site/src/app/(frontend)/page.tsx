@@ -114,6 +114,8 @@ const Paragraphs = ({ text }: { text: string }) =>
 
 async function Intro({ sections }: { sections: Section[] }) {
   const s = await getSettings()
+  // The deck beside the intro (when chosen and there are posts); otherwise the image.
+  const deck = s.introSide === 'alap' ? await listAlap(30) : []
   // A button shows only if its section is on the homepage (and switched on), or it has a link.
   const buttons = (s.introButtons ?? [])
     .map((b) => {
@@ -143,13 +145,19 @@ async function Intro({ sections }: { sections: Section[] }) {
           </div>
         ) : null}
       </div>
-      <div className="intro-art">
-        {s.introImage && typeof s.introImage === 'object' ? (
-          <Img media={s.introImage} use={[]} priority />
-        ) : (
-          <img src="/brand/icon.svg" alt="" width={280} height={280} />
-        )}
-      </div>
+      {deck.length ? (
+        <div className="intro-art intro-deck">
+          <AlapDeck items={deck} compact />
+        </div>
+      ) : (
+        <div className="intro-art">
+          {s.introImage && typeof s.introImage === 'object' ? (
+            <Img media={s.introImage} use={[]} priority />
+          ) : (
+            <img src="/brand/icon.svg" alt="" width={280} height={280} />
+          )}
+        </div>
+      )}
     </section>
   )
 }

@@ -1615,6 +1615,10 @@ export interface SiteSetting {
   introText?: string | null;
   introSpacing?: ('compact' | 'normal' | 'loose') | null;
   /**
+   * With the deck, phones show it after the heading and buttons. With no posts, the image shows.
+   */
+  introSide?: ('image' | 'alap') | null;
+  /**
    * The sketch or a photo. Leave empty to show the icon.
    */
   introImage?: (number | null) | Media;
@@ -1838,6 +1842,10 @@ export interface InterfaceText {
      * Default: এখানে এখনো কিছু নেই।
      */
     empty?: string | null;
+    /**
+     * Default: লোড হচ্ছে…
+     */
+    loading?: string | null;
     /**
      * Default: বিষয়
      */
@@ -2249,6 +2257,10 @@ export interface InterfaceText {
      */
     hint?: string | null;
     /**
+     * Default: পুরোটা পড়ুন
+     */
+    readMore?: string | null;
+    /**
      * Default: এখনো কোনো আলাপ নেই।
      */
     empty?: string | null;
@@ -2327,6 +2339,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   introTitleColor?: T;
   introText?: T;
   introSpacing?: T;
+  introSide?: T;
   introImage?: T;
   introButtons?:
     | T
@@ -2484,6 +2497,7 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         next?: T;
         back?: T;
         empty?: T;
+        loading?: T;
         topics?: T;
       };
   video?:
@@ -2646,6 +2660,7 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         next?: T;
         previous?: T;
         hint?: T;
+        readMore?: T;
         empty?: T;
       };
   post?:

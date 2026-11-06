@@ -25,6 +25,7 @@ export const defaults = {
     next: 'পরেরটা',
     back: 'ফিরে যান',
     empty: 'এখানে এখনো কিছু নেই।',
+    loading: 'লোড হচ্ছে…',
     topics: 'বিষয়',
   },
   video: {
@@ -131,6 +132,7 @@ export const defaults = {
     next: 'পরেরটা',
     previous: 'আগেরটা',
     hint: 'পাশে টেনে পরের আলাপ দেখুন',
+    readMore: 'পুরোটা পড়ুন',
     empty: 'এখনো কোনো আলাপ নেই।',
   },
   post: {

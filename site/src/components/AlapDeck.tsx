@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRef, useState } from 'react'
 
 import { useT } from '@/i18n/client'
@@ -10,6 +11,9 @@ import { Img } from './Img'
 import { ArrowLeft, ArrowRight } from './icons'
 
 const SWIPE = 70 // px needed to move to the next card
+
+/** Roughly more than the 7 lines shown in the compact (intro) card. */
+const isLong = (text: string) => text.length > 260 || text.split(/\n/).length > 7
 const FLY_MS = 220
 
 /**
@@ -17,7 +21,7 @@ const FLY_MS = 220
  * Swipe sideways (or use the arrows / ← → keys); it loops endlessly.
  * Vertical movement is left to the page, so scrolling keeps working on phones.
  */
-export function AlapDeck({ items }: { items: Alap[] }) {
+export function AlapDeck({ items, compact = false }: { items: Alap[]; compact?: boolean }) {
   const t = useT()
   const [index, setIndex] = useState(0)
   const [dx, setDx] = useState(0)
@@ -115,7 +119,12 @@ export function AlapDeck({ items }: { items: Alap[] }) {
               <Img media={item.image} use={['square']} sizes="(max-width: 600px) 90vw, 480px" />
             </div>
           ) : null}
-          <p className="deck-text">{item.text}</p>
+          <p className={`deck-text${compact ? ' clamp' : ''}`}>{item.text}</p>
+          {compact && isLong(item.text) ? (
+            <Link href="/alap" className="deck-more">
+              {t.alap.readMore} →
+            </Link>
+          ) : null}
           <time className="deck-date" dateTime={item.publishedAt}>
             {bnDate(item.publishedAt)}
           </time>

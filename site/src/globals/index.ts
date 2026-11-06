@@ -89,6 +89,20 @@ export const SiteSettings: GlobalConfig = {
               ],
             },
             {
+              name: 'introSide',
+              type: 'radio',
+              label: 'Beside the intro, show',
+              defaultValue: 'image',
+              options: [
+                { label: 'An image (or the icon)', value: 'image' },
+                { label: 'The খুচরো আলাপ deck', value: 'alap' },
+              ],
+              admin: {
+                layout: 'horizontal',
+                description: 'With the deck, phones show it after the heading and buttons. With no posts, the image shows.',
+              },
+            },
+            {
               name: 'introImage',
               type: 'upload',
               relationTo: 'media',
