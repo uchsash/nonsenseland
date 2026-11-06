@@ -1,3 +1,8 @@
 # Licensed font archives (not committed)
 Neometric Font-*.zip
 Neometric Font-*/
+
+# Book files (EPUB/Word) are uploaded through the admin, not kept in git
+free-books/
+*.epub
+*.docx
