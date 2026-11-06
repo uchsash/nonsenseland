@@ -77,15 +77,14 @@ async function HomeSection({ section }: { section: Section }) {
       return <BookShelf title={section.title} books={books} layout="slider" link="/books" />
     }
     case 'alap': {
-      const items = await listAlap(30)
+      const items = await listAlap(6)
       if (!items.length) return null
       return (
         <section className="section">
           <div className="section-head">
             <h2>{section.title}</h2>
-            <Link href="/alap">{(await getT()).common.seeAll}</Link>
           </div>
-          <AlapDeck items={items} />
+          <AlapDeck items={items} seeAll />
         </section>
       )
     }
@@ -115,7 +114,7 @@ const Paragraphs = ({ text }: { text: string }) =>
 async function Intro({ sections }: { sections: Section[] }) {
   const s = await getSettings()
   // The deck beside the intro (when chosen and there are posts); otherwise the image.
-  const deck = s.introSide === 'alap' ? await listAlap(30) : []
+  const deck = s.introSide === 'alap' ? await listAlap(6) : []
   // A button shows only if its section is on the homepage (and switched on), or it has a link.
   const buttons = (s.introButtons ?? [])
     .map((b) => {
@@ -147,7 +146,7 @@ async function Intro({ sections }: { sections: Section[] }) {
       </div>
       {deck.length ? (
         <div className="intro-art intro-deck">
-          <AlapDeck items={deck} />
+          <AlapDeck items={deck} seeAll />
         </div>
       ) : (
         <div className="intro-art">

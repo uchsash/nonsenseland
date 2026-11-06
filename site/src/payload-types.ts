@@ -574,14 +574,27 @@ export interface Video {
  */
 export interface Alap {
   id: number;
+  kind?: ('post' | 'book') | null;
   /**
-   * At most 220 characters, so cards stay short.
+   * The card shows this book’s cover as a mockup, its name and a “বইটি পড়ুন” link.
+   */
+  book?: (number | null) | Book;
+  /**
+   * At most 220 characters, so cards stay short. For a book card this is the headline.
    */
   text: string;
   /**
-   * Required, so every card in the deck has the same shape. Square works best.
+   * Required for normal posts, so every card has the same shape. Square works best.
    */
-  image: number | Media;
+  image?: (number | null) | Media;
+  /**
+   * Only one card can be pinned; pinning this one unpins the other. Book cards show only while pinned.
+   */
+  pinned?: boolean | null;
+  /**
+   * Optional. After this date the pin ends by itself.
+   */
+  pinUntil?: string | null;
   /**
    * Untick to hide it from the site.
    */
@@ -1116,8 +1129,12 @@ export interface VideosSelect<T extends boolean = true> {
  * via the `definition` "alap_select".
  */
 export interface AlapSelect<T extends boolean = true> {
+  kind?: T;
+  book?: T;
   text?: T;
   image?: T;
+  pinned?: T;
+  pinUntil?: T;
   published?: T;
   publishedAt?: T;
   title?: T;
@@ -2268,6 +2285,18 @@ export interface InterfaceText {
      */
     readLess?: string | null;
     /**
+     * Default: বইটি পড়ুন
+     */
+    readBook?: string | null;
+    /**
+     * Default: সব খুচরো আলাপ দেখুন
+     */
+    seeAll?: string | null;
+    /**
+     * Default: আরও পুরোনো আলাপ
+     */
+    olderPosts?: string | null;
+    /**
      * Default: এখনো কোনো আলাপ নেই।
      */
     empty?: string | null;
@@ -2677,6 +2706,9 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         hint?: T;
         readMore?: T;
         readLess?: T;
+        readBook?: T;
+        seeAll?: T;
+        olderPosts?: T;
         empty?: T;
       };
   post?:

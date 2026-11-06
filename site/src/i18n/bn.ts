@@ -134,6 +134,9 @@ export const defaults = {
     hint: 'পাশে টেনে পরের আলাপ দেখুন',
     readMore: 'আরও পড়ুন',
     readLess: 'কম দেখান',
+    readBook: 'বইটি পড়ুন',
+    seeAll: 'সব খুচরো আলাপ দেখুন',
+    olderPosts: 'আরও পুরোনো আলাপ',
     empty: 'এখনো কোনো আলাপ নেই।',
   },
   post: {

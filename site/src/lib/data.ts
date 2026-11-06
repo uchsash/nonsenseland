@@ -169,14 +169,55 @@ export async function searchAll(q: string) {
   return { articles: articles.docs, videos: videos.docs, books: books.docs }
 }
 
-/** Latest খুচরো আলাপ posts for the deck. */
-export async function listAlap(limit = 30) {
+/** Normal খুচরো আলাপ posts (book cards only ever show while pinned). */
+const alapPosts: Where = {
+  and: [
+    { published: { equals: true } },
+    { or: [{ kind: { equals: 'post' } }, { kind: { exists: false } }] },
+  ],
+}
+
+/** The pinned card (book card or post), if its pin is still running. */
+export const getPinnedAlap = cache(async () => {
+  const now = new Date().toISOString()
   const res = await (await payloadClient()).find({
     collection: 'alap',
-    where: { published: { equals: true } },
+    where: {
+      and: [
+        { published: { equals: true } },
+        { pinned: { equals: true } },
+        { or: [{ pinUntil: { exists: false } }, { pinUntil: { greater_than: now } }] },
+      ],
+    },
+    sort: '-publishedAt',
+    limit: 1,
+    depth: 2, // book → cover
+  })
+  return res.docs[0] ?? null
+})
+
+/** The deck: the pinned card first, then the latest posts. */
+export async function listAlap(limit = 6) {
+  const pinned = await getPinnedAlap()
+  const res = await (await payloadClient()).find({
+    collection: 'alap',
+    where: pinned ? { and: [alapPosts, { id: { not_equals: pinned.id } }] } : alapPosts,
     sort: '-publishedAt',
     limit,
     depth: 1,
   })
-  return res.docs
+  return pinned ? [pinned, ...res.docs] : res.docs
+}
+
+/** The খুচরো আলাপ feed page by page (the pinned card is shown separately on page 1). */
+export async function alapFeed(page = 1, limit = 15) {
+  const pinned = await getPinnedAlap()
+  return (await payloadClient()).find({
+    collection: 'alap',
+    where: pinned ? { and: [alapPosts, { id: { not_equals: pinned.id } }] } : alapPosts,
+    sort: '-publishedAt',
+    limit,
+    page,
+    depth: 1,
+  })
 }

@@ -1491,3 +1491,91 @@ html {
   color: var(--accent);
   font-weight: 600;
 }
+
+/* ---------- খুচরো আলাপ: book card (mockup) ---------- */
+.book-mock {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 14%, var(--surface)), var(--surface));
+  perspective: 900px;
+}
+.book-mock-cover {
+  width: 52%;
+  border-radius: 2px 6px 6px 2px;
+  overflow: hidden;
+  transform: rotateY(-18deg) rotateZ(-1.5deg);
+  box-shadow:
+    -6px 0 0 -2px color-mix(in srgb, var(--text) 25%, transparent),
+    14px 18px 28px rgb(0 0 0 / 0.28);
+}
+.book-mock-cover img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.book-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  white-space: normal;
+}
+.book-card-headline {
+  color: var(--accent);
+  font-size: 1.1em;
+}
+.book-card-title {
+  font-size: 1.15em;
+  font-weight: 600;
+}
+.book-card-by {
+  font-size: 0.9em;
+}
+.deck-more.book-card-link {
+  font-weight: 600;
+}
+.deck-all {
+  text-align: center;
+  margin: 10px 0 0;
+  font-size: 15px;
+}
+.deck-all a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- খুচরো আলাপ feed page ---------- */
+.feed {
+  max-width: 560px;
+}
+.feed-post {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.feed-image {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background: var(--surface);
+}
+.feed-image img {
+  width: 100%;
+  height: auto;
+}
+.feed-text {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.7;
+}
+.feed-book .deck-image {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.feed-book .deck-text {
+  height: auto;
+}

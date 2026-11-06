@@ -1,11 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useRef, useState } from 'react'
 
 import { useT } from '@/i18n/client'
 import type { Alap } from '@/payload-types'
 import { bnDate, bnNumber } from '@/utilities/bn'
 
+import { AlapBookCard } from './AlapBookCard'
 import { Img } from './Img'
 import { ArrowLeft, ArrowRight } from './icons'
 
@@ -17,7 +19,7 @@ const FLY_MS = 220
  * Swipe sideways (or use the arrows / ← → keys); it loops endlessly.
  * Vertical movement is left to the page, so scrolling keeps working on phones.
  */
-export function AlapDeck({ items }: { items: Alap[] }) {
+export function AlapDeck({ items, seeAll = false }: { items: Alap[]; seeAll?: boolean }) {
   const t = useT()
   const [index, setIndex] = useState(0)
   const [dx, setDx] = useState(0)
@@ -129,29 +131,35 @@ export function AlapDeck({ items }: { items: Alap[] }) {
           onPointerCancel={onPointerEnd}
           aria-live="polite"
         >
-          <div className="deck-image">
-            {item.image && typeof item.image === 'object' ? (
-              <Img media={item.image} use={['square']} sizes="(max-width: 600px) 90vw, 480px" />
-            ) : (
-              // Older posts without an image keep the same card shape.
-              <img className="deck-image-empty" src="/brand/icon.svg" alt="" />
-            )}
-          </div>
-          <p ref={textRef} className={`deck-text${expanded ? ' is-expanded' : ''}`}>
-            {item.text}
-          </p>
-          {overflows ? (
-            <button
-              type="button"
-              className="deck-more"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => setExpanded(!expanded)}
-              aria-expanded={expanded}
-            >
-              {expanded ? t.alap.readLess : t.alap.readMore}
-            </button>
+          {item.kind === 'book' ? (
+            <AlapBookCard item={item} />
           ) : (
-            <span className="deck-more-space" aria-hidden="true" />
+            <>
+              <div className="deck-image">
+                {item.image && typeof item.image === 'object' ? (
+                  <Img media={item.image} use={['square']} sizes="(max-width: 600px) 90vw, 480px" />
+                ) : (
+                  // Older posts without an image keep the same card shape.
+                  <img className="deck-image-empty" src="/brand/icon.svg" alt="" />
+                )}
+              </div>
+              <p ref={textRef} className={`deck-text${expanded ? ' is-expanded' : ''}`}>
+                {item.text}
+              </p>
+              {overflows ? (
+                <button
+                  type="button"
+                  className="deck-more"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => setExpanded(!expanded)}
+                  aria-expanded={expanded}
+                >
+                  {expanded ? t.alap.readLess : t.alap.readMore}
+                </button>
+              ) : (
+                <span className="deck-more-space" aria-hidden="true" />
+              )}
+            </>
           )}
           <time className="deck-date" dateTime={item.publishedAt}>
             {bnDate(item.publishedAt)}
@@ -170,6 +178,11 @@ export function AlapDeck({ items }: { items: Alap[] }) {
         </button>
       </div>
       <p className="deck-hint muted">{t.alap.hint}</p>
+      {seeAll ? (
+        <p className="deck-all">
+          <Link href="/alap">{t.alap.seeAll}</Link>
+        </p>
+      ) : null}
     </div>
   )
 }
