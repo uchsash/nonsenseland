@@ -127,7 +127,7 @@ export async function getReadableChapter(book: Book, order: number) {
   return res.docs[0] ?? null
 }
 
-export async function getAdsFor(slot: string) {
+export async function getAdsFor(slot: string, adId?: number) {
   const settings = await getAdSettings()
   if (!settings.enabled) return []
   const now = new Date().toISOString()
@@ -136,7 +136,7 @@ export async function getAdsFor(slot: string) {
     where: {
       and: [
         { active: { equals: true } },
-        { slots: { contains: slot } },
+        adId ? { id: { equals: adId } } : { slots: { contains: slot } },
         { or: [{ startAt: { exists: false } }, { startAt: { less_than_equal: now } }] },
         { or: [{ endAt: { exists: false } }, { endAt: { greater_than: now } }] },
       ],
@@ -147,9 +147,12 @@ export async function getAdsFor(slot: string) {
   return res.docs
 }
 
-/** One of the active ads for a slot; when several share a slot they take turns at random. */
-export async function pickAd(slot: string) {
-  const ads = await getAdsFor(slot)
+/**
+ * The ad to show: a specific one (if it is active and in date), otherwise one of the
+ * active ads for the slot, taking turns at random.
+ */
+export async function pickAd(slot: string, adId?: number) {
+  const ads = await getAdsFor(slot, adId)
   return ads.length ? ads[Math.floor(Math.random() * ads.length)] : null
 }
 
@@ -164,4 +167,16 @@ export async function searchAll(q: string) {
     payload.find({ collection: 'books', where: where(['title', 'description', 'originalAuthor']), limit: 20, depth: 1 }),
   ])
   return { articles: articles.docs, videos: videos.docs, books: books.docs }
+}
+
+/** Latest খুচরো আলাপ posts for the deck. */
+export async function listAlap(limit = 30) {
+  const res = await (await payloadClient()).find({
+    collection: 'alap',
+    where: { published: { equals: true } },
+    sort: '-publishedAt',
+    limit,
+    depth: 1,
+  })
+  return res.docs
 }

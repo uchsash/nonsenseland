@@ -10,9 +10,9 @@ import { Img } from './Img'
  * One ad position. Shows nothing when ads are switched off or no ad is active,
  * so the page simply closes up.
  */
-export async function AdSlot({ slot }: { slot: string }) {
+export async function AdSlot({ slot, adId }: { slot: string; adId?: number }) {
   const t = await getT()
-  const ad = await pickAd(slot)
+  const ad = await pickAd(slot, adId)
   if (!ad) return null
 
   if (ad.mode === 'house' && typeof ad.image === 'object' && ad.image) {

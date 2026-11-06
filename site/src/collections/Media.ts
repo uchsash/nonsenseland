@@ -25,6 +25,8 @@ export const Media: CollectionConfig = {
       // Book covers: resized only, never cropped (real covers have different proportions).
       { name: 'cover', width: 600 },
       { name: 'og', width: 1200, height: 630, position: 'centre' },
+      // খুচরো আলাপ cards.
+      { name: 'square', width: 900, height: 900, position: 'centre' },
     ],
     formatOptions: { format: 'webp', options: { quality: 82 } },
   },

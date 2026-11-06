@@ -298,6 +298,32 @@ if (!settings.introButtons?.length && sectionId('videos') && sectionId('library'
   })
 }
 
+// Sample খুচরো আলাপ posts (নমুনা) so the deck can be seen; delete them in the admin.
+if (!(await payload.count({ collection: 'alap' })).totalDocs) {
+  const samples = [
+    ['নমুনা আলাপ ১: এখানে ছোট একটা ভাবনা বা খবর লেখা থাকবে, ছবির সঙ্গে।', '#f3d9c9'],
+    ['নমুনা আলাপ ২: ছবি ছাড়াও শুধু লেখা দিয়ে পোস্ট করা যায়।\nনতুন লাইনও রাখা যায়।', null],
+    ['নমুনা আলাপ ৩: শেষটার পর আবার প্রথমটা ফিরে আসবে।', '#d9e2e6'],
+  ] as const
+  for (const [i, [text, color]] of samples.entries()) {
+    await payload.create({
+      collection: 'alap',
+      data: {
+        text,
+        image: color ? await placeholder(`নমুনা আলাপের ছবি ${i + 1}`, color, 1080, 1080) : undefined,
+        publishedAt: new Date(Date.now() - i * 3600_000).toISOString(),
+      },
+    })
+  }
+}
+const homeSections = (await payload.findGlobal({ slug: 'homepage' })).sections ?? []
+if (homeSections.length && !homeSections.some((s) => s.blockType === 'alap')) {
+  const after = homeSections.findIndex((s) => s.blockType === 'articles')
+  const sections = [...homeSections]
+  sections.splice(after + 1, 0, { blockType: 'alap', enabled: true, title: 'খুচরো আলাপ' })
+  await payload.updateGlobal({ slug: 'homepage', data: { sections } })
+}
+
 // A house ad promoting a published book.
 if (!(await payload.count({ collection: 'ads' })).totalDocs) {
   await payload.create({

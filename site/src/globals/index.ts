@@ -193,6 +193,11 @@ const blocks: Block[] = [
   },
   { slug: 'ad', labels: { singular: 'Ad slot', plural: 'Ad slots' }, fields: [enabled] },
   {
+    slug: 'alap',
+    labels: { singular: 'খুচরো আলাপ deck', plural: 'খুচরো আলাপ decks' },
+    fields: [enabled, heading],
+  },
+  {
     slug: 'newsletter',
     labels: { singular: 'Newsletter sign-up', plural: 'Newsletter sign-ups' },
     fields: [enabled, heading, { name: 'text', type: 'text' }],
@@ -241,6 +246,8 @@ const SECTION_LABELS: Record<string, string> = {
   newsletter: 'Newsletter',
   contact: 'Contact form',
   ad: 'Ads',
+  alap: 'খুচরো আলাপ (deck)',
+  post: 'খুচরো আলাপ (quick-post page)',
   notFound: 'Page not found',
 }
 

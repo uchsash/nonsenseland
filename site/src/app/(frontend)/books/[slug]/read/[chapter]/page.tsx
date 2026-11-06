@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { AdSlot } from '@/components/AdSlot'
 import { Reader } from '@/components/Reader'
 import { FootnoteList } from '@/components/FootnoteList'
 import { RichText } from '@/components/RichText'
@@ -9,6 +10,7 @@ import { getT } from '@/i18n/server'
 import { getBook, getChapterList, getReadableChapter } from '@/lib/data'
 import { bnNumber } from '@/utilities/bn'
 import { indexFootnotes } from '@/utilities/footnotes'
+import { takeAdBlocks } from '@/utilities/lexical'
 import { colorClass } from '@/utilities/palette'
 
 type Props = { params: Promise<{ slug: string; chapter: string }> }
@@ -61,10 +63,7 @@ export default async function ChapterPage({ params }: Props) {
         {content === 'locked' ? (
           <p className="empty">{t.book.locked}</p>
         ) : (
-          <>
-            <RichText data={content.content} />
-            <FootnoteList index={indexFootnotes(content.content)} />
-          </>
+          <ChapterText content={content.content} showAds={(book.online?.access ?? 'free') === 'free'} />
         )}
 
         <nav className="chapter-nav">
@@ -92,5 +91,22 @@ export default async function ChapterPage({ params }: Props) {
         ) : null}
       </article>
     </Reader>
+  )
+}
+
+/** Chapter text; ads placed in the editor are shown only at the end, and never in paid books. */
+function ChapterText({ content, showAds }: { content: Parameters<typeof RichText>[0]['data']; showAds: boolean }) {
+  const [text, ads] = takeAdBlocks(content)
+  return (
+    <>
+      <RichText data={text} />
+      <FootnoteList index={indexFootnotes(text)} />
+      {showAds
+        ? ads.map((block, i) => {
+            const ad = (block.fields as { ad?: number | { id: number } | null }).ad
+            return <AdSlot key={i} slot="article-inline" adId={typeof ad === 'object' && ad ? ad.id : (ad ?? undefined)} />
+          })
+        : null}
+    </>
   )
 }

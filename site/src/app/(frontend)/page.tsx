@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { AdSlot } from '@/components/AdSlot'
+import { AlapDeck } from '@/components/AlapDeck'
 import { BookShelf } from '@/components/BookShelf'
 import { ArticleCard } from '@/components/Cards'
 import { NewsletterForm } from '@/components/Forms'
@@ -8,7 +9,7 @@ import { Img } from '@/components/Img'
 import { Slider } from '@/components/Slider'
 import { VideoSlider } from '@/components/VideoSlider'
 import { getT } from '@/i18n/server'
-import { getCategories, getHomepage, getSettings, listArticles, listBooks, listVideos } from '@/lib/data'
+import { getCategories, getHomepage, getSettings, listAlap, listArticles, listBooks, listVideos } from '@/lib/data'
 import type { Homepage } from '@/payload-types'
 import { colorClass } from '@/utilities/palette'
 
@@ -74,6 +75,19 @@ async function HomeSection({ section }: { section: Section }) {
       const books = await listBooks(section.blockType)
       if (!books.length) return null
       return <BookShelf title={section.title} books={books} layout="slider" link="/books" />
+    }
+    case 'alap': {
+      const items = await listAlap(30)
+      if (!items.length) return null
+      return (
+        <section className="section">
+          <div className="section-head">
+            <h2>{section.title}</h2>
+            <Link href="/alap">{(await getT()).common.seeAll}</Link>
+          </div>
+          <AlapDeck items={items} />
+        </section>
+      )
     }
     case 'ad':
       return <AdSlot slot="home" />

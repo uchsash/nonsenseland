@@ -1,6 +1,6 @@
 import type { Media } from '@/payload-types'
 
-type Size = 'thumb' | 'card' | 'cover' | 'og'
+type Size = 'thumb' | 'card' | 'cover' | 'og' | 'square'
 
 /**
  * Responsive image from the media library. Payload already stores resized WebP

@@ -18,6 +18,7 @@ import { docMetadata } from '@/lib/seo'
 import type { Author, Book, Category } from '@/payload-types'
 import { bnDate, bnNumber } from '@/utilities/bn'
 import { indexFootnotes } from '@/utilities/footnotes'
+import { hasAdBlock } from '@/utilities/lexical'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -36,7 +37,9 @@ export default async function ArticlePage({ params }: Props) {
   const category = article.category as Category | null
   const author = article.author as Author | null
   const book = article.relatedBook as Book | null
-  const [first, rest] = splitRichText(article.content)
+  // Ads placed by hand in the editor replace both automatic positions (middle and end).
+  const manualAds = hasAdBlock(article.content)
+  const [first, rest] = manualAds ? [article.content, null] : splitRichText(article.content)
   const footnotes = indexFootnotes(article.content)
   const more = await listArticles({ category: category?.id, limit: 6, exclude: article.id })
 
@@ -83,7 +86,7 @@ export default async function ArticlePage({ params }: Props) {
               </div>
             </div>
           ) : null}
-          <AdSlot slot="article-end" />
+          {manualAds ? null : <AdSlot slot="article-end" />}
         </div>
       </article>
       {more.docs.length ? (

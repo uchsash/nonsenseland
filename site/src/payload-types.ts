@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     articles: Article;
     videos: Video;
+    alap: Alap;
     categories: Category;
     topics: Topic;
     authors: Author;
@@ -100,6 +101,7 @@ export interface Config {
   collectionsSelect: {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     videos: VideosSelect<false> | VideosSelect<true>;
+    alap: AlapSelect<false> | AlapSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
@@ -284,6 +286,14 @@ export interface Media {
       filename?: string | null;
     };
     og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    square?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -555,6 +565,28 @@ export interface Video {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Short posts. Quickest from your phone: open /post on the site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "alap".
+ */
+export interface Alap {
+  id: number;
+  text: string;
+  /**
+   * Optional. Square works best.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Untick to hide it from the site.
+   */
+  published?: boolean | null;
+  publishedAt: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * About, Privacy Policy, Terms, Refund Policy…
@@ -908,6 +940,10 @@ export interface PayloadLockedDocument {
         value: number | Video;
       } | null)
     | ({
+        relationTo: 'alap';
+        value: number | Alap;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: number | Category;
       } | null)
@@ -1071,6 +1107,19 @@ export interface VideosSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "alap_select".
+ */
+export interface AlapSelect<T extends boolean = true> {
+  text?: T;
+  image?: T;
+  published?: T;
+  publishedAt?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1271,6 +1320,16 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
         og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        square?:
           | T
           | {
               url?: T;
@@ -1661,6 +1720,13 @@ export interface Homepage {
             id?: string | null;
             blockName?: string | null;
             blockType: 'ad';
+          }
+        | {
+            enabled?: boolean | null;
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'alap';
           }
         | {
             enabled?: boolean | null;
@@ -2165,6 +2231,70 @@ export interface InterfaceText {
      */
     label?: string | null;
   };
+  alap?: {
+    /**
+     * Default: খুচরো আলাপ
+     */
+    title?: string | null;
+    /**
+     * Default: পরেরটা
+     */
+    next?: string | null;
+    /**
+     * Default: আগেরটা
+     */
+    previous?: string | null;
+    /**
+     * Default: পাশে টেনে পরের আলাপ দেখুন
+     */
+    hint?: string | null;
+    /**
+     * Default: এখনো কোনো আলাপ নেই।
+     */
+    empty?: string | null;
+  };
+  post?: {
+    /**
+     * Default: নতুন খুচরো আলাপ
+     */
+    title?: string | null;
+    /**
+     * Default: কী বলতে চান?
+     */
+    text?: string | null;
+    /**
+     * Default: ছবি (ঐচ্ছিক)
+     */
+    image?: string | null;
+    /**
+     * Default: পোস্ট করুন
+     */
+    submit?: string | null;
+    /**
+     * Default: পোস্ট হচ্ছে…
+     */
+    posting?: string | null;
+    /**
+     * Default: পোস্ট হয়েছে!
+     */
+    done?: string | null;
+    /**
+     * Default: সাইটে দেখুন
+     */
+    view?: string | null;
+    /**
+     * Default: আরেকটা লিখুন
+     */
+    another?: string | null;
+    /**
+     * Default: পোস্ট করা যায়নি। আবার চেষ্টা করুন।
+     */
+    failed?: string | null;
+    /**
+     * Default: ছবিটা অনেক বড় (সর্বোচ্চ ১০ MB)।
+     */
+    tooBig?: string | null;
+  };
   notFound?: {
     /**
      * Default: পাতাটি খুঁজে পাওয়া যায়নি
@@ -2288,6 +2418,14 @@ export interface HomepageSelect<T extends boolean = true> {
           | T
           | {
               enabled?: T;
+              id?: T;
+              blockName?: T;
+            };
+        alap?:
+          | T
+          | {
+              enabled?: T;
+              title?: T;
               id?: T;
               blockName?: T;
             };
@@ -2500,6 +2638,29 @@ export interface InterfaceTextSelect<T extends boolean = true> {
     | T
     | {
         label?: T;
+      };
+  alap?:
+    | T
+    | {
+        title?: T;
+        next?: T;
+        previous?: T;
+        hint?: T;
+        empty?: T;
+      };
+  post?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        image?: T;
+        submit?: T;
+        posting?: T;
+        done?: T;
+        view?: T;
+        another?: T;
+        failed?: T;
+        tooBig?: T;
       };
   notFound?:
     | T

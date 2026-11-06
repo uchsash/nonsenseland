@@ -7,6 +7,7 @@ import { buildConfig, type CollectionConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { Alap } from './collections/Alap'
 import { Articles } from './collections/Articles'
 import { BookFiles } from './collections/BookFiles'
 import { Books } from './collections/Books'
@@ -26,6 +27,7 @@ import {
 import { Authors, Categories, Topics } from './collections/Taxonomy'
 import { Users } from './collections/Users'
 import { Videos } from './collections/Videos'
+import { AdBlock } from './blocks/AdBlock'
 import { LinesBlock } from './blocks/Lines'
 import { FootnoteLinkFeature } from './features/footnoteLink'
 import { ParagraphStyleFeature } from './features/paragraphStyle/feature.server'
@@ -72,7 +74,7 @@ export default buildConfig({
     meta: { titleSuffix: ' · Nonsenseland admin' },
   },
   collections: [
-    ...[Articles, Videos, Categories, Topics, Authors, Pages, Books, Chapters, Media, Ads].map(withRevalidation),
+    ...[Articles, Videos, Alap, Categories, Topics, Authors, Pages, Books, Chapters, Media, Ads].map(withRevalidation),
     BookFiles,
     Subscribers,
     Messages,
@@ -106,7 +108,7 @@ export default buildConfig({
         },
       }),
       // “Lines without gaps” block (toolbar: + → Lines without gaps).
-      BlocksFeature({ blocks: [LinesBlock] }),
+      BlocksFeature({ blocks: [LinesBlock, AdBlock] }),
     ],
   }),
   secret: process.env.PAYLOAD_SECRET || '',

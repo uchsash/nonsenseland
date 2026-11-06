@@ -7,6 +7,8 @@ const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
+  // Photos from the quick-post page (/post); they are already shrunk in the browser.
+  experimental: { serverActions: { bodySizeLimit: '12mb' } },
   images: {
     localPatterns: [
       {

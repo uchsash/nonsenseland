@@ -8,6 +8,7 @@ import {
 import { type FootnoteIndex, indexFootnotes, isFootnote } from '@/utilities/footnotes'
 import { colorClass } from '@/utilities/palette'
 
+import { AdSlot } from './AdSlot'
 import { Footnote } from './Footnote'
 
 type Value = SerializedEditorState | null | undefined
@@ -72,6 +73,12 @@ const makeConverters =
       return link(args)
     },
     blocks: {
+      // An ad placed in the editor (async server component: renders nothing when off or expired).
+      ad: ({ node }: { node: unknown }) => {
+        const ad = (node as { fields: { ad?: number | { id: number } | null } }).fields.ad
+        const adId = typeof ad === 'object' && ad ? ad.id : (ad ?? undefined)
+        return <AdSlot slot="article-inline" adId={adId} />
+      },
       lines: ({ node }: { node: unknown }) => {
         const { text = '', align = 'left' } = (node as { fields: LinesFields }).fields
         const lines = text.split(/\r?\n/)
