@@ -67,12 +67,12 @@ export const Videos: CollectionConfig = {
       admin: {
         condition: (data) => data?.thumbnailSource !== 'own' && data?.thumbnailSource !== 'youtube',
         description:
-          'Optional. Leave empty and the title is split by itself (anything after “—” or “:” becomes the small line).',
+          'Optional. Write the headline and subheading as you want them on the image. Left empty, they are taken from the title (anything after “—” or “:” becomes the subheading).',
       },
       fields: [
-        { name: 'highlight', type: 'text', label: 'Big orange line', admin: { placeholder: 'হ্যারি পটার' } },
-        { name: 'line2', type: 'text', label: 'Second line', admin: { placeholder: 'এখন বাংলায়' } },
-        { name: 'subline', type: 'text', label: 'Small line', admin: { placeholder: 'রেগুলার ও ইলাস্ট্রেটেড এডিশন' } },
+        { name: 'highlight', type: 'text', label: 'Headline (big, orange)', admin: { placeholder: 'হ্যারি পটার' } },
+        { name: 'line2', type: 'text', label: 'Second line (dark, optional)', admin: { placeholder: 'এখন বাংলায়' } },
+        { name: 'subline', type: 'text', label: 'Subheading (small line)', admin: { placeholder: 'রেগুলার ও ইলাস্ট্রেটেড এডিশন' } },
       ],
     },
     { name: 'description', type: 'textarea' },

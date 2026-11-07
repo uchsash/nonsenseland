@@ -183,7 +183,7 @@ export interface Article {
   id: number;
   title: string;
   /**
-   * Add a photo and the header is made when you save. Leave the lines empty and the title is split by itself (anything after “—” or “:” becomes the small line).
+   * Add a photo and the header is made when you save. Write the headline and subheading as you want them on the image; the article’s title stays as it is. Left empty, they are taken from the title (anything after “—” or “:” becomes the subheading).
    */
   header?: {
     /**
@@ -574,7 +574,7 @@ export interface Video {
   thumbnail?: (number | null) | Media;
   thumbnailSource?: ('own' | 'youtube' | 'card') | null;
   /**
-   * Optional. Leave empty and the title is split by itself (anything after “—” or “:” becomes the small line).
+   * Optional. Write the headline and subheading as you want them on the image. Left empty, they are taken from the title (anything after “—” or “:” becomes the subheading).
    */
   card?: {
     highlight?: string | null;

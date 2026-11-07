@@ -31,13 +31,13 @@ export const Articles: CollectionConfig = {
       admin: {
         condition: (data) => data?.coverSource !== 'own',
         description:
-          'Add a photo and the header is made when you save. Leave the lines empty and the title is split by itself (anything after “—” or “:” becomes the small line).',
+          'Add a photo and the header is made when you save. Write the headline and subheading as you want them on the image; the article’s title stays as it is. Left empty, they are taken from the title (anything after “—” or “:” becomes the subheading).',
       },
       fields: [
         { name: 'photo', type: 'upload', relationTo: 'media', admin: { description: 'Placed in the frame. Without a photo, the caricature is used.' } },
-        { name: 'highlight', type: 'text', label: 'Big orange line' },
-        { name: 'line2', type: 'text', label: 'Second line' },
-        { name: 'subline', type: 'text', label: 'Small line' },
+        { name: 'highlight', type: 'text', label: 'Headline (big, orange)' },
+        { name: 'line2', type: 'text', label: 'Second line (dark, optional)' },
+        { name: 'subline', type: 'text', label: 'Subheading (small line)' },
       ],
     },
     {
