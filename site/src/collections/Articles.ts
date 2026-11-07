@@ -1,9 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
+import { fillArticleHeader } from '../lib/article-header'
+import { automaticImageCleanup } from '../lib/template-media'
 import { readingMinutes } from '../utilities/lexical'
 import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
+
+const headerCleanup = automaticImageCleanup({ collection: 'articles', field: 'cover', source: 'coverSource' })
 
 export const Articles: CollectionConfig = {
   slug: 'articles',
@@ -20,11 +24,38 @@ export const Articles: CollectionConfig = {
   fields: [
     { name: 'title', type: 'text', required: true },
     {
+      // Header made from the template: the photo in a frame, the category and the title.
+      name: 'header',
+      type: 'group',
+      label: 'Header from the template',
+      admin: {
+        condition: (data) => data?.coverSource !== 'own',
+        description:
+          'Add a photo and the header is made when you save. Leave the lines empty and the title is split by itself (anything after “—” or “:” becomes the small line).',
+      },
+      fields: [
+        { name: 'photo', type: 'upload', relationTo: 'media', admin: { description: 'Placed in the frame. Without a photo, the caricature is used.' } },
+        { name: 'highlight', type: 'text', label: 'Big orange line' },
+        { name: 'line2', type: 'text', label: 'Second line' },
+        { name: 'subline', type: 'text', label: 'Small line' },
+      ],
+    },
+    {
       name: 'cover',
       type: 'upload',
       relationTo: 'media',
-      required: true,
-      admin: { description: 'Thumbnail / header image (16:9 works best).' },
+      label: 'Header image',
+      admin: {
+        description:
+          'Made from the template above. To use a finished image of your own instead, remove this one and upload yours (16:9).',
+      },
+    },
+    {
+      // Where the header came from: 'own' (uploaded) or 'template' (made on save).
+      name: 'coverSource',
+      type: 'select',
+      options: ['own', 'template'].map((v) => ({ label: v, value: v })),
+      admin: { hidden: true },
     },
     {
       name: 'excerpt',
@@ -80,6 +111,14 @@ export const Articles: CollectionConfig = {
         if (data._status === 'published' && !data.publishedAt) data.publishedAt = new Date().toISOString()
         return data
       },
+      async ({ data, originalDoc, req }) => {
+        await fillArticleHeader(data, originalDoc, req)
+        return data
+      },
     ],
+    // Template headers that were replaced, or whose article was deleted, are removed.
+    afterChange: [headerCleanup.afterChange],
+    beforeDelete: [headerCleanup.beforeDelete],
+    afterDelete: [headerCleanup.afterDelete],
   },
 }

@@ -183,9 +183,22 @@ export interface Article {
   id: number;
   title: string;
   /**
-   * Thumbnail / header image (16:9 works best).
+   * Add a photo and the header is made when you save. Leave the lines empty and the title is split by itself (anything after “—” or “:” becomes the small line).
    */
-  cover: number | Media;
+  header?: {
+    /**
+     * Placed in the frame. Without a photo, the caricature is used.
+     */
+    photo?: (number | null) | Media;
+    highlight?: string | null;
+    line2?: string | null;
+    subline?: string | null;
+  };
+  /**
+   * Made from the template above. To use a finished image of your own instead, remove this one and upload yours (16:9).
+   */
+  cover?: (number | null) | Media;
+  coverSource?: ('own' | 'template') | null;
   /**
    * One or two lines shown on cards and when shared.
    */
@@ -1106,7 +1119,16 @@ export interface PayloadMigration {
  */
 export interface ArticlesSelect<T extends boolean = true> {
   title?: T;
+  header?:
+    | T
+    | {
+        photo?: T;
+        highlight?: T;
+        line2?: T;
+        subline?: T;
+      };
   cover?: T;
+  coverSource?: T;
   excerpt?: T;
   content?: T;
   category?: T;

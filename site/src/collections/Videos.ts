@@ -1,10 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import { publishedOrStaff, staffOnly } from '../access'
-import { fillVideoThumbnail, idOf } from '../lib/video-thumbnail'
+import { automaticImageCleanup } from '../lib/template-media'
+import { fillVideoThumbnail } from '../lib/video-thumbnail'
 import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 import { detectPlatform } from '../utilities/video'
+
+const thumbnailCleanup = automaticImageCleanup({ collection: 'videos', field: 'thumbnail', source: 'thumbnailSource' })
 
 export const Videos: CollectionConfig = {
   slug: 'videos',
@@ -105,24 +108,9 @@ export const Videos: CollectionConfig = {
         return data
       },
     ],
-    afterChange: [
-      // An automatic thumbnail that was replaced is removed, so the media library stays tidy.
-      async ({ doc, previousDoc, req }) => {
-        const before = idOf(previousDoc?.thumbnail)
-        if (!before || before === idOf(doc.thumbnail) || previousDoc?.thumbnailSource === 'own') return
-        if (!previousDoc?.thumbnailSource) return // older videos: their thumbnail was uploaded by hand
-        await req.payload
-          .delete({ collection: 'media', id: before, req })
-          .catch((err) => req.payload.logger.warn({ err }, 'Could not remove the old automatic thumbnail'))
-      },
-    ],
-    afterDelete: [
-      // Deleting a video also removes its automatic thumbnail (never one you uploaded).
-      async ({ doc, req }) => {
-        const id = idOf(doc.thumbnail)
-        if (!id || !doc.thumbnailSource || doc.thumbnailSource === 'own') return
-        await req.payload.delete({ collection: 'media', id, req }).catch(() => null)
-      },
-    ],
+    // Automatic thumbnails that were replaced, or whose video was deleted, are removed.
+    afterChange: [thumbnailCleanup.afterChange],
+    beforeDelete: [thumbnailCleanup.beforeDelete],
+    afterDelete: [thumbnailCleanup.afterDelete],
   },
 }
