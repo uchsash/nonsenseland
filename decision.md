@@ -252,7 +252,7 @@ Checked on bKash's official page (2026-11-06): https://www.bkash.com/en/page/per
 - **Fees:**
   - receiving payments from customers: free (bKash calls this a promotional offer, valid until further notice)
   - sending money to a customer (for refunds): ৳5
-  - cash-out: charges apply after the first 3 months
+  - cash-out: free up to ৳5,000 for the first 3 months; charges apply otherwise
 - Statements are available in the bKash Merchant App.
 
 ### Website integration (developer side)
@@ -299,6 +299,39 @@ Checked on bKash's official page (2026-11-06): https://www.bkash.com/en/page/per
 6. What bKash reviews before go-live (site, Terms, refund policy, demo).
 
 **Needed to implement:** the four credentials for sandbox and again for live (`username`, `password`, `app_key`, `app_secret`), HTTPS on nonsenseland.com, published Terms and refund policy, and sandbox access. Until credentials arrive the flow can be built and tested against a local stand-in for bKash.
+
+### bKash research update (2026-11-09)
+
+**Official bKash pages (read directly)**
+- The PRA page says customers can pay a PRA through the bKash Payment Gateway. The Online Business page sends sellers without a trade licence to the PRA.
+- The Online Business page has a sign-up form for online sellers, with "Do you have a valid trade license?" as a yes/no question and a website URL field: https://www.bkash.com/en/business/online-business
+- bKash publishes no per-payment rate for merchants, and PRA receiving is free as a promotional offer.
+- PRA opening also asks for a screenshot of the `*16001#` SMS listing the numbers registered on the NID.
+
+**Still unconfirmed: can a PRA get API credentials?** bKash's own pages imply yes without explaining how. bKash's sample WooCommerce plugin asks for a Merchant Wallet, and third-party (mostly vendor) guides say the API needs a merchant account. Only bKash can settle this.
+
+**Onboarding path, from a bKash-format guide (mirror dated 2024-11-14; may have changed)**
+1. Integration start: Developer Portal, Merchant Integration Portal (`pgw-integration.bkash.com`), demo link and sandbox credentials are provided.
+2. Build against sandbox.
+3. Validate Create and Execute responses in the Merchant Integration Portal.
+4. Production onboarding: live credentials are issued in the portal.
+5. Confirm readiness with production credentials.
+6. UAT and go-live: technical UAT checks the backend's security; business UAT checks the customer journey.
+
+The portal did not open from this computer (name lookup failed here, though it resolves through public DNS). Try it from another network.
+
+**Test data, same guide (unverified):** PIN 12121, OTP 123456. Normal wallets 01770618575, 01929918378, 01770618576, 01877722345, 01619777282, 01619777283. Failure cases: 01823074817 (insufficient balance), 01823074818 (debit block). Demo: https://merchantdemo.sandbox.bka.sh/
+
+**Do not use the shared sandbox credentials published on blogs and GitHub.** They are not ours, may stop working at any time, and bKash issues its own at onboarding.
+
+**Details to confirm in sandbox**
+- Live base URL: third-party packages use `https://tokenized.pay.bka.sh/v2`; the host exists, but bKash's docs do not state it. Keep it a setting, because bKash may issue another URL.
+- Callback fields: the official agreement sample shows `status` and `signature`; community samples for payments show `paymentID` and `status`. bKash does not explain `signature`, so payment is confirmed only through Execute or Query.
+- Refresh token life: 30 days in current docs, 28 in the 2024 guide.
+
+**Build decision:** write a small client of our own (a few endpoints) instead of a library. `bkash-js` does support Cloudflare Workers but is a very small project, and a payment path should not depend on it.
+
+**If a PRA cannot get API access:** keep manual TrxID on the PRA; apply for a merchant account (trade licence); or use an aggregator such as SSLCommerz, aamarPay or shurjoPay, which do not need your own bKash merchant account but have their own agreement and fees.
 
 ### How the site handles it (so nothing core changes later)
 The checkout uses **interchangeable payment methods**, each switchable on/off in admin:
