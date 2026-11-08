@@ -2,6 +2,8 @@ import path from 'path'
 
 import sharp, { type OverlayOptions } from 'sharp'
 
+import { FRAME_INNER, type Framing, framePhoto } from '../utilities/photo-frame'
+
 /**
  * Template images (1280×720), in the style of the hand-made reel thumbnails. Video thumbnail:
  * a short orange dash and the category, the headline big in orange, a dark second line,
@@ -74,6 +76,8 @@ type CardInput = {
   subline?: string | null
   /** A photo to place in the template's frame (article headers). Without it: the caricature. */
   photo?: Buffer | null
+  /** How the photo sits in the frame. Without it, the most interesting area is picked. */
+  framing?: Framing
 }
 
 const svg = (body: string, w = W, h = H) =>
@@ -147,14 +151,44 @@ async function caricatureCard(input: CardInput): Promise<OverlayOptions[]> {
  * Article header: the photo in a rounded frame on the left (white border, an orange
  * gradient frame offset behind it, the brand's small circles), the text on the right.
  */
-const FRAME = { x: 56, y: 56, w: 664, h: 584, r: 26, border: 10 }
+const FRAME = { x: 56, y: 56, w: FRAME_INNER.w + 20, h: FRAME_INNER.h + 20, r: 26, border: 10 }
+
+/** The picture for the frame: placed by hand when framing was chosen, otherwise automatic. */
+async function framedPhoto(source: Buffer, framing: Framing | undefined) {
+  const { w, h } = FRAME_INNER
+  const upright = await sharp(source).rotate().toBuffer({ resolveWithObject: true })
+  if (framing?.zoom == null) {
+    return sharp(upright.data).resize({ width: w, height: h, fit: 'cover', position: sharp.strategy.attention }).png().toBuffer()
+  }
+  const placed = framePhoto(upright.info, framing)
+  const width = Math.round(placed.width)
+  const height = Math.round(placed.height)
+  const left = Math.round(placed.left)
+  const top = Math.round(placed.top)
+  // Only the part inside the frame; a blurred copy fills any space around a whole photo.
+  const visible = await sharp(upright.data)
+    .resize({ width, height, fit: 'fill' })
+    .extract({
+      left: Math.max(0, -left),
+      top: Math.max(0, -top),
+      width: Math.min(w - Math.max(0, left), width - Math.max(0, -left)),
+      height: Math.min(h - Math.max(0, top), height - Math.max(0, -top)),
+    })
+    .png()
+    .toBuffer()
+  return sharp(upright.data)
+    .resize({ width: w, height: h, fit: 'cover' })
+    .blur(28)
+    .modulate({ brightness: 0.82 })
+    .composite([{ input: visible, left: Math.max(0, left), top: Math.max(0, top) }])
+    .png()
+    .toBuffer()
+}
 
 async function photoCard(input: CardInput & { photo: Buffer }): Promise<OverlayOptions[]> {
   const { x, y, w, h, r, border } = FRAME
   const inner = { w: w - border * 2, h: h - border * 2 }
-  const photo = await sharp(input.photo)
-    .rotate()
-    .resize({ width: inner.w, height: inner.h, fit: 'cover', position: sharp.strategy.attention })
+  const photo = await sharp(await framedPhoto(input.photo, input.framing))
     .composite([{ input: svg(`<rect width="${inner.w}" height="${inner.h}" rx="${r - 6}" fill="#fff"/>`, inner.w, inner.h), blend: 'dest-in' }])
     .png()
     .toBuffer()

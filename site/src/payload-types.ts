@@ -197,6 +197,9 @@ export interface Article {
      * Placed in the frame. Without a photo, the caricature is used.
      */
     photo?: (number | null) | Media;
+    zoom?: number | null;
+    focusX?: number | null;
+    focusY?: number | null;
     highlight?: string | null;
     line2?: string | null;
     subline?: string | null;
@@ -1212,6 +1215,9 @@ export interface ArticlesSelect<T extends boolean = true> {
     | T
     | {
         photo?: T;
+        zoom?: T;
+        focusX?: T;
+        focusY?: T;
         highlight?: T;
         line2?: T;
         subline?: T;

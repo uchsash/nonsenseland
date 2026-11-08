@@ -18,6 +18,9 @@ type ArticleData = {
     highlight?: string | null
     line2?: string | null
     subline?: string | null
+    zoom?: number | null
+    focusX?: number | null
+    focusY?: number | null
   } | null
 }
 
@@ -58,7 +61,17 @@ export async function fillArticleHeader(
   if (current && previousSource === 'own' && !photoAdded) return
 
   const key = (d?: ArticleData) =>
-    JSON.stringify([d?.title, idOf(d?.category), idOf(d?.header?.photo), d?.header?.highlight, d?.header?.line2, d?.header?.subline])
+    JSON.stringify([
+      d?.title,
+      idOf(d?.category),
+      idOf(d?.header?.photo),
+      d?.header?.highlight,
+      d?.header?.line2,
+      d?.header?.subline,
+      d?.header?.zoom ?? null,
+      d?.header?.focusX ?? null,
+      d?.header?.focusY ?? null,
+    ])
   const needsNew = !current || photoAdded || (previousSource === 'template' && key(data) !== key(original))
   if (!needsNew || !data.title) return
 
@@ -74,6 +87,7 @@ export async function fillArticleHeader(
     line2: data.header?.line2,
     subline: data.header?.subline,
     photo: photoId ? await mediaFile(photoId, req) : null,
+    framing: data.header ?? undefined,
   })
 
   const media = await req.payload.create({

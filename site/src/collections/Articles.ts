@@ -35,6 +35,14 @@ export const Articles: CollectionConfig = {
       },
       fields: [
         { name: 'photo', type: 'upload', relationTo: 'media', admin: { description: 'Placed in the frame. Without a photo, the caricature is used.' } },
+        {
+          name: 'frame',
+          type: 'ui',
+          admin: { components: { Field: '/components/admin/HeaderPhotoFrame#HeaderPhotoFrame' } },
+        },
+        { name: 'zoom', type: 'number', admin: { hidden: true } },
+        { name: 'focusX', type: 'number', admin: { hidden: true } },
+        { name: 'focusY', type: 'number', admin: { hidden: true } },
         { name: 'highlight', type: 'text', label: 'Headline (big, orange)' },
         { name: 'line2', type: 'text', label: 'Second line (dark, optional)' },
         { name: 'subline', type: 'text', label: 'Subheading (small line)' },
