@@ -1,6 +1,6 @@
 # Nonsenseland Website: Decisions
 
-Last updated: 2026-11-06
+Last updated: 2026-11-08
 
 This file records what has been decided, what is still open, and what is needed from the owner.
 
@@ -29,11 +29,11 @@ Everything below works and was tested in the browser:
 
 **Design templates (2026-11-06).** Video title card: cream background, a short orange dash with the category, the headline big in orange, a dark second line, a small muted line, the icon bottom-left, and the caricature on its orange waves (cut from the Facebook cover) on the right; the lines can be set per video under "Title card text", otherwise the title is split by itself. Book card in খুচরো আলাপ: a poster template (book standing on the brand's orange waves, small outlined circles, "— নতুন বই", the icon) in three colourways chosen per card: orange, dark, cream.
 
-**Automatic video thumbnails:** a video saved without a thumbnail gets YouTube's own thumbnail (YouTube links) or a title card made from the logo, category, Bangla title and the caricature (`site/src/assets/caricature.png`, taken from the Facebook cover). An uploaded thumbnail always wins. Facebook's own video frames need the Facebook Graph API (Page token) — not set up yet.
+**Automatic video thumbnails:** a video saved without a thumbnail gets YouTube's own thumbnail (YouTube links) or a title card (see Design templates; caricature scene `site/src/assets/caricature-scene.png`, taken from the Facebook cover). An uploaded thumbnail always wins. Facebook's own video frames need the Facebook Graph API (Page token) — not set up yet.
 
 **Code repository:** https://github.com/uchsash/nonsenseland (public). Not in git: `.env` (secrets), uploaded images and book files, `free-books/`, licensed fonts.
 
-**Quality checks (all passing):** ESLint (0 problems), TypeScript, production build, and 16 automated tests (`npm run test:int`), including access-rule tests: visitors cannot read users, subscribers, messages, Kindle logs, orders, chapter text or book files; cannot create accounts or change settings; cannot see drafts.
+**Quality checks (all passing):** ESLint (0 problems), TypeScript, production build, and 28 automated tests (`npm run test:int`), including access-rule tests: visitors cannot read users, subscribers, messages, Kindle logs, orders, chapter text or book files; cannot create accounts or change settings; cannot see drafts.
 
 **Hydration warning (fixed 2026-11-06):** caused by the ColorZilla browser extension adding an attribute to `<body>`; the site now ignores extension-added body attributes. Reader, theme and “continue reading” now read browser storage in the hydration-safe way.
 
