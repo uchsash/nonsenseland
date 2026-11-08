@@ -140,6 +140,12 @@ export const Alap: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeDelete: [
+      // A card's likes go with it.
+      async ({ id, req }) => {
+        await req.payload.delete({ collection: 'likes', where: { alap: { equals: id } }, req })
+      },
+    ],
     beforeValidate: [
       // A book card starts with the usual headline.
       ({ data }) => {

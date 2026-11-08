@@ -274,6 +274,12 @@ export const Books: CollectionConfig = {
     slugField(),
   ],
   hooks: {
+    beforeDelete: [
+      // Readers' saved places in this book go with it.
+      async ({ id, req }) => {
+        await req.payload.delete({ collection: 'reading-progress', where: { book: { equals: id } }, req })
+      },
+    ],
     afterChange: [
       async ({ doc, req, context }) => {
         if (context.skipImport || !doc.online?.importNow) return doc

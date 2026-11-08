@@ -112,6 +112,32 @@ describe('Google sign-in', () => {
   })
 })
 
+describe('deleting things readers have touched', () => {
+  it('removes a liked card, and a reader who has likes', async () => {
+    const media = (await payload.find({ collection: 'media', limit: 1, depth: 0 })).docs[0]
+    const a = await reader(`del-a-${stamp}@test.invalid`)
+    const b = await reader(`del-b-${stamp}@test.invalid`)
+    const make = () =>
+      payload.create({
+        collection: 'alap',
+        data: { kind: 'post', text: 'x', image: media.id, published: false, publishedAt: new Date().toISOString() },
+      })
+    const [one, two] = [await make(), await make()]
+    await payload.create({ collection: 'likes', data: { user: a.id, alap: one.id } })
+    await payload.create({ collection: 'likes', data: { user: a.id, alap: two.id } })
+    await payload.create({ collection: 'likes', data: { user: b.id, alap: two.id } })
+    await payload.create({ collection: 'bookmarks', data: { user: a.id, kind: 'book', target: 1 } })
+
+    await payload.delete({ collection: 'alap', id: one.id })
+    expect((await payload.count({ collection: 'likes', where: { alap: { equals: one.id } } })).totalDocs).toBe(0)
+
+    await payload.delete({ collection: 'users', id: a.id })
+    expect((await payload.count({ collection: 'bookmarks', where: { user: { equals: a.id } } })).totalDocs).toBe(0)
+    expect((await payload.findByID({ collection: 'alap', id: two.id })).likeCount).toBe(1)
+    await payload.delete({ collection: 'alap', id: two.id })
+  })
+})
+
 describe('newsletter', () => {
   it('signs unsubscribe links', () => {
     const token = unsubscribeToken('a@b.c')

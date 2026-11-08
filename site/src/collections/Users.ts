@@ -68,6 +68,21 @@ export const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeDelete: [
+      // A reader's own records go with the account; the like totals they touched are corrected.
+      async ({ id, req }) => {
+        const mine = { user: { equals: id } }
+        const { docs } = await req.payload.find({ collection: 'likes', where: mine, limit: 5000, depth: 0, pagination: false, req })
+        await req.payload.delete({ collection: 'likes', where: mine, req })
+        await req.payload.delete({ collection: 'bookmarks', where: mine, req })
+        await req.payload.delete({ collection: 'reading-progress', where: mine, req })
+        for (const like of docs) {
+          const alap = typeof like.alap === 'object' ? like.alap.id : like.alap
+          const { totalDocs } = await req.payload.count({ collection: 'likes', where: { alap: { equals: alap } }, req })
+          await req.payload.db.updateOne({ collection: 'alap', id: alap, data: { likeCount: totalDocs }, req, returning: false })
+        }
+      },
+    ],
     beforeChange: [
       // The very first account becomes the admin.
       async ({ req, operation, data, originalDoc, context }) => {

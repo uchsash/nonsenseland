@@ -25,6 +25,11 @@ export const useAccount = () => {
   return value
 }
 
+/** After the server accepts a signed-in action, later pages load this reader's state too. */
+const rememberSignedIn = () => {
+  if (!maybeSignedIn()) document.cookie = 'nl-in=1; path=/; max-age=604800; samesite=lax'
+}
+
 const post = (path: string, body: unknown) =>
   fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
 
@@ -75,16 +80,19 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
   const toggleLike = useCallback(
     (id: number) => {
-      if (!maybeSignedIn()) return toLogin()
-      setLikes((prev) => {
-        const next = new Set(prev)
-        if (!next.delete(id)) next.add(id)
-        return next
-      })
+      // Without the hint it may still be someone signed in through the admin: the server decides.
+      if (maybeSignedIn()) {
+        setLikes((prev) => {
+          const next = new Set(prev)
+          if (!next.delete(id)) next.add(id)
+          return next
+        })
+      }
       post('/account/like', { alap: id })
         .then((r) => (r.status === 401 ? (toLogin(), null) : r.json()))
         .then((result) => {
           if (!result) return
+          rememberSignedIn()
           setCounts((prev) => ({ ...prev, [id]: result.count }))
           setLikes((prev) => {
             const next = new Set(prev)
@@ -100,16 +108,20 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
   const toggleBookmark = useCallback(
     (kind: string, target: number) => {
-      if (!maybeSignedIn()) return toLogin()
       const key = `${kind}:${target}`
-      setBookmarks((prev) => {
-        const next = new Set(prev)
-        if (!next.delete(key)) next.add(key)
-        return next
-      })
+      const flip = () =>
+        setBookmarks((prev) => {
+          const next = new Set(prev)
+          if (!next.delete(key)) next.add(key)
+          return next
+        })
+      const hinted = maybeSignedIn()
+      if (hinted) flip()
       post('/account/bookmark', { kind, target })
         .then((r) => {
-          if (r.status === 401) toLogin()
+          if (r.status === 401) return toLogin()
+          if (!hinted && r.ok) flip()
+          rememberSignedIn()
         })
         .catch(() => {})
     },
