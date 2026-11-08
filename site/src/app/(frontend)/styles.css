@@ -1813,3 +1813,21 @@ html {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* The Messenger share link only works where the app is installed. */
+@media (hover: hover) {
+  .share a.share-phone {
+    display: none;
+  }
+}
+.account-delete {
+  margin-top: 28px;
+  font-size: 15px;
+}
+.account-delete summary {
+  color: var(--muted);
+  cursor: pointer;
+}
+.account-delete form {
+  margin-top: 14px;
+}

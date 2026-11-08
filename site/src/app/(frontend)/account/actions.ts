@@ -1,9 +1,10 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { getT } from '@/i18n/server'
-import { currentUser, safeNext, setLoginCookies } from '@/lib/account'
+import { currentUser, HINT_COOKIE, safeNext, setLoginCookies } from '@/lib/account'
 import { payloadClient } from '@/lib/data'
 import { sendEmail } from '@/lib/email'
 import { validUnsubscribe } from '@/lib/newsletter'
@@ -150,6 +151,28 @@ export async function changePassword(_: FormState, form: FormData): Promise<Form
   }
   await payload.update({ collection: 'users', id: user.id, data: { password } })
   return { ok: true, message: t.account.saved }
+}
+
+export async function deleteAccount(_: FormState, form: FormData): Promise<FormState> {
+  const t = await getT()
+  const user = await currentUser()
+  if (!user) return { ok: false, message: t.account.loginFailed }
+  if (user.role !== 'reader') return { ok: false, message: t.account.deleteStaff }
+  if (text(form, 'confirm').toLowerCase() !== user.email.toLowerCase()) {
+    return { ok: false, message: t.account.deleteMismatch }
+  }
+  const payload = await payloadClient()
+  try {
+    await payload.delete({ collection: 'subscribers', where: { email: { equals: user.email } } })
+    await payload.delete({ collection: 'users', id: user.id })
+  } catch (err) {
+    payload.logger.error({ err }, 'Account deletion failed')
+    return { ok: false, message: t.account.signupFailed }
+  }
+  const store = await cookies()
+  store.delete(`${payload.config.cookiePrefix}-token`)
+  store.delete(HINT_COOKIE)
+  redirect('/')
 }
 
 export async function unsubscribe(_: FormState, form: FormData): Promise<FormState> {

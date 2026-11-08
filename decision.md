@@ -24,10 +24,13 @@ Everything below works and was tested in the browser:
 - likes on খুচরো আলাপ (signed-in readers; totals visible to everyone)
 - saved Kindle address, filled in automatically
 - newsletter written in the admin (test copy, then send to all), with one-click unsubscribe
+- readers can delete their own account (confirmed by typing their email); swipe between chapters; Messenger share on phones
 
 Needs from the owner before these work live: **Google sign-in** needs a Google Cloud OAuth client (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, redirect `https://nonsenseland.com/auth/google/callback`); until then the button is hidden. **Password-reset emails and newsletters** need Resend (free plan: 100 emails/day, 3,000/month, so a list above 100 subscribers needs a paid plan or sending over several days).
 
 Security decisions: staff accounts can never sign in through Google. A Google sign-in on an address never proven by email replaces that account's password, so someone who registered another person's address loses access. Email verification at sign-up is not required (a reader can read at once).
+
+**Security checks on GitHub (2026-11-08):** Dependabot alerts and security updates, secret scanning and CodeQL are on. Remaining package warnings come from inside Payload (happy-dom via its rich-text package, drizzle-kit, deepmerge); they need a Payload update, not a forced fix.
 
 **Left for launch (phase 1):**
 1. Real content: replace the **নমুনা** (sample) videos, articles and placeholder covers; upload the two EPUBs.

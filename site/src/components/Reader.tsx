@@ -166,6 +166,38 @@ export function Reader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posKey, position?.chapter])
 
+  // Swiping sideways moves between chapters: left for the next, right for the previous.
+  useEffect(() => {
+    if (!prevHref && !nextHref) return
+    // Without this the browser's own swipe-back fires as well, moving two chapters at once.
+    const root = document.documentElement
+    root.style.overscrollBehaviorX = 'none'
+    let start: { x: number; y: number } | null = null
+    const onStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement
+      const scrollable = target.closest('table, pre, input, textarea, select, .reader-tools, [role="dialog"]')
+      start = e.touches.length === 1 && !scrollable ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null
+    }
+    const onEnd = (e: TouchEvent) => {
+      if (!start) return
+      const dx = e.changedTouches[0].clientX - start.x
+      const dy = e.changedTouches[0].clientY - start.y
+      start = null
+      // Long and clearly sideways, and not the end of selecting text.
+      if (Math.abs(dx) < 90 || Math.abs(dx) < Math.abs(dy) * 2.5) return
+      if (window.getSelection()?.toString()) return
+      if (dx < 0 && nextHref) router.push(nextHref)
+      if (dx > 0 && prevHref) router.push(prevHref)
+    }
+    document.addEventListener('touchstart', onStart, { passive: true })
+    document.addEventListener('touchend', onEnd, { passive: true })
+    return () => {
+      document.removeEventListener('touchstart', onStart)
+      document.removeEventListener('touchend', onEnd)
+      root.style.overscrollBehaviorX = ''
+    }
+  }, [nextHref, prevHref, router])
+
   // ← → keys move between chapters.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

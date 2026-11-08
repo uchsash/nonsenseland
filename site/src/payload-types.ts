@@ -2678,6 +2678,30 @@ export interface InterfaceText {
      * Default: লিংকটি ঠিক নেই।
      */
     badLink?: string | null;
+    /**
+     * Default: অ্যাকাউন্ট মুছে ফেলুন
+     */
+    deleteTitle?: string | null;
+    /**
+     * Default: আপনার অ্যাকাউন্ট, সংরক্ষিত তালিকা, পড়ার অগ্রগতি আর ভালো লাগাগুলো চিরতরে মুছে যাবে। এটি ফেরানো যাবে না।
+     */
+    deleteWarning?: string | null;
+    /**
+     * Default: নিশ্চিত করতে আপনার ইমেইল লিখুন
+     */
+    deleteConfirm?: string | null;
+    /**
+     * Default: চিরতরে মুছে ফেলুন
+     */
+    deleteButton?: string | null;
+    /**
+     * Default: ইমেইল মেলেনি।
+     */
+    deleteMismatch?: string | null;
+    /**
+     * Default: অ্যাডমিন অ্যাকাউন্ট এখান থেকে মোছা যায় না।
+     */
+    deleteStaff?: string | null;
   };
   post?: {
     /**
@@ -3137,6 +3161,12 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         unsubscribeButton?: T;
         unsubscribed?: T;
         badLink?: T;
+        deleteTitle?: T;
+        deleteWarning?: T;
+        deleteConfirm?: T;
+        deleteButton?: T;
+        deleteMismatch?: T;
+        deleteStaff?: T;
       };
   post?:
     | T

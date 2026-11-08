@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-import { LogoutButton, PasswordForm, ProfileForm } from '@/components/AccountForms'
+import { DeleteAccountForm, LogoutButton, PasswordForm, ProfileForm } from '@/components/AccountForms'
 import { getT } from '@/i18n/server'
 import { currentUser } from '@/lib/account'
 import { payloadClient } from '@/lib/data'
@@ -131,6 +131,7 @@ export default async function AccountPage() {
       </section>
 
       <LogoutButton />
+      {user.role === 'reader' ? <DeleteAccountForm /> : null}
     </div>
   )
 }

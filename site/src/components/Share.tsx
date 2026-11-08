@@ -28,6 +28,10 @@ export function Share({ path, title }: { path: string; title: string }) {
       <a href={`https://www.facebook.com/sharer/sharer.php?u=${u}`} target="_blank" rel="noopener noreferrer">
         Facebook
       </a>
+      {/* Opens the Messenger app, so it is shown only on phones (see styles.css). */}
+      <a className="share-phone" href={`fb-messenger://share/?link=${u}`}>
+        Messenger
+      </a>
       <a href={`https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`} target="_blank" rel="noopener noreferrer">
         WhatsApp
       </a>

@@ -5,6 +5,7 @@ import { type FormEvent, startTransition, useActionState } from 'react'
 
 import {
   changePassword,
+  deleteAccount,
   forgotPassword,
   login,
   resetPassword,
@@ -206,6 +207,27 @@ export function LogoutButton() {
     <button type="button" className="btn ghost" onClick={logout}>
       {t.account.logout}
     </button>
+  )
+}
+
+export function DeleteAccountForm() {
+  const t = useT()
+  const [state, submit, pending] = useForm(deleteAccount)
+  return (
+    <details className="account-delete">
+      <summary>{t.account.deleteTitle}</summary>
+      <form onSubmit={submit} className="auth-form">
+        <p className="muted">{t.account.deleteWarning}</p>
+        <label className="field">
+          {t.account.deleteConfirm}
+          <input className="input" type="email" name="confirm" required autoComplete="off" />
+        </label>
+        <button className="btn ghost" disabled={pending}>
+          {t.account.deleteButton}
+        </button>
+        <Note state={state} />
+      </form>
+    </details>
   )
 }
 
