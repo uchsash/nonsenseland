@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { BookmarkButton } from '@/components/AccountButtons'
 import { AdSlot } from '@/components/AdSlot'
 import { ContinueReading } from '@/components/ContinueReading'
 import { KindleForm } from '@/components/Forms'
@@ -79,6 +80,7 @@ export default async function BookPage({ params }: Props) {
           )}
 
           <div className="book-actions">
+            <BookmarkButton kind="book" target={book.id} withLabel />
             <ContinueReading book={book.slug!} titles={titles} />
             {chapters.length ? (
               <Link href={`/books/${book.slug}/read/1`} className="btn">

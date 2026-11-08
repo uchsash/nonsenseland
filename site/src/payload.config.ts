@@ -29,7 +29,9 @@ import { Users } from './collections/Users'
 import { Videos } from './collections/Videos'
 import { AdBlock } from './blocks/AdBlock'
 import { LinesBlock } from './blocks/Lines'
+import { Bookmarks, Likes, Newsletters } from './collections/Readers'
 import { FootnoteLinkFeature } from './features/footnoteLink'
+import { deliverNewsletter } from './lib/newsletter'
 import { ParagraphStyleFeature } from './features/paragraphStyle/feature.server'
 import { AdSettings, Homepage, InterfaceText, SiteSettings } from './globals'
 import { PALETTE } from './utilities/palette'
@@ -83,6 +85,9 @@ export default buildConfig({
     Coupons,
     Entitlements,
     ReadingProgress,
+    Bookmarks,
+    Likes,
+    Newsletters,
     Users,
   ],
   globals: [SiteSettings, Homepage, AdSettings, InterfaceText].map((g) => ({
@@ -91,7 +96,20 @@ export default buildConfig({
   })),
   // Runs scheduled publishing every minute while the server runs.
   // On Cloudflare a Cron Trigger calls /api/payload-jobs/run instead (set up at deployment).
-  jobs: { autoRun: [{ cron: '* * * * *', queue: 'default' }] },
+  jobs: {
+    autoRun: [{ cron: '* * * * *', queue: 'default' }],
+    tasks: [
+      {
+        slug: 'sendNewsletter',
+        retries: 3,
+        inputSchema: [{ name: 'newsletter', type: 'number', required: true }],
+        handler: async ({ input, req }) => {
+          await deliverNewsletter(input.newsletter, req.payload)
+          return { output: {} }
+        },
+      },
+    ],
+  },
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
       // The built-in link feature is replaced by one that also does footnotes.

@@ -17,6 +17,18 @@ Everything below works and was tested in the browser:
 - search (Bangla), topics, About page with contact form, sitemap, robots, draft preview
 - phone layout, dark mode, admin panel
 
+**Phase 2 is built (2026-11-08), running locally:**
+- reader accounts: email + password, Google, forgot/reset password, `/account` page
+- reading place shared across devices; the newer of browser and server wins
+- bookmarks on articles, books and chapters
+- likes on খুচরো আলাপ (signed-in readers; totals visible to everyone)
+- saved Kindle address, filled in automatically
+- newsletter written in the admin (test copy, then send to all), with one-click unsubscribe
+
+Needs from the owner before these work live: **Google sign-in** needs a Google Cloud OAuth client (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, redirect `https://nonsenseland.com/auth/google/callback`); until then the button is hidden. **Password-reset emails and newsletters** need Resend (free plan: 100 emails/day, 3,000/month, so a list above 100 subscribers needs a paid plan or sending over several days).
+
+Security decisions: staff accounts can never sign in through Google. A Google sign-in on an address never proven by email replaces that account's password, so someone who registered another person's address loses access. Email verification at sign-up is not required (a reader can read at once).
+
 **Left for launch (phase 1):**
 1. Real content: replace the **নমুনা** (sample) videos, articles and placeholder covers; upload the two EPUBs.
 2. Owner reviews all Bangla interface text (`site/src/i18n/bn.ts`) and the About page.
@@ -33,7 +45,7 @@ Everything below works and was tested in the browser:
 
 **Code repository:** https://github.com/uchsash/nonsenseland (public). Not in git: `.env` (secrets), uploaded images and book files, `free-books/`, licensed fonts.
 
-**Quality checks (all passing):** ESLint (0 problems), TypeScript, production build, and 28 automated tests (`npm run test:int`), including access-rule tests: visitors cannot read users, subscribers, messages, Kindle logs, orders, chapter text or book files; cannot create accounts or change settings; cannot see drafts.
+**Quality checks (all passing):** ESLint (0 problems), TypeScript, production build, and 42 automated tests (`npm run test:int`), including access-rule tests: visitors cannot read users, subscribers, messages, Kindle logs, orders, chapter text or book files; cannot create accounts or change settings; cannot see drafts.
 
 **Hydration warning (fixed 2026-11-06):** caused by the ColorZilla browser extension adding an attribute to `<body>`; the site now ignores extension-added body attributes. Reader, theme and “continue reading” now read browser storage in the hydration-safe way.
 

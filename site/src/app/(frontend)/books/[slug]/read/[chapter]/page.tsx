@@ -50,6 +50,7 @@ export default async function ChapterPage({ params }: Props) {
       prevHref={prev ? href(prev.order) : undefined}
       nextHref={next ? href(next.order) : undefined}
       position={{ book: book.slug!, chapter: order }}
+      bookmark={list[index] ? { kind: 'chapter', target: list[index].id } : undefined}
     >
       <article className="reading-column">
         <header className="reading-head">

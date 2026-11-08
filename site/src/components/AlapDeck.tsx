@@ -7,6 +7,7 @@ import { useT } from '@/i18n/client'
 import type { Alap } from '@/payload-types'
 import { bnDate, bnNumber } from '@/utilities/bn'
 
+import { LikeButton } from './AccountButtons'
 import { AlapBookCard } from './AlapBookCard'
 import { Img } from './Img'
 import { ArrowLeft, ArrowRight } from './icons'
@@ -161,9 +162,12 @@ export function AlapDeck({ items, seeAll = false }: { items: Alap[]; seeAll?: bo
               )}
             </>
           )}
-          <time className="deck-date" dateTime={item.publishedAt}>
-            {bnDate(item.publishedAt)}
-          </time>
+          <div className="deck-foot">
+            <time className="deck-date" dateTime={item.publishedAt}>
+              {bnDate(item.publishedAt)}
+            </time>
+            <LikeButton id={item.id} initial={item.likeCount} />
+          </div>
         </article>
       </div>
       <div className="deck-nav">

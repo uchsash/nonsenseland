@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import { getT } from '@/i18n/server'
 import { payloadClient } from '@/lib/data'
@@ -15,7 +15,9 @@ export default async function PostPage() {
   const payload = await payloadClient()
   const { user } = await payload.auth({ headers: await headers() })
   const role = (user as { role?: string } | null)?.role
-  if (role !== 'admin' && role !== 'editor') redirect('/admin/login?redirect=%2Fpost')
+  // A signed-in reader must not be sent to the admin login: it would send them straight back.
+  if (user && role !== 'admin' && role !== 'editor') notFound()
+  if (!user) redirect('/admin/login?redirect=%2Fpost')
 
   const t = await getT()
   const recent = await payload.find({

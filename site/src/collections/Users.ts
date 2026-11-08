@@ -13,6 +13,7 @@ export const Users: CollectionConfig = {
     tokenExpiration: 60 * 60 * 24 * 7,
     maxLoginAttempts: 5,
     lockTime: 15 * 60 * 1000,
+    cookies: { sameSite: 'Lax', secure: process.env.NODE_ENV === 'production' },
   },
   access: {
     // Readers (phase 2) never get into the admin panel.
@@ -48,14 +49,34 @@ export const Users: CollectionConfig = {
     {
       name: 'kindleEmail',
       type: 'email',
-      admin: { description: 'Saved Send-to-Kindle address (readers, phase 2).' },
+      admin: { description: 'Saved Send-to-Kindle address.' },
+    },
+    {
+      // Set by Google sign-in or a password-reset email: this address is proven to be theirs.
+      name: 'emailVerified',
+      type: 'checkbox',
+      defaultValue: false,
+      access: { create: adminFieldOnly, update: adminFieldOnly },
+      admin: { readOnly: true, position: 'sidebar' },
+    },
+    {
+      name: 'googleId',
+      type: 'text',
+      index: true,
+      access: { read: adminFieldOnly, create: adminFieldOnly, update: adminFieldOnly },
+      admin: { readOnly: true, position: 'sidebar' },
     },
   ],
   hooks: {
     beforeChange: [
       // The very first account becomes the admin.
-      async ({ req, operation, data }) => {
-        if (operation !== 'create') return data
+      async ({ req, operation, data, originalDoc, context }) => {
+        if (operation === 'update') {
+          // A changed address is no longer proven.
+          if (data.email && data.email !== originalDoc?.email && !context.keepVerified) data.emailVerified = false
+          return data
+        }
+        if (operation !== 'create' || context.readerSignup) return data
         const { totalDocs } = await req.payload.count({ collection: 'users', overrideAccess: true })
         if (totalDocs === 0) data.role = 'admin'
         return data

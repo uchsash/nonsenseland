@@ -18,6 +18,7 @@ export async function sendEmail({
 }) {
   if (!process.env.RESEND_API_KEY || !from) {
     console.info(`[email not configured] would send "${subject}" to ${to}`)
+    if (process.env.NODE_ENV !== 'production') console.info(text)
     return false
   }
   const res = await fetch('https://api.resend.com/emails', {

@@ -16,6 +16,28 @@ const Svg = ({ size = 20, children }: P & { children: React.ReactNode }) => (
   </svg>
 )
 
+export const UserIcon = (p: P) => (
+  <Svg {...p}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21c1.2-4 4.2-6 8-6s6.8 2 8 6" />
+  </Svg>
+)
+
+export const HeartIcon = ({ filled, ...p }: P & { filled?: boolean }) => (
+  <Svg {...p}>
+    <path
+      d="M12 20.5s-7.5-4.6-9.2-9.3C1.7 8 3.8 4.8 7.1 4.8c2 0 3.7 1 4.9 2.9 1.2-1.9 2.9-2.9 4.9-2.9 3.3 0 5.4 3.2 4.3 6.4-1.7 4.7-9.2 9.3-9.2 9.3Z"
+      fill={filled ? 'currentColor' : 'none'}
+    />
+  </Svg>
+)
+
+export const BookmarkIcon = ({ filled, ...p }: P & { filled?: boolean }) => (
+  <Svg {...p}>
+    <path d="M6 3.5h12v17.5l-6-4-6 4V3.5Z" fill={filled ? 'currentColor' : 'none'} />
+  </Svg>
+)
+
 export const SearchIcon = (p: P) => (
   <Svg {...p}>
     <circle cx="11" cy="11" r="7" />

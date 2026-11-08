@@ -3,6 +3,7 @@
 import { getT } from '@/i18n/server'
 import { payloadClient } from '@/lib/data'
 import { emailConfigured, sendEmail } from '@/lib/email'
+import { currentUser } from '@/lib/account'
 import { readStoredFile } from '@/lib/files'
 import { verifyHuman, visitorHash } from '@/lib/visitor'
 import type { BookFile } from '@/payload-types'
@@ -19,8 +20,12 @@ export async function subscribe(_: FormState, form: FormData): Promise<FormState
   if (!EMAIL.test(email)) return { ok: false, message: t.newsletter.invalid }
   if (!(await verifyHuman(form.get('cf-turnstile-response')))) return { ok: false, message: t.contact.failed }
   const payload = await payloadClient()
-  const exists = await payload.count({ collection: 'subscribers', where: { email: { equals: email } } })
-  if (exists.totalDocs) return { ok: true, message: t.newsletter.already }
+  const { docs } = await payload.find({ collection: 'subscribers', where: { email: { equals: email } }, limit: 1, depth: 0 })
+  if (docs[0]) {
+    if (!docs[0].unsubscribedAt) return { ok: true, message: t.newsletter.already }
+    await payload.update({ collection: 'subscribers', id: docs[0].id, data: { unsubscribedAt: null } })
+    return { ok: true, message: t.newsletter.done }
+  }
   await payload.create({ collection: 'subscribers', data: { email } })
   return { ok: true, message: t.newsletter.done }
 }
@@ -90,6 +95,11 @@ export async function sendToKindle(_: FormState, form: FormData): Promise<FormSt
       data: { book: book.id, ipHash, status: 'sent' },
       overrideAccess: true,
     })
+    // Signed-in readers get this address filled in next time.
+    const user = await currentUser()
+    if (user && user.kindleEmail !== to) {
+      await payload.update({ collection: 'users', id: user.id, data: { kindleEmail: to } }).catch(() => null)
+    }
     return { ok: true, message: t.kindle.sent }
   } catch (err) {
     payload.logger.error({ err }, 'Kindle send failed')

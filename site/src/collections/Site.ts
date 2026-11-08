@@ -111,7 +111,10 @@ export const Subscribers: CollectionConfig = {
   slug: 'subscribers',
   admin: { useAsTitle: 'email', group: 'Readers', defaultColumns: ['email', 'createdAt'] },
   access: formOnly,
-  fields: [{ name: 'email', type: 'email', required: true, unique: true }],
+  fields: [
+    { name: 'email', type: 'email', required: true, unique: true },
+    { name: 'unsubscribedAt', type: 'date', admin: { readOnly: true } },
+  ],
 }
 
 export const Messages: CollectionConfig = {
@@ -249,5 +252,8 @@ export const ReadingProgress: CollectionConfig = {
     { name: 'book', type: 'relationship', relationTo: 'books', required: true },
     { name: 'chapter', type: 'relationship', relationTo: 'chapters' },
     { name: 'position', type: 'number', admin: { description: '0–1 within the chapter' } },
+    { name: 'chapterNumber', type: 'number' },
+    { name: 'savedAt', type: 'number', admin: { description: 'When the reader was there (ms).' } },
   ],
+  indexes: [{ fields: ['user', 'book'], unique: true }],
 }

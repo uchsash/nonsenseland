@@ -6,7 +6,7 @@ import { useState, useSyncExternalStore } from 'react'
 
 import { useT } from '@/i18n/client'
 
-import { CloseIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from './icons'
+import { CloseIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon, UserIcon } from './icons'
 import { setStored } from './useStored'
 
 type Item = { label: string; href: string }
@@ -57,6 +57,9 @@ export function HeaderNav({ items }: { items: Item[] }) {
       <div className="header-tools">
         <Link href="/search" className="icon-btn" aria-label={t.nav.search}>
           <SearchIcon />
+        </Link>
+        <Link href="/account" className="icon-btn" aria-label={t.account.title} prefetch={false}>
+          <UserIcon />
         </Link>
         <button
           type="button"

@@ -8,6 +8,8 @@ import { useT } from '@/i18n/client'
 import { bnNumber } from '@/utilities/bn'
 
 import { CloseIcon, ListIcon } from './icons'
+import { BookmarkButton } from './AccountButtons'
+import { queueProgress, whenProgressReady } from './progressSync'
 import { parseStored, setStored, useStored } from './useStored'
 
 type Theme = 'auto' | 'light' | 'sepia' | 'dark'
@@ -75,6 +77,7 @@ export function Reader({
   prevHref,
   nextHref,
   position,
+  bookmark,
 }: {
   children: React.ReactNode
   toc?: TocItem[]
@@ -82,6 +85,7 @@ export function Reader({
   nextHref?: string
   /** For books: where to remember the reading place. */
   position?: { book: string; chapter: number }
+  bookmark?: { kind: 'article' | 'chapter'; target: number }
 }) {
   const t = useT()
   const router = useRouter()
@@ -106,6 +110,8 @@ export function Reader({
   // Progress bar and remembering the place.
   const posKey = position ? `nl-pos-${position.book}` : null
   const lastSave = useRef(0)
+  // Nothing is saved until the old place has been restored, or opening a chapter would erase it.
+  const restored = useRef(false)
   const onScroll = useCallback(() => {
     const el = body.current
     if (!el) return
@@ -114,11 +120,13 @@ export function Reader({
     const ratio = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 1
     setProgress(ratio)
     // Save the place at most twice a second.
-    if (posKey && position && Date.now() - lastSave.current > 500) {
+    if (posKey && position && restored.current && Date.now() - lastSave.current > 500) {
       lastSave.current = Date.now()
+      const place = { chapter: position.chapter, ratio, at: Date.now() }
       try {
-        localStorage.setItem(posKey, JSON.stringify({ chapter: position.chapter, ratio, at: Date.now() }))
+        localStorage.setItem(posKey, JSON.stringify(place))
       } catch {}
+      queueProgress(position.book, place)
     }
   }, [posKey, position])
 
@@ -130,17 +138,30 @@ export function Reader({
 
   // Return to the saved place when reopening the same chapter.
   useEffect(() => {
-    if (!posKey || !position || location.hash) return
-    try {
-      const saved = JSON.parse(localStorage.getItem(posKey) ?? 'null')
-      if (saved?.chapter === position.chapter && saved.ratio > 0.02 && saved.ratio < 0.98) {
-        const el = body.current
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.scrollY
-          window.scrollTo({ top: top + saved.ratio * (el.offsetHeight - window.innerHeight) })
+    restored.current = false
+    if (!posKey || !position || location.hash) {
+      restored.current = true
+      return
+    }
+    let cancelled = false
+    // Wait briefly for the place saved on another device.
+    void Promise.race([whenProgressReady(), new Promise((r) => setTimeout(r, 2500))]).then(() => {
+      if (cancelled) return
+      try {
+        const saved = JSON.parse(localStorage.getItem(posKey) ?? 'null')
+        if (window.scrollY < 80 && saved?.chapter === position.chapter && saved.ratio > 0.02 && saved.ratio < 0.98) {
+          const el = body.current
+          if (el) {
+            const top = el.getBoundingClientRect().top + window.scrollY
+            window.scrollTo({ top: top + saved.ratio * (el.offsetHeight - window.innerHeight) })
+          }
         }
-      }
-    } catch {}
+      } catch {}
+      restored.current = true
+    })
+    return () => {
+      cancelled = true
+    }
     // Only on first open of this chapter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posKey, position?.chapter])
@@ -171,6 +192,7 @@ export function Reader({
       <div ref={body}>{children}</div>
 
       <div className="reader-tools">
+        {bookmark ? <BookmarkButton kind={bookmark.kind} target={bookmark.target} /> : null}
         {toc?.length ? (
           <button
             type="button"

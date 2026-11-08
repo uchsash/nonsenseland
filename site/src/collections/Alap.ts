@@ -122,6 +122,7 @@ export const Alap: CollectionConfig = {
       defaultValue: () => new Date().toISOString(),
       admin: { position: 'sidebar', date: { pickerAppearance: 'dayAndTime' } },
     },
+    { name: 'likeCount', type: 'number', defaultValue: 0, admin: { position: 'sidebar', readOnly: true } },
     {
       // Short label for admin lists, filled from the text.
       name: 'title',

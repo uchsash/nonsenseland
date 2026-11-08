@@ -86,6 +86,9 @@ export interface Config {
     coupons: Coupon;
     entitlements: Entitlement;
     'reading-progress': ReadingProgress;
+    bookmarks: Bookmark;
+    likes: Like;
+    newsletters: Newsletter;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -118,6 +121,9 @@ export interface Config {
     coupons: CouponsSelect<false> | CouponsSelect<true>;
     entitlements: EntitlementsSelect<false> | EntitlementsSelect<true>;
     'reading-progress': ReadingProgressSelect<false> | ReadingProgressSelect<true>;
+    bookmarks: BookmarksSelect<false> | BookmarksSelect<true>;
+    likes: LikesSelect<false> | LikesSelect<true>;
+    newsletters: NewslettersSelect<false> | NewslettersSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -148,6 +154,7 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      sendNewsletter: TaskSendNewsletter;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -644,6 +651,7 @@ export interface Alap {
    */
   published?: boolean | null;
   publishedAt: string;
+  likeCount?: number | null;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -737,6 +745,7 @@ export interface Ad {
 export interface Subscriber {
   id: number;
   email: string;
+  unsubscribedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -806,9 +815,11 @@ export interface User {
   name?: string | null;
   role: 'admin' | 'editor' | 'reader';
   /**
-   * Saved Send-to-Kindle address (readers, phase 2).
+   * Saved Send-to-Kindle address.
    */
   kindleEmail?: string | null;
+  emailVerified?: boolean | null;
+  googleId?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -872,6 +883,72 @@ export interface ReadingProgress {
    * 0–1 within the chapter
    */
   position?: number | null;
+  chapterNumber?: number | null;
+  /**
+   * When the reader was there (ms).
+   */
+  savedAt?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookmarks".
+ */
+export interface Bookmark {
+  id: number;
+  user: number | User;
+  kind: 'article' | 'book' | 'chapter';
+  target: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "likes".
+ */
+export interface Like {
+  id: number;
+  user: number | User;
+  alap: number | Alap;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletters".
+ */
+export interface Newsletter {
+  id: number;
+  subject: string;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Save with an address here to send only a test copy there. Nobody else receives it.
+   */
+  testEmail?: string | null;
+  /**
+   * Tick and save to start sending. This cannot be undone.
+   */
+  sendNow?: boolean | null;
+  status?: ('draft' | 'queued' | 'sending' | 'sent' | 'failed') | null;
+  sentCount?: number | null;
+  sentAt?: string | null;
+  report?: string | null;
+  cursor?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -944,7 +1021,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'sendNewsletter' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -977,7 +1054,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'sendNewsletter' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -1066,6 +1143,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'reading-progress';
         value: number | ReadingProgress;
+      } | null)
+    | ({
+        relationTo: 'bookmarks';
+        value: number | Bookmark;
+      } | null)
+    | ({
+        relationTo: 'likes';
+        value: number | Like;
+      } | null)
+    | ({
+        relationTo: 'newsletters';
+        value: number | Newsletter;
       } | null)
     | ({
         relationTo: 'users';
@@ -1199,6 +1288,7 @@ export interface AlapSelect<T extends boolean = true> {
   pinUntil?: T;
   published?: T;
   publishedAt?: T;
+  likeCount?: T;
   title?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1467,6 +1557,7 @@ export interface BookFilesSelect<T extends boolean = true> {
  */
 export interface SubscribersSelect<T extends boolean = true> {
   email?: T;
+  unsubscribedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1563,6 +1654,46 @@ export interface ReadingProgressSelect<T extends boolean = true> {
   book?: T;
   chapter?: T;
   position?: T;
+  chapterNumber?: T;
+  savedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookmarks_select".
+ */
+export interface BookmarksSelect<T extends boolean = true> {
+  user?: T;
+  kind?: T;
+  target?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "likes_select".
+ */
+export interface LikesSelect<T extends boolean = true> {
+  user?: T;
+  alap?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletters_select".
+ */
+export interface NewslettersSelect<T extends boolean = true> {
+  subject?: T;
+  body?: T;
+  testEmail?: T;
+  sendNow?: T;
+  status?: T;
+  sentCount?: T;
+  sentAt?: T;
+  report?: T;
+  cursor?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1574,6 +1705,8 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   role?: T;
   kindleEmail?: T;
+  emailVerified?: T;
+  googleId?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2356,6 +2489,10 @@ export interface InterfaceText {
      */
     newBook?: string | null;
     /**
+     * Default: ভালো লেগেছে
+     */
+    like?: string | null;
+    /**
      * Default: সব খুচরো আলাপ দেখুন
      */
     seeAll?: string | null;
@@ -2367,6 +2504,180 @@ export interface InterfaceText {
      * Default: এখনো কোনো আলাপ নেই।
      */
     empty?: string | null;
+  };
+  account?: {
+    /**
+     * Default: আমার অ্যাকাউন্ট
+     */
+    title?: string | null;
+    /**
+     * Default: লগইন
+     */
+    login?: string | null;
+    /**
+     * Default: লগআউট
+     */
+    logout?: string | null;
+    /**
+     * Default: অ্যাকাউন্ট খুলুন
+     */
+    createAccount?: string | null;
+    /**
+     * Default: অ্যাকাউন্ট আছে? লগইন করুন
+     */
+    haveAccount?: string | null;
+    /**
+     * Default: Google দিয়ে চালিয়ে যান
+     */
+    withGoogle?: string | null;
+    /**
+     * Default: নাম
+     */
+    name?: string | null;
+    /**
+     * Default: ইমেইল
+     */
+    email?: string | null;
+    /**
+     * Default: পাসওয়ার্ড
+     */
+    password?: string | null;
+    /**
+     * Default: অন্তত ৮ অক্ষর
+     */
+    passwordHint?: string | null;
+    /**
+     * Default: বর্তমান পাসওয়ার্ড
+     */
+    currentPassword?: string | null;
+    /**
+     * Default: নতুন পাসওয়ার্ড
+     */
+    newPassword?: string | null;
+    /**
+     * Default: পাসওয়ার্ড বদলান
+     */
+    setPassword?: string | null;
+    /**
+     * Default: পাসওয়ার্ড
+     */
+    changePassword?: string | null;
+    /**
+     * Default: পাসওয়ার্ড ভুলে গেছেন?
+     */
+    forgot?: string | null;
+    /**
+     * Default: রিসেট লিংক পাঠান
+     */
+    sendReset?: string | null;
+    /**
+     * Default: এই ইমেইলে অ্যাকাউন্ট থাকলে একটি লিংক পাঠানো হয়েছে।
+     */
+    resetSent?: string | null;
+    /**
+     * Default: ননসেন্সল্যান্ড: পাসওয়ার্ড রিসেট
+     */
+    resetSubject?: string | null;
+    /**
+     * Default: নিচের লিংকে গিয়ে নতুন পাসওয়ার্ড দিন। আপনি না চাইলে এই ইমেইলটি এড়িয়ে যান।
+     */
+    resetBody?: string | null;
+    /**
+     * Default: লিংকটির মেয়াদ শেষ। আবার চেষ্টা করুন।
+     */
+    resetExpired?: string | null;
+    /**
+     * Default: ইমেইল বা পাসওয়ার্ড মেলেনি।
+     */
+    loginFailed?: string | null;
+    /**
+     * Default: অ্যাকাউন্ট খোলা যায়নি। আবার চেষ্টা করুন।
+     */
+    signupFailed?: string | null;
+    /**
+     * Default: Google দিয়ে লগইন হয়নি। আবার চেষ্টা করুন।
+     */
+    googleFailed?: string | null;
+    /**
+     * Default: এই অ্যাকাউন্টে পাসওয়ার্ড দিয়ে লগইন করুন।
+     */
+    googleStaff?: string | null;
+    /**
+     * Default: তথ্যগুলো ঠিকমতো লিখুন।
+     */
+    invalid?: string | null;
+    /**
+     * Default: পাসওয়ার্ড অন্তত ৮ অক্ষরের হতে হবে।
+     */
+    shortPassword?: string | null;
+    /**
+     * Default: বর্তমান পাসওয়ার্ড মেলেনি।
+     */
+    wrongPassword?: string | null;
+    /**
+     * Default: এই ইমেইলে আগেই অ্যাকাউন্ট আছে।
+     */
+    emailTaken?: string | null;
+    /**
+     * Default: নিউজলেটার পেতে চাই
+     */
+    wantNewsletter?: string | null;
+    /**
+     * Default: কিন্ডল ইমেইল
+     */
+    kindle?: string | null;
+    /**
+     * Default: সংরক্ষণ করুন
+     */
+    save?: string | null;
+    /**
+     * Default: সংরক্ষণ হয়েছে।
+     */
+    saved?: string | null;
+    /**
+     * Default: তথ্য
+     */
+    settings?: string | null;
+    /**
+     * Default: যা পড়ছেন
+     */
+    reading?: string | null;
+    /**
+     * Default: এখনো কোনো বই শুরু করেননি।
+     */
+    noReading?: string | null;
+    /**
+     * Default: সংরক্ষিত
+     */
+    saved_items?: string | null;
+    /**
+     * Default: এখনো কিছু সংরক্ষণ করেননি।
+     */
+    noSaved?: string | null;
+    /**
+     * Default: সংরক্ষণ
+     */
+    bookmark?: string | null;
+    /**
+     * Default: সংরক্ষিত
+     */
+    bookmarked?: string | null;
+    /**
+     * Default: নিউজলেটার বন্ধ করুন
+     */
+    unsubscribeTitle?: string | null;
+    /**
+     * Default: আর ইমেইল চাই না
+     */
+    unsubscribeButton?: string | null;
+    /**
+     * Default: বন্ধ করা হয়েছে। আর ইমেইল যাবে না।
+     */
+    unsubscribed?: string | null;
+    /**
+     * Default: লিংকটি ঠিক নেই।
+     */
+    badLink?: string | null;
   };
   post?: {
     /**
@@ -2775,9 +3086,57 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         readLess?: T;
         readBook?: T;
         newBook?: T;
+        like?: T;
         seeAll?: T;
         olderPosts?: T;
         empty?: T;
+      };
+  account?:
+    | T
+    | {
+        title?: T;
+        login?: T;
+        logout?: T;
+        createAccount?: T;
+        haveAccount?: T;
+        withGoogle?: T;
+        name?: T;
+        email?: T;
+        password?: T;
+        passwordHint?: T;
+        currentPassword?: T;
+        newPassword?: T;
+        setPassword?: T;
+        changePassword?: T;
+        forgot?: T;
+        sendReset?: T;
+        resetSent?: T;
+        resetSubject?: T;
+        resetBody?: T;
+        resetExpired?: T;
+        loginFailed?: T;
+        signupFailed?: T;
+        googleFailed?: T;
+        googleStaff?: T;
+        invalid?: T;
+        shortPassword?: T;
+        wrongPassword?: T;
+        emailTaken?: T;
+        wantNewsletter?: T;
+        kindle?: T;
+        save?: T;
+        saved?: T;
+        settings?: T;
+        reading?: T;
+        noReading?: T;
+        saved_items?: T;
+        noSaved?: T;
+        bookmark?: T;
+        bookmarked?: T;
+        unsubscribeTitle?: T;
+        unsubscribeButton?: T;
+        unsubscribed?: T;
+        badLink?: T;
       };
   post?:
     | T
@@ -2815,6 +3174,16 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendNewsletter".
+ */
+export interface TaskSendNewsletter {
+  input: {
+    newsletter: number;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

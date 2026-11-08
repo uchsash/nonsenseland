@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { LikeButton } from '@/components/AccountButtons'
 import { AlapBookCard } from '@/components/AlapBookCard'
 import { Img } from '@/components/Img'
 import { Pager } from '@/components/ListPage'
@@ -31,9 +32,12 @@ function FeedPost({ item }: { item: Alap }) {
           <p className="feed-text">{item.text}</p>
         </>
       )}
-      <time className="deck-date" dateTime={item.publishedAt}>
-        {bnDate(item.publishedAt)}
-      </time>
+      <div className="deck-foot">
+        <time className="deck-date" dateTime={item.publishedAt}>
+          {bnDate(item.publishedAt)}
+        </time>
+        <LikeButton id={item.id} initial={item.likeCount} />
+      </div>
     </article>
   )
 }

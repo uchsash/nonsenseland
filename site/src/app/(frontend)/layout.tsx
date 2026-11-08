@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Script from 'next/script'
 import React, { Suspense } from 'react'
 
+import { AccountProvider } from '@/components/AccountProvider'
 import { HeaderNav } from '@/components/HeaderNav'
 import { NavigationLoader } from '@/components/NavigationLoader'
 import { UiTextProvider } from '@/i18n/client'
@@ -88,7 +89,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <HeaderNav items={menu} />
           </div>
         </header>
-        <main>{children}</main>
+        <main>
+          <AccountProvider>{children}</AccountProvider>
+        </main>
         <Suspense fallback={null}>
           <NavigationLoader />
         </Suspense>

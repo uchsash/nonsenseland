@@ -6,10 +6,12 @@ import { useActionState } from 'react'
 import { type FormState, sendMessage, sendToKindle, subscribe } from '@/app/(frontend)/actions'
 import { useT } from '@/i18n/client'
 
+import { useAccount } from './AccountProvider'
+
 const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 /** Invisible-by-default Cloudflare spam check; renders nothing until keys are set. */
-function Human() {
+export function Human() {
   if (!siteKey) return null
   return (
     <>
@@ -19,7 +21,7 @@ function Human() {
   )
 }
 
-const Note = ({ state }: { state: FormState }) =>
+export const Note = ({ state }: { state: FormState }) =>
   state.message ? (
     <p className="form-note" role="status" style={{ color: state.ok ? 'inherit' : 'var(--accent)' }}>
       {state.message}
@@ -86,6 +88,7 @@ export function ContactForm() {
 export function KindleForm({ bookId, sender }: { bookId: number; sender: string }) {
   const t = useT()
   const [state, action, pending] = useActionState(sendToKindle, {})
+  const { user } = useAccount()
   return (
     <form action={action} className="kindle-box">
       <strong>{t.kindle.title}</strong>
@@ -111,6 +114,8 @@ export function KindleForm({ bookId, sender }: { bookId: number; sender: string 
           type="email"
           name="kindle"
           required
+          key={user?.kindleEmail ?? ''}
+          defaultValue={user?.kindleEmail ?? ''}
           placeholder={t.kindle.placeholder}
         />
         <button className="btn" disabled={pending}>

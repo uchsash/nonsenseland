@@ -44,7 +44,7 @@ export default async function ArticlePage({ params }: Props) {
   const more = await listArticles({ category: category?.id, limit: 6, exclude: article.id })
 
   return (
-    <Reader>
+    <Reader bookmark={{ kind: 'article', target: article.id }}>
       <article>
         <header className="reading-column reading-head">
           <div className="card-meta">
