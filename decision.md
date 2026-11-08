@@ -266,6 +266,40 @@ Checked on bKash's official page (2026-11-06): https://www.bkash.com/en/page/per
 - API credentials (app key, app secret, username, password) and sandbox access are issued by bKash during merchant onboarding.
 - **Not yet confirmed:** whether a **PRA** gets its own API credentials for website checkout. The PRA page says it can receive through the Payment Gateway, but not how a PRA gets connected. **Ask bKash (16247 or the merchant support email) before phase 3.**
 
+### bKash API notes (read from developer.bka.sh on 2026-11-09)
+
+**Use Tokenized Checkout without agreement.** One payment at a time; the customer enters wallet number, OTP and PIN on bKash's own page, so the site never sees them. Agreements (saved wallets) can come later.
+
+**Flow**
+1. Server gets a token: Grant Token, with `username` and `password` headers and `app_key`, `app_secret` in the body.
+2. Create Payment: `amount`, `currency` BDT, `intent` sale, `payerReference`, `merchantInvoiceNumber` (unique per attempt), `callbackURL`. Returns `paymentId` and `bKashURL`.
+3. Redirect the customer to `bKashURL` exactly as returned.
+4. bKash returns the customer to the success, failure or cancelled callback.
+5. On success only: Execute Payment with the `paymentId`. **The callback alone proves nothing.**
+6. Mark the order paid only when Execute says `Completed` (or Query Payment does), and the amount and invoice match the order.
+7. If Execute gets no answer in 30 seconds: never assume failure and never call Execute again. Call Query Payment. `Completed` = paid. `Initiated` = start again with a new Create Payment.
+
+**Sandbox endpoints** (base `https://tokenized.sandbox.bka.sh/v2/tokenized-checkout`): `/auth/grant-token`, `/payment/create`, `/payment/execute`, `/query/payment`, `/refund/payment/transaction`. Requests carry `Authorization: Bearer <id_token>` and `X-App-Key`.
+
+**Rules that shape the code**
+- Token lasts 60 minutes; refresh at minute 50–55; refresh token lasts 30 days. **Grant/Refresh more than twice an hour is an error and blocks refresh for an hour**, so the token must be stored in the database and shared, not fetched per request (Cloudflare Workers do not share memory).
+- App secret and refresh token stay on the server only.
+- A `paymentId` lasts 24 hours and can be executed once, whatever the result.
+- All APIs time out at 30 seconds. Show customers `errorMessageEn`, not the code.
+- Duplicate protection on our side, so a retry cannot charge twice. Code 2029 = duplicate; 2062 / 2068 = already completed (check status, do not charge again).
+- Refunds: up to 60 days, up to 10 partial refunds per transaction, duplicates blocked for 10 minutes. On timeout, call Refund Status before retrying.
+- IPN (optional, later): bKash support registers our listener URL. It confirms a one-time subscription, sends only successful transactions, and every message must have its signature verified.
+
+**Not found in the public docs; ask bKash**
+1. Can a **Personal Retail Account** get Tokenized Checkout credentials, or does it need a merchant account? (Unconfirmed since 2026-11-06, and the deciding question.)
+2. How to get sandbox credentials and official test wallets. (Third-party guides list test wallets with OTP 123456 and PIN 12121; unverified.)
+3. The **live base URL** for the v2 API. (Third-party packages show host `tokenized.pay.bka.sh` for an older version; unverified.)
+4. The exact callback parameters. (Older integrations receive `paymentID` and `status`; to confirm in sandbox.)
+5. Any charge per payment for gateway use on a PRA, and whether the ৳30,000 per day limit applies to gateway payments.
+6. What bKash reviews before go-live (site, Terms, refund policy, demo).
+
+**Needed to implement:** the four credentials for sandbox and again for live (`username`, `password`, `app_key`, `app_secret`), HTTPS on nonsenseland.com, published Terms and refund policy, and sandbox access. Until credentials arrive the flow can be built and tested against a local stand-in for bKash.
+
 ### How the site handles it (so nothing core changes later)
 The checkout uses **interchangeable payment methods**, each switchable on/off in admin:
 1. **bKash automatic (API):** used once credentials are issued. The order is marked paid automatically and refunds are possible from admin.

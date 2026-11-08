@@ -42,6 +42,16 @@ How chapters are found: at **Heading 1/Heading 2** if the book has them; otherwi
 (EPUBs made from Google Docs). A short first line such as “উৎসর্গ” becomes the chapter title.
 Images are imported, empty spacer lines removed, `***` shown as a scene break, Google redirect links unwrapped.
 
+## Backup
+
+GitHub holds only the code. The database, uploads and `.env` live on this computer until the site is deployed.
+
+- `npm run backup` saves everything to `G:\Nonsenseland Backups\<date>` (Docker must be running). Set `BACKUP_DIR` for another location.
+- `npm run restore -- "<backup folder>" --test` checks a backup in a throwaway database without touching the site.
+- `npm run restore -- "<backup folder>" --yes` replaces the current data with the backup.
+
+Backups include `.env`, so keep them private, and copy them off this disk.
+
 ## Access rules (summary)
 
 - Chapter text and book files are **never** served by the public API; the site checks access itself.
