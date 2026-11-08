@@ -57,6 +57,21 @@ export default async function BookPage({ params }: Props) {
               .filter(Boolean)
               .join(' · ')}
           </div>
+          {print?.buyLinks?.length ? (
+            <div style={{ marginTop: 16 }}>
+              <strong>{t.book.buyFrom}</strong>
+              {print.badge ? <span className="badge"> · {print.badge}</span> : null}
+              <div className="buy-links">
+                {print.buyLinks.map((l) => (
+                  <a key={l.url} href={l.url} className="btn ghost" target="_blank" rel="noopener noreferrer">
+                    {l.store}
+                    {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           {book.about ? (
             <RichText data={book.about} className="prose desc" />
           ) : (
@@ -82,21 +97,6 @@ export default async function BookPage({ params }: Props) {
               bookId={book.id}
               sender={process.env.KINDLE_FROM?.match(/<(.+)>/)?.[1] ?? process.env.KINDLE_FROM ?? ''}
             />
-          ) : null}
-
-          {print?.buyLinks?.length ? (
-            <div style={{ marginTop: 28 }}>
-              <strong>{t.book.buyFrom}</strong>
-              {print.badge ? <span className="badge"> · {print.badge}</span> : null}
-              <div className="buy-links">
-                {print.buyLinks.map((l) => (
-                  <a key={l.url} href={l.url} className="btn ghost" target="_blank" rel="noopener noreferrer">
-                    {l.store}
-                    {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
-                  </a>
-                ))}
-              </div>
-            </div>
           ) : null}
 
           <div className="facts">
