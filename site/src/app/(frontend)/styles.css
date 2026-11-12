@@ -1982,6 +1982,17 @@ html {
   border-radius: 0;
   overflow: visible;
 }
+.promo-kind {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  z-index: 1;
+  padding: 1px 9px 2px;
+  border: 1px solid color-mix(in srgb, var(--promo-muted) 55%, transparent);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--promo-muted);
+}
 .promo-art {
   position: relative;
   display: grid;

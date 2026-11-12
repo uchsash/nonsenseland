@@ -1,4 +1,5 @@
-import { getSettings, payloadClient } from '@/lib/data'
+import { getT } from '@/i18n/server'
+import { payloadClient } from '@/lib/data'
 import type { Ad, Book } from '@/payload-types'
 import { bnNumber } from '@/utilities/bn'
 
@@ -19,14 +20,15 @@ export async function BookPromo({ ad, label, compact = false }: { ad: Ad; label:
   if (!book || book._status !== 'published') return null
   const shop = book.print?.enabled ? book.print.buyLinks?.[0] : undefined
   const theme = ad.theme ?? 'night'
-  const { ownerName } = await getSettings()
-  const byline = [book.originalAuthor, book.role === 'translator' ? `অনুবাদ: ${ownerName}` : null]
-    .filter(Boolean)
-    .join(' · ')
+  const t = await getT()
+  const byline = book.originalAuthor ?? ''
+  // অনুবাদ or মৌলিক, small in a corner; the kicker line is kept for selling the book.
+  const kind = book.role === 'translator' ? t.book.filterTranslation : t.book.filterOriginal
 
   return (
     <aside className={`ad book-promo promo-${theme}${compact ? ' promo-compact' : ''}`} aria-label={label}>
       <span className="promo-label">{label}</span>
+      <span className="promo-kind">{kind}</span>
       <a href={`/books/${book.slug}`} className="promo-art" tabIndex={-1} aria-hidden="true">
         <span className="promo-glow" />
         <span className="book-3d">
