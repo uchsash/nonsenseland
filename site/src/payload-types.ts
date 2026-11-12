@@ -718,6 +718,10 @@ export interface Ad {
   name: string;
   active?: boolean | null;
   /**
+   * End-only ads are skipped anywhere else, so their wording can talk about having just finished reading.
+   */
+  placement: 'anywhere' | 'end';
+  /**
    * Where this can appear.
    */
   slots: ('home' | 'article-inline' | 'article-end' | 'book' | 'video' | 'manual')[];
@@ -1539,6 +1543,7 @@ export interface MediaSelect<T extends boolean = true> {
 export interface AdsSelect<T extends boolean = true> {
   name?: T;
   active?: T;
+  placement?: T;
   slots?: T;
   mode?: T;
   image?: T;

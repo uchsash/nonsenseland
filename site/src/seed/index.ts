@@ -331,6 +331,7 @@ if (!(await payload.count({ collection: 'ads' })).totalDocs) {
     collection: 'ads',
     data: {
       name: 'নমুনা: অ্যান্টিম্যাটার প্রচার',
+      placement: 'anywhere',
       slots: ['home', 'article-end'],
       mode: 'house',
       image: await placeholder('অ্যান্টিম্যাটার বইয়ের প্রচার (নমুনা)', '#f15a24', 1200, 300),

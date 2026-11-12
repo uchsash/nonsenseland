@@ -43,7 +43,7 @@ export const Ads: CollectionConfig = {
   labels: { singular: 'Ad / promo', plural: 'Ads & promos' },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'slots', 'mode', 'active', 'endAt'],
+    defaultColumns: ['name', 'placement', 'slots', 'active', 'endAt'],
     group: 'Promotion',
     description: 'House ads for your books now; Google AdSense or other code later. Master switch: Ad settings.',
   },
@@ -51,6 +51,22 @@ export const Ads: CollectionConfig = {
   fields: [
     { name: 'name', type: 'text', required: true, admin: { description: 'For you only, not shown.' } },
     { name: 'active', type: 'checkbox', defaultValue: true, admin: { position: 'sidebar' } },
+    {
+      // A safety lock: an end-of-text ad (its wording says “পরের পড়ার জন্য…”) never shows in the
+      // middle of a text, even if it is placed there by mistake.
+      name: 'placement',
+      type: 'select',
+      required: true,
+      defaultValue: 'anywhere',
+      options: [
+        { label: 'Anywhere (compact size)', value: 'anywhere' },
+        { label: 'Only at the end of an article or book (full size)', value: 'end' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'End-only ads are skipped anywhere else, so their wording can talk about having just finished reading.',
+      },
+    },
     {
       name: 'slots',
       type: 'select',

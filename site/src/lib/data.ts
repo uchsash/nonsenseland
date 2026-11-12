@@ -149,7 +149,8 @@ export async function getReadableChapter(book: Book, order: number, reader: () =
   return res.docs[0] ?? null
 }
 
-export async function getAdsFor(slot: string, adId?: number) {
+/** Ads for a position. Away from the end of a text, end-of-text ads are never offered. */
+export async function getAdsFor(slot: string, adId?: number, endOfText = false) {
   const settings = await getAdSettings()
   if (!settings.enabled) return []
   const now = new Date().toISOString()
@@ -159,6 +160,7 @@ export async function getAdsFor(slot: string, adId?: number) {
       and: [
         { active: { equals: true } },
         adId ? { id: { equals: adId } } : { slots: { contains: slot } },
+        ...(endOfText ? [] : [{ placement: { not_equals: 'end' } }]),
         { or: [{ startAt: { exists: false } }, { startAt: { less_than_equal: now } }] },
         { or: [{ endAt: { exists: false } }, { endAt: { greater_than: now } }] },
       ],
@@ -173,8 +175,8 @@ export async function getAdsFor(slot: string, adId?: number) {
  * The ad to show: a specific one (if it is active and in date), otherwise one of the
  * active ads for the slot, taking turns at random.
  */
-export async function pickAd(slot: string, adId?: number) {
-  const ads = await getAdsFor(slot, adId)
+export async function pickAd(slot: string, adId?: number, endOfText = false) {
+  const ads = await getAdsFor(slot, adId, endOfText)
   return ads.length ? ads[Math.floor(Math.random() * ads.length)] : null
 }
 

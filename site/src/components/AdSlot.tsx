@@ -13,8 +13,11 @@ import { Img } from './Img'
  */
 export async function AdSlot({ slot, adId, full = false }: { slot: string; adId?: number; full?: boolean }) {
   const t = await getT()
-  const ad = await pickAd(slot, adId)
+  const ad = await pickAd(slot, adId, full)
   if (!ad) return null
+
+  // An end-of-text ad never shows anywhere but the end of an article or book.
+  if (ad.placement === 'end' && !full) return null
 
   // Full size only at the end of an article or book, where the reader has stopped;
   // everywhere else (in the middle of a text, between sections) a compact one.
