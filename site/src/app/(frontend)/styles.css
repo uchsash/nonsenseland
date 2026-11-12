@@ -2069,3 +2069,12 @@ html {
     justify-content: center;
   }
 }
+
+/* “বইটি শেষ। পড়ার জন্য ধন্যবাদ!” at the end of a book, before anything else */
+.book-finished {
+  margin: 48px 0 8px;
+  text-align: center;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 1.15em;
+  font-weight: 600;
+}

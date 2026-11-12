@@ -77,6 +77,11 @@ export default async function ChapterPage({ params }: Props) {
           <ChapterText
             content={content.content}
             showAds={(book.online?.access ?? 'free') === 'free'}
+            ending={
+              next ? null : (
+                <p className={`book-finished ${colorClass('dark-orange')}`}>{t.book.finished}</p>
+              )
+            }
           />
         )}
 
@@ -98,11 +103,6 @@ export default async function ChapterPage({ params }: Props) {
             </Link>
           )}
         </nav>
-        {!next ? (
-          <p className="muted" style={{ textAlign: 'center', marginTop: 32 }}>
-            {t.book.finished}
-          </p>
-        ) : null}
       </article>
     </Reader>
   )
@@ -206,19 +206,25 @@ async function Locked({ book, reason, here }: { book: Book; reason: LockReason; 
   )
 }
 
-/** Chapter text; ads placed in the editor are shown only at the end, and never in paid books. */
+/**
+ * Chapter text; ads placed in the editor are shown only at the end, and never in paid books.
+ * On the last chapter, `ending` (“বইটি শেষ…”) comes right after the text, before any ad.
+ */
 function ChapterText({
   content,
   showAds,
+  ending,
 }: {
   content: Parameters<typeof RichText>[0]['data']
   showAds: boolean
+  ending?: React.ReactNode
 }) {
   const [text, ads] = takeAdBlocks(content)
   return (
     <>
       <RichText data={text} />
       <FootnoteList index={indexFootnotes(text)} />
+      {ending}
       {showAds
         ? ads.map((block, i) => {
             const ad = (block.fields as { ad?: number | { id: number } | null }).ad
