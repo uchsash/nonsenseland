@@ -21,11 +21,14 @@ export function BookShelf({
   books,
   layout,
   link,
+  showPrice = false,
 }: {
   title: string
   books: Book[]
   layout: 'slider' | 'grid'
   link?: string
+  /** E-book shelves show ফ্রি or the price on each cover. */
+  showPrice?: boolean
 }) {
   const t = useT()
   const [origin, setOrigin] = useState<Origin | null>(null)
@@ -79,7 +82,7 @@ export function BookShelf({
       </div>
     ) : null
 
-  const cards = shown.map((b) => <BookCard key={b.id} book={b} />)
+  const cards = shown.map((b) => <BookCard key={b.id} book={b} showPrice={showPrice} />)
   const empty = <p className="empty">{t.book.filterEmpty}</p>
 
   if (layout === 'slider') {

@@ -74,7 +74,15 @@ async function HomeSection({ section }: { section: Section }) {
     case 'published': {
       const books = await listBooks(section.blockType)
       if (!books.length) return null
-      return <BookShelf title={section.title} books={books} layout="slider" link="/books" />
+      return (
+        <BookShelf
+          title={section.title}
+          books={books}
+          layout="slider"
+          link="/books"
+          showPrice={section.blockType === 'library'}
+        />
+      )
     }
     case 'alap': {
       const items = await listAlap(6)

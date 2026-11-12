@@ -2109,9 +2109,21 @@ export interface InterfaceText {
   };
   book?: {
     /**
-     * Default: বিনামূল্যে পড়ুন
+     * Default: ই-বুক
      */
     free?: string | null;
+    /**
+     * Default: ফ্রি
+     */
+    priceFree?: string | null;
+    /**
+     * Default: ই-বুক
+     */
+    ebook?: string | null;
+    /**
+     * Default: কিনুন · ৳{n} — keep {n} where the number goes.
+     */
+    buyPrice?: string | null;
     /**
      * Default: আমার প্রকাশিত বই
      */
@@ -2189,9 +2201,21 @@ export interface InterfaceText {
      */
     lockedBuy?: string | null;
     /**
-     * Default: পুরো বইটি পড়তে চাইলে কিনতে পারেন এখান থেকে:
+     * Default: পুরো বইটি পড়তে চাইলে ছাপা বইটি কিনতে পারেন:
      */
     lockedBuyLinks?: string | null;
+    /**
+     * Default: পুরো বইটি পড়তে চাইলে কিনতে পারেন {link}। — keep {n} where the number goes.
+     */
+    lockedBuyEbook?: string | null;
+    /**
+     * Default: এখান থেকে
+     */
+    lockedHere?: string | null;
+    /**
+     * Default: ছাপা বইটিও পাওয়া যাচ্ছে:
+     */
+    lockedPrinted?: string | null;
     /**
      * Default: পুরো বইটি অনলাইনে কেনার ব্যবস্থা শিগগিরই আসছে।
      */
@@ -2993,6 +3017,9 @@ export interface InterfaceTextSelect<T extends boolean = true> {
     | T
     | {
         free?: T;
+        priceFree?: T;
+        ebook?: T;
+        buyPrice?: T;
         published?: T;
         startReading?: T;
         continueReading?: T;
@@ -3013,6 +3040,9 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         lockedLogin?: T;
         lockedBuy?: T;
         lockedBuyLinks?: T;
+        lockedBuyEbook?: T;
+        lockedHere?: T;
+        lockedPrinted?: T;
         lockedSoon?: T;
         lockedOwned?: T;
         notes?: T;

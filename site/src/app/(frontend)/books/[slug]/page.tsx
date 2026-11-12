@@ -17,13 +17,18 @@ import { docMetadata } from '@/lib/seo'
 import type { BookFile } from '@/payload-types'
 import { bnNumber } from '@/utilities/bn'
 import { colorClass } from '@/utilities/palette'
+import { ebookPrice } from '@/utilities/price'
 
 type Props = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const book = await getBook(slug)
-  return docMetadata(book, { path: `/books/${slug}`, description: book?.description, image: book?.cover })
+  return docMetadata(book, {
+    path: `/books/${slug}`,
+    description: book?.description,
+    image: book?.cover,
+  })
 }
 
 export default async function BookPage({ params }: Props) {
@@ -39,6 +44,7 @@ export default async function BookPage({ params }: Props) {
   const canDownload = isFree && epub && book.ebook?.allowDownload
   const canKindle = isFree && epub && book.ebook?.allowKindle && emailConfigured()
   const print = book.print?.enabled ? book.print : null
+  const ebook = ebookPrice(book)
   const titles = Object.fromEntries(chapters.map((c) => [c.order, c.title]))
 
   return (
@@ -58,13 +64,27 @@ export default async function BookPage({ params }: Props) {
               .filter(Boolean)
               .join(' · ')}
           </div>
+          {ebook && !ebook.free ? (
+            <div id="buy" className="ebook-buy">
+              <strong>{t.book.ebook}</strong> ·{' '}
+              {ebook.was ? <s className="muted">৳{bnNumber(ebook.was)}</s> : null} ৳
+              {bnNumber(ebook.price)}
+              <p className="muted">{t.book.lockedSoon}</p>
+            </div>
+          ) : null}
           {print?.buyLinks?.length ? (
             <div style={{ marginTop: 16 }}>
               <strong>{t.book.buyFrom}</strong>
               {print.badge ? <span className="badge"> · {print.badge}</span> : null}
               <div className="buy-links">
                 {print.buyLinks.map((l) => (
-                  <a key={l.url} href={l.url} className="btn ghost" target="_blank" rel="noopener noreferrer">
+                  <a
+                    key={l.url}
+                    href={l.url}
+                    className="btn ghost"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {l.store}
                     {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
                   </a>
@@ -97,7 +117,9 @@ export default async function BookPage({ params }: Props) {
           {canKindle ? (
             <KindleForm
               bookId={book.id}
-              sender={process.env.KINDLE_FROM?.match(/<(.+)>/)?.[1] ?? process.env.KINDLE_FROM ?? ''}
+              sender={
+                process.env.KINDLE_FROM?.match(/<(.+)>/)?.[1] ?? process.env.KINDLE_FROM ?? ''
+              }
             />
           ) : null}
 

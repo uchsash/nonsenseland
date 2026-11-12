@@ -64,17 +64,24 @@ export const Books: CollectionConfig = {
       type: 'richText',
       label: 'Description',
       required: true,
-      admin: { description: 'Shown on the book page. Select text to make it bold, italic, a link or a colour.' },
+      admin: {
+        description:
+          'Shown on the book page. Select text to make it bold, italic, a link or a colour.',
+      },
     },
     {
       name: 'description',
       type: 'textarea',
       label: 'Short summary (for sharing)',
       admin: {
-        description: 'Optional. Shown when the book is shared on Facebook and in search results. Left empty, it is taken from the description.',
+        description:
+          'Optional. Shown when the book is shared on Facebook and in search results. Left empty, it is taken from the description.',
       },
       hooks: {
-        beforeChange: [({ value, siblingData }) => String(value ?? '').trim() || summarize(richTextToPlain(siblingData?.about))],
+        beforeChange: [
+          ({ value, siblingData }) =>
+            String(value ?? '').trim() || summarize(richTextToPlain(siblingData?.about)),
+        ],
       },
     },
     {
@@ -97,7 +104,7 @@ export const Books: CollectionConfig = {
               options: [
                 { label: 'Free for everyone', value: 'free' },
                 { label: 'Members only (phase 2)', value: 'members' },
-                { label: 'Paid (phase 3)', value: 'paid' },
+                { label: 'Sample, then buy (paid e-book or printed book)', value: 'paid' },
               ],
               admin: { condition: (_, s) => Boolean(s?.enabled) },
             },
@@ -131,7 +138,8 @@ export const Books: CollectionConfig = {
                   relationTo: 'book-files',
                   admin: {
                     condition: (_, s) => s?.importFrom === 'word',
-                    description: 'Chapters start at every "Heading 1". Text must be Unicode Bangla, not Bijoy.',
+                    description:
+                      'Chapters start at every "Heading 1". Text must be Unicode Bangla, not Bijoy.',
                   },
                 },
                 {
@@ -155,7 +163,8 @@ export const Books: CollectionConfig = {
         },
         {
           label: 'Chapters',
-          description: 'This book’s chapters in reading order. Click one to edit it; “Order” sets the position.',
+          description:
+            'This book’s chapters in reading order. Click one to edit it; “Order” sets the position.',
           fields: [
             {
               name: 'chapters',
@@ -176,8 +185,18 @@ export const Books: CollectionConfig = {
             {
               type: 'row',
               fields: [
-                { name: 'allowDownload', type: 'checkbox', defaultValue: true, label: 'Allow download' },
-                { name: 'allowKindle', type: 'checkbox', defaultValue: true, label: 'Allow Send to Kindle' },
+                {
+                  name: 'allowDownload',
+                  type: 'checkbox',
+                  defaultValue: true,
+                  label: 'Allow download',
+                },
+                {
+                  name: 'allowKindle',
+                  type: 'checkbox',
+                  defaultValue: true,
+                  label: 'Allow Send to Kindle',
+                },
               ],
             },
             {
@@ -193,7 +212,12 @@ export const Books: CollectionConfig = {
           name: 'print',
           label: 'Print edition',
           fields: [
-            { name: 'enabled', type: 'checkbox', defaultValue: false, label: 'Show in “my published books”' },
+            {
+              name: 'enabled',
+              type: 'checkbox',
+              defaultValue: false,
+              label: 'Show in “my published books”',
+            },
             {
               type: 'row',
               admin: { condition: (_, s) => Boolean(s?.enabled) },
@@ -213,7 +237,12 @@ export const Books: CollectionConfig = {
                 {
                   type: 'row',
                   fields: [
-                    { name: 'store', type: 'text', required: true, admin: { description: 'e.g. রকমারি' } },
+                    {
+                      name: 'store',
+                      type: 'text',
+                      required: true,
+                      admin: { description: 'e.g. রকমারি' },
+                    },
                     { name: 'url', type: 'text', required: true },
                     { name: 'price', type: 'number', admin: { description: 'Optional, in ৳' } },
                   ],
@@ -233,7 +262,8 @@ export const Books: CollectionConfig = {
         {
           name: 'sale',
           label: 'Selling (phase 3)',
-          description: 'Prepared for later. Nothing here is shown on the site yet.',
+          description:
+            'The e-book price shows on the cover and after the free chapters. Online payment comes in phase 3; until then give readers access under Readers → Book access. Leave the price empty for printed books: readers are sent to the buy links instead.',
           fields: [
             {
               type: 'row',
@@ -263,7 +293,13 @@ export const Books: CollectionConfig = {
         },
       ],
     },
-    { name: 'topics', type: 'relationship', relationTo: 'topics', hasMany: true, admin: { position: 'sidebar' } },
+    {
+      name: 'topics',
+      type: 'relationship',
+      relationTo: 'topics',
+      hasMany: true,
+      admin: { position: 'sidebar' },
+    },
     { name: 'featured', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar' } },
     {
       name: 'order',
@@ -277,7 +313,11 @@ export const Books: CollectionConfig = {
     beforeDelete: [
       // Readers' saved places in this book go with it.
       async ({ id, req }) => {
-        await req.payload.delete({ collection: 'reading-progress', where: { book: { equals: id } }, req })
+        await req.payload.delete({
+          collection: 'reading-progress',
+          where: { book: { equals: id } },
+          req,
+        })
       },
     ],
     afterChange: [
@@ -288,7 +328,8 @@ export const Books: CollectionConfig = {
           report = await importBookChapters({ book: doc, req })
         } catch (error) {
           // Shown as an error when saving; the whole save (book + chapters) is rolled back.
-          if (error instanceof ImportError) throw new APIError(`Chapters not imported: ${error.message}`, 400, undefined, true)
+          if (error instanceof ImportError)
+            throw new APIError(`Chapters not imported: ${error.message}`, 400, undefined, true)
           throw error
         }
         // Return the updated book so the admin shows the new report straight after saving.

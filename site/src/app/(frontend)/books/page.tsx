@@ -18,7 +18,7 @@ export default async function BooksPage() {
       <header className="page-head">
         <h1>{t.nav.books}</h1>
       </header>
-      {library.length ? <BookShelf title={t.book.free} books={library} layout="grid" /> : null}
+      {library.length ? <BookShelf title={t.book.free} books={library} layout="grid" showPrice /> : null}
       {published.length ? <BookShelf title={t.book.published} books={published} layout="grid" /> : null}
       {!library.length && !published.length ? <p className="empty">{t.common.empty}</p> : null}
     </div>

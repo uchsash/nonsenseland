@@ -199,7 +199,7 @@ const blocks: Block[] = [
       },
     ],
   },
-  { slug: 'library', labels: { singular: 'Free books row', plural: 'Free books rows' }, fields: [enabled, heading] },
+  { slug: 'library', labels: { singular: 'E-books row', plural: 'E-books rows' }, fields: [enabled, heading] },
   {
     slug: 'published',
     labels: { singular: 'My published books', plural: 'My published books' },

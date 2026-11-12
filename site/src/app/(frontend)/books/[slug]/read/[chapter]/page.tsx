@@ -12,6 +12,7 @@ import { currentUser } from '@/lib/account'
 import { getBook, getChapterList, getReadableChapter, type LockReason } from '@/lib/data'
 import type { Book } from '@/payload-types'
 import { bnNumber } from '@/utilities/bn'
+import { ebookPrice } from '@/utilities/price'
 import { indexFootnotes } from '@/utilities/footnotes'
 import { takeAdBlocks } from '@/utilities/lexical'
 import { colorClass } from '@/utilities/palette'
@@ -144,29 +145,62 @@ async function Locked({ book, reason, here }: { book: Book; reason: LockReason; 
       </div>
     )
   }
+  const sample = countWord(book.online?.sampleChapters ?? 0)
   const links = book.print?.enabled ? (book.print.buyLinks ?? []) : []
+  const linkButtons = (
+    <div className="buy-links">
+      {links.map((l) => (
+        <a key={l.url} href={l.url} className="btn ghost" target="_blank" rel="noopener noreferrer">
+          {l.store}
+          {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
+        </a>
+      ))}
+    </div>
+  )
+  const price = ebookPrice(book)
+
+  // A paid e-book: bought on this site, so a reader who already bought it just logs in.
+  if (price && !price.free) {
+    const [before, after] = t.book.lockedBuyEbook.split('{link}')
+    return (
+      <div className="locked-box">
+        <p>{fill(t.book.lockedBuy, { n: sample })}</p>
+        <p>
+          {before}
+          <Link href={`/books/${book.slug}#buy`}>{t.book.lockedHere}</Link>
+          {after}
+        </p>
+        <div className="buy-links">
+          <Link href={`/books/${book.slug}#buy`} className="btn">
+            {fill(t.book.buyPrice, { n: bnNumber(price.price) })}
+          </Link>
+        </div>
+        {signedIn ? null : (
+          <p className="muted">
+            <Link href={`/login?next=${next}`}>{t.book.lockedOwned}</Link>
+          </p>
+        )}
+        {links.length ? (
+          <>
+            <p className="muted">{t.book.lockedPrinted}</p>
+            {linkButtons}
+          </>
+        ) : null}
+      </div>
+    )
+  }
+
+  // A printed book: the rest is in the printed copy, bought elsewhere; nothing to log in for.
   return (
     <div className="locked-box">
-      <p>{fill(t.book.lockedBuy, { n: countWord(book.online?.sampleChapters ?? 0) })}</p>
+      <p>{fill(t.book.lockedBuy, { n: sample })}</p>
       {links.length ? (
         <>
           <p>{t.book.lockedBuyLinks}</p>
-          <div className="buy-links">
-            {links.map((l) => (
-              <a key={l.url} href={l.url} className="btn" target="_blank" rel="noopener noreferrer">
-                {l.store}
-                {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
-              </a>
-            ))}
-          </div>
+          {linkButtons}
         </>
       ) : (
         <p className="muted">{t.book.lockedSoon}</p>
-      )}
-      {signedIn ? null : (
-        <p className="muted">
-          <Link href={`/login?next=${next}`}>{t.book.lockedOwned}</Link>
-        </p>
       )}
     </div>
   )
