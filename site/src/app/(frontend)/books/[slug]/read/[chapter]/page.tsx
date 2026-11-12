@@ -37,7 +37,10 @@ export default async function ChapterPage({ params }: Props) {
   const book = await getBook(slug)
   if (!book || !Number.isInteger(order)) notFound()
 
-  const [list, content] = await Promise.all([getChapterList(book.id), getReadableChapter(book, order, currentUser)])
+  const [list, content] = await Promise.all([
+    getChapterList(book.id),
+    getReadableChapter(book, order, currentUser),
+  ])
   if (!content) notFound()
 
   const index = list.findIndex((c) => c.order === order)
@@ -59,16 +62,21 @@ export default async function ChapterPage({ params }: Props) {
       <article className="reading-column">
         <header className="reading-head">
           <div className="card-meta">
-            <Link href={`/books/${book.slug}`}>{book.title}</Link> · {t.book.chapter} {bnNumber(index + 1)}/
-            {bnNumber(list.length)}
+            <Link href={`/books/${book.slug}`}>{book.title}</Link> · {t.book.chapter}{' '}
+            {bnNumber(index + 1)}/{bnNumber(list.length)}
           </div>
-          <h1 className={'locked' in content ? undefined : colorClass(content.titleColor)}>{title}</h1>
+          <h1 className={'locked' in content ? undefined : colorClass(content.titleColor)}>
+            {title}
+          </h1>
         </header>
 
         {'locked' in content ? (
           <Locked book={book} reason={locked!} here={href(order)} />
         ) : (
-          <ChapterText content={content.content} showAds={(book.online?.access ?? 'free') === 'free'} />
+          <ChapterText
+            content={content.content}
+            showAds={(book.online?.access ?? 'free') === 'free'}
+          />
         )}
 
         <nav className="chapter-nav">
@@ -99,6 +107,23 @@ export default async function ChapterPage({ params }: Props) {
   )
 }
 
+const WORDS = [
+  '',
+  'একটি',
+  'দুটি',
+  'তিনটি',
+  'চারটি',
+  'পাঁচটি',
+  'ছয়টি',
+  'সাতটি',
+  'আটটি',
+  'নয়টি',
+  'দশটি',
+]
+
+/** “তিনটি” rather than “৩টি” for small counts. */
+const countWord = (n: number) => WORDS[n] ?? `${bnNumber(n)}টি`
+
 /** What a closed chapter shows: log in for members-only books; the buy links for paid ones. */
 async function Locked({ book, reason, here }: { book: Book; reason: LockReason; here: string }) {
   const t = await getT()
@@ -122,16 +147,19 @@ async function Locked({ book, reason, here }: { book: Book; reason: LockReason; 
   const links = book.print?.enabled ? (book.print.buyLinks ?? []) : []
   return (
     <div className="locked-box">
-      <p>{fill(t.book.lockedBuy, { n: bnNumber(book.online?.sampleChapters ?? 0) })}</p>
+      <p>{fill(t.book.lockedBuy, { n: countWord(book.online?.sampleChapters ?? 0) })}</p>
       {links.length ? (
-        <div className="buy-links">
-          {links.map((l) => (
-            <a key={l.url} href={l.url} className="btn" target="_blank" rel="noopener noreferrer">
-              {l.store}
-              {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
-            </a>
-          ))}
-        </div>
+        <>
+          <p>{t.book.lockedBuyLinks}</p>
+          <div className="buy-links">
+            {links.map((l) => (
+              <a key={l.url} href={l.url} className="btn" target="_blank" rel="noopener noreferrer">
+                {l.store}
+                {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
+              </a>
+            ))}
+          </div>
+        </>
       ) : (
         <p className="muted">{t.book.lockedSoon}</p>
       )}
@@ -145,7 +173,13 @@ async function Locked({ book, reason, here }: { book: Book; reason: LockReason; 
 }
 
 /** Chapter text; ads placed in the editor are shown only at the end, and never in paid books. */
-function ChapterText({ content, showAds }: { content: Parameters<typeof RichText>[0]['data']; showAds: boolean }) {
+function ChapterText({
+  content,
+  showAds,
+}: {
+  content: Parameters<typeof RichText>[0]['data']
+  showAds: boolean
+}) {
   const [text, ads] = takeAdBlocks(content)
   return (
     <>
@@ -154,7 +188,13 @@ function ChapterText({ content, showAds }: { content: Parameters<typeof RichText
       {showAds
         ? ads.map((block, i) => {
             const ad = (block.fields as { ad?: number | { id: number } | null }).ad
-            return <AdSlot key={i} slot="article-inline" adId={typeof ad === 'object' && ad ? ad.id : (ad ?? undefined)} />
+            return (
+              <AdSlot
+                key={i}
+                slot="article-inline"
+                adId={typeof ad === 'object' && ad ? ad.id : (ad ?? undefined)}
+              />
+            )
           })
         : null}
     </>

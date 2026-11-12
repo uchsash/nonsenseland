@@ -2185,11 +2185,15 @@ export interface InterfaceText {
      */
     lockedLogin?: string | null;
     /**
-     * Default: প্রথম {n}টি অধ্যায় পড়া গেল। বাকিটা পড়তে বইটি কিনুন। — keep {n} where the number goes.
+     * Default: প্রথম {n} অধ্যায় পড়ার জন্য ধন্যবাদ। — keep {n} where the number goes.
      */
     lockedBuy?: string | null;
     /**
-     * Default: অনলাইনে কেনার ব্যবস্থা শিগগিরই আসছে।
+     * Default: পুরো বইটি পড়তে চাইলে কিনতে পারেন এখান থেকে:
+     */
+    lockedBuyLinks?: string | null;
+    /**
+     * Default: পুরো বইটি অনলাইনে কেনার ব্যবস্থা শিগগিরই আসছে।
      */
     lockedSoon?: string | null;
     /**
@@ -3008,6 +3012,7 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         locked?: T;
         lockedLogin?: T;
         lockedBuy?: T;
+        lockedBuyLinks?: T;
         lockedSoon?: T;
         lockedOwned?: T;
         notes?: T;
