@@ -9,7 +9,7 @@ import { Img } from './Img'
  * line of copy written for the place it appears, and a buy button with the shop's price.
  * Real text and HTML, so it fits any screen: side by side on wide screens, stacked on phones.
  */
-export async function BookPromo({ ad, label }: { ad: Ad; label: string }) {
+export async function BookPromo({ ad, label, compact = false }: { ad: Ad; label: string; compact?: boolean }) {
   const bookId = typeof ad.book === 'object' ? ad.book?.id : ad.book
   if (!bookId) return null
   // The ad list loads books shallowly; the cover image needs one level more.
@@ -25,7 +25,7 @@ export async function BookPromo({ ad, label }: { ad: Ad; label: string }) {
     .join(' · ')
 
   return (
-    <aside className={`ad book-promo promo-${theme}`} aria-label={label}>
+    <aside className={`ad book-promo promo-${theme}${compact ? ' promo-compact' : ''}`} aria-label={label}>
       <span className="promo-label">{label}</span>
       <a href={`/books/${book.slug}`} className="promo-art" tabIndex={-1} aria-hidden="true">
         <span className="promo-glow" />

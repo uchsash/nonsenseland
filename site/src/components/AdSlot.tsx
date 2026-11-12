@@ -16,7 +16,9 @@ export async function AdSlot({ slot, adId }: { slot: string; adId?: number }) {
   const ad = await pickAd(slot, adId)
   if (!ad) return null
 
-  if (ad.mode === 'book') return <BookPromo ad={ad} label={t.ad.label} />
+  // Inside a text (e.g. after a book's last chapter) the reader has stopped, so the full ad
+  // fits; between sections or after an article a compact one keeps the page moving.
+  if (ad.mode === 'book') return <BookPromo ad={ad} label={t.ad.label} compact={slot !== 'article-inline'} />
 
   if (ad.mode === 'house' && typeof ad.image === 'object' && ad.image) {
     const book = ad.book as Book | null
