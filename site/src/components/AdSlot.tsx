@@ -4,6 +4,7 @@ import { getT } from '@/i18n/server'
 import { getAdSettings, pickAd } from '@/lib/data'
 import type { Book } from '@/payload-types'
 
+import { BookPromo } from './BookPromo'
 import { Img } from './Img'
 
 /**
@@ -14,6 +15,8 @@ export async function AdSlot({ slot, adId }: { slot: string; adId?: number }) {
   const t = await getT()
   const ad = await pickAd(slot, adId)
   if (!ad) return null
+
+  if (ad.mode === 'book') return <BookPromo ad={ad} label={t.ad.label} />
 
   if (ad.mode === 'house' && typeof ad.image === 'object' && ad.image) {
     const book = ad.book as Book | null

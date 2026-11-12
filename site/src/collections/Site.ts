@@ -64,6 +64,7 @@ export const Ads: CollectionConfig = {
       required: true,
       defaultValue: 'house',
       options: [
+        { label: 'Book promo (designed from the book)', value: 'book' },
         { label: 'House ad (my banner)', value: 'house' },
         { label: 'Google AdSense', value: 'adsense' },
         { label: 'Custom code', value: 'custom' },
@@ -84,9 +85,35 @@ export const Ads: CollectionConfig = {
       type: 'relationship',
       relationTo: 'books',
       admin: {
-        condition: (d) => d?.mode === 'house',
-        description: 'Or link to one of your books instead of a URL.',
+        condition: (d) => d?.mode === 'house' || d?.mode === 'book',
+        description: 'Book promo: the book to advertise (cover, buy link and price come from it). House ad: link here instead of a URL.',
       },
+    },
+    {
+      name: 'kicker',
+      type: 'text',
+      label: 'Small line above the headline',
+      admin: { condition: (d) => d?.mode === 'book', placeholder: 'আরও পড়তে চান?' },
+    },
+    {
+      name: 'headline',
+      type: 'text',
+      admin: {
+        condition: (d) => d?.mode === 'book',
+        description: 'Written for where the ad appears. Empty: the book title.',
+      },
+    },
+    { name: 'text', type: 'textarea', admin: { condition: (d) => d?.mode === 'book', rows: 3 } },
+    {
+      name: 'theme',
+      type: 'select',
+      defaultValue: 'night',
+      options: [
+        { label: 'Night (dark, gold)', value: 'night' },
+        { label: 'Paper (cream, orange)', value: 'paper' },
+        { label: 'Sunset (orange)', value: 'sunset' },
+      ],
+      admin: { condition: (d) => d?.mode === 'book', description: 'Pick the one that suits the cover.' },
     },
     {
       name: 'adsenseSlot',

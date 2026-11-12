@@ -721,16 +721,26 @@ export interface Ad {
    * Where this can appear.
    */
   slots: ('home' | 'article-inline' | 'article-end' | 'book' | 'video')[];
-  mode: 'house' | 'adsense' | 'custom';
+  mode: 'book' | 'house' | 'adsense' | 'custom';
   /**
    * Wide banner, e.g. 1200×300.
    */
   image?: (number | null) | Media;
   link?: string | null;
   /**
-   * Or link to one of your books instead of a URL.
+   * Book promo: the book to advertise (cover, buy link and price come from it). House ad: link here instead of a URL.
    */
   book?: (number | null) | Book;
+  kicker?: string | null;
+  /**
+   * Written for where the ad appears. Empty: the book title.
+   */
+  headline?: string | null;
+  text?: string | null;
+  /**
+   * Pick the one that suits the cover.
+   */
+  theme?: ('night' | 'paper' | 'sunset') | null;
   adsenseSlot?: string | null;
   code?: string | null;
   startAt?: string | null;
@@ -1534,6 +1544,10 @@ export interface AdsSelect<T extends boolean = true> {
   image?: T;
   link?: T;
   book?: T;
+  kicker?: T;
+  headline?: T;
+  text?: T;
+  theme?: T;
   adsenseSlot?: T;
   code?: T;
   startAt?: T;
