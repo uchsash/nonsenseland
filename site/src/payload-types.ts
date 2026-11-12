@@ -861,6 +861,8 @@ export interface Coupon {
   createdAt: string;
 }
 /**
+ * A reader listed here can read every chapter of that paid book.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "entitlements".
  */
@@ -2179,6 +2181,22 @@ export interface InterfaceText {
      */
     locked?: string | null;
     /**
+     * Default: বাকি অধ্যায়গুলো পড়তে লগইন করুন। অ্যাকাউন্ট খোলা বিনামূল্যে।
+     */
+    lockedLogin?: string | null;
+    /**
+     * Default: প্রথম {n}টি অধ্যায় পড়া গেল। বাকিটা পড়তে বইটি কিনুন। — keep {n} where the number goes.
+     */
+    lockedBuy?: string | null;
+    /**
+     * Default: অনলাইনে কেনার ব্যবস্থা শিগগিরই আসছে।
+     */
+    lockedSoon?: string | null;
+    /**
+     * Default: আগে কিনে থাকলে লগইন করুন।
+     */
+    lockedOwned?: string | null;
+    /**
      * Default: টীকা
      */
     notes?: string | null;
@@ -2988,6 +3006,10 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         finished?: T;
         backToBook?: T;
         locked?: T;
+        lockedLogin?: T;
+        lockedBuy?: T;
+        lockedSoon?: T;
+        lockedOwned?: T;
         notes?: T;
         filterOriginal?: T;
         filterTranslation?: T;

@@ -7,7 +7,10 @@ import { Reader } from '@/components/Reader'
 import { FootnoteList } from '@/components/FootnoteList'
 import { RichText } from '@/components/RichText'
 import { getT } from '@/i18n/server'
-import { getBook, getChapterList, getReadableChapter } from '@/lib/data'
+import { fill } from '@/i18n/bn'
+import { currentUser } from '@/lib/account'
+import { getBook, getChapterList, getReadableChapter, type LockReason } from '@/lib/data'
+import type { Book } from '@/payload-types'
 import { bnNumber } from '@/utilities/bn'
 import { indexFootnotes } from '@/utilities/footnotes'
 import { takeAdBlocks } from '@/utilities/lexical'
@@ -34,7 +37,7 @@ export default async function ChapterPage({ params }: Props) {
   const book = await getBook(slug)
   if (!book || !Number.isInteger(order)) notFound()
 
-  const [list, content] = await Promise.all([getChapterList(book.id), getReadableChapter(book, order)])
+  const [list, content] = await Promise.all([getChapterList(book.id), getReadableChapter(book, order, currentUser)])
   if (!content) notFound()
 
   const index = list.findIndex((c) => c.order === order)
@@ -43,6 +46,7 @@ export default async function ChapterPage({ params }: Props) {
   const href = (o: number) => `/books/${book.slug}/read/${o}`
   const toc = list.map((c) => ({ title: c.title, href: href(c.order), current: c.order === order }))
   const title = list[index]?.title ?? ''
+  const locked = 'locked' in content ? content.locked : null
 
   return (
     <Reader
@@ -58,11 +62,11 @@ export default async function ChapterPage({ params }: Props) {
             <Link href={`/books/${book.slug}`}>{book.title}</Link> · {t.book.chapter} {bnNumber(index + 1)}/
             {bnNumber(list.length)}
           </div>
-          <h1 className={content === 'locked' ? undefined : colorClass(content.titleColor)}>{title}</h1>
+          <h1 className={'locked' in content ? undefined : colorClass(content.titleColor)}>{title}</h1>
         </header>
 
-        {content === 'locked' ? (
-          <p className="empty">{t.book.locked}</p>
+        {'locked' in content ? (
+          <Locked book={book} reason={locked!} here={href(order)} />
         ) : (
           <ChapterText content={content.content} showAds={(book.online?.access ?? 'free') === 'free'} />
         )}
@@ -92,6 +96,51 @@ export default async function ChapterPage({ params }: Props) {
         ) : null}
       </article>
     </Reader>
+  )
+}
+
+/** What a closed chapter shows: log in for members-only books; the buy links for paid ones. */
+async function Locked({ book, reason, here }: { book: Book; reason: LockReason; here: string }) {
+  const t = await getT()
+  const next = encodeURIComponent(here)
+  const signedIn = Boolean(await currentUser())
+  if (reason === 'login') {
+    return (
+      <div className="locked-box">
+        <p>{t.book.lockedLogin}</p>
+        <div className="book-actions">
+          <Link href={`/login?next=${next}`} className="btn">
+            {t.account.login}
+          </Link>
+          <Link href={`/signup?next=${next}`} className="btn ghost">
+            {t.account.createAccount}
+          </Link>
+        </div>
+      </div>
+    )
+  }
+  const links = book.print?.enabled ? (book.print.buyLinks ?? []) : []
+  return (
+    <div className="locked-box">
+      <p>{fill(t.book.lockedBuy, { n: bnNumber(book.online?.sampleChapters ?? 0) })}</p>
+      {links.length ? (
+        <div className="buy-links">
+          {links.map((l) => (
+            <a key={l.url} href={l.url} className="btn" target="_blank" rel="noopener noreferrer">
+              {l.store}
+              {l.price ? ` · ৳${bnNumber(l.price)}` : ''}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p className="muted">{t.book.lockedSoon}</p>
+      )}
+      {signedIn ? null : (
+        <p className="muted">
+          <Link href={`/login?next=${next}`}>{t.book.lockedOwned}</Link>
+        </p>
+      )}
+    </div>
   )
 }
 

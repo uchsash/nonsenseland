@@ -226,9 +226,15 @@ export const Coupons: CollectionConfig = {
 }
 
 /** Which user owns which book (free / bought / gift). Used from phase 2. */
+/** Who may read a paid book in full. Added by hand for now (e.g. after a bKash TrxID is checked). */
 export const Entitlements: CollectionConfig = {
   slug: 'entitlements',
-  admin: { group: 'Shop', hidden: true },
+  labels: { singular: 'Book access', plural: 'Book access' },
+  admin: {
+    group: 'Readers',
+    defaultColumns: ['user', 'book', 'source', 'createdAt'],
+    description: 'A reader listed here can read every chapter of that paid book.',
+  },
   access: { read: staffOnly, create: staffOnly, update: staffOnly, delete: staffOnly },
   fields: [
     { name: 'user', type: 'relationship', relationTo: 'users', required: true, index: true },

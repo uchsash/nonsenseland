@@ -112,11 +112,33 @@ export const getChapterList = cache(async (bookId: number) => {
  * A chapter's text, or null if the visitor may not read it.
  * Phase 1: free books are fully open; members/paid books open only their sample chapters.
  */
-export async function getReadableChapter(book: Book, order: number) {
+type Reader = { id: number; role?: string | null } | null
+
+/** Why a chapter is closed: “login” for members-only books, “buy” for paid ones. */
+export type LockReason = 'login' | 'buy'
+
+/**
+ * Whether this reader may open chapters past the free sample: staff always; members-only
+ * books for any signed-in reader; paid books once the reader has access (bought or given).
+ */
+async function mayReadAll(book: Book, reader: Reader): Promise<boolean> {
+  if (!reader) return false
+  if (reader.role === 'admin' || reader.role === 'editor') return true
+  if (book.online?.access === 'members') return true
+  const owned = await (await payloadClient()).count({
+    collection: 'entitlements',
+    where: { and: [{ user: { equals: reader.id } }, { book: { equals: book.id } }] },
+  })
+  return owned.totalDocs > 0
+}
+
+export async function getReadableChapter(book: Book, order: number, reader: () => Promise<Reader> = async () => null) {
   if (!book.online?.enabled) return null
   const access = book.online.access ?? 'free'
   const sample = book.online.sampleChapters ?? 0
-  if (access !== 'free' && order > sample) return 'locked' as const
+  if (access !== 'free' && order > sample && !(await mayReadAll(book, await reader()))) {
+    return { locked: (access === 'members' ? 'login' : 'buy') as LockReason }
+  }
   const res = await (await payloadClient()).find({
     collection: 'chapters',
     where: { and: [{ book: { equals: book.id } }, { order: { equals: order } }] },
