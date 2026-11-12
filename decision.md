@@ -38,6 +38,16 @@ Security decisions: staff accounts can never sign in through Google. A Google si
 3. Deployment to Cloudflare. Needs from the owner: domain, Cloudflare account, Neon (database) account, Resend (email) account. Then: R2 storage, Turnstile keys, email DNS records (SPF/DKIM), a cron trigger for scheduled publishing, backups, uptime alert.
 4. Privacy Policy and Terms pages (draft to be written, owner approves).
 
+**Database and live setup (decided 2026-11-12):**
+1. **Neon Postgres, Free plan** (Singapore, Postgres 17), connected through Cloudflare **Hyperdrive**. Postgres chosen over Cloudflare D1/SQLite for the long run: concurrent writes (sales, likes), richer features, and a standard export to move anywhere. The connection details are in `site/.env.production.local` (never committed).
+2. **Cloudflare caches every public page**, refreshed when something is published, so visitors rarely wake the database. After 5 idle minutes Neon sleeps; the next database request waits about half a second.
+3. **Scheduled tasks run hourly**, not every minute (every minute would keep Neon awake all month and use up the free 100 compute-hours). Scheduled posts go live within the hour; **newsletters start sending as soon as you press send**, and the hourly run only finishes anything left over.
+4. **Watch Neon → Usage weekly in the first month.** Above about 80 compute-hours a month, upgrade to the Launch plan (pay as you go, no minimum; about $5–19 a month at expected traffic).
+5. **Our own daily database backup to R2**, in addition to Neon's built-in recovery.
+6. To check on the test site: whether Hyperdrive's open connections stop Neon from sleeping.
+
+**Email:** Resend, domain nonsenseland.com (Tokyo region), records added through Cloudflare. Add DMARC (`_dmarc` TXT `v=DMARC1; p=none;`) for better delivery.
+
 **Hosting stays Cloudflare Workers at $5/month (decided 2026-11-06).** The `sharp` image library used locally does not run on Workers, so at deployment: (1) automatic title-card thumbnails are drawn in the admin's browser when a video is saved, then uploaded; (2) image sizes come from Cloudflare Image Resizing (free allowance of 5,000 unique images/month); (3) YouTube thumbnails are fetched by the server as now. No extra hosting cost. Free servers were rejected: Oracle Always Free reclaims idle machines, Render free sleeps (~50 s first load), Vercel Hobby forbids commercial use.
 
 **Article headers from the template (2026-11-07).** Articles (ফিচার and other লেখা) get their header made on save: the uploaded photo in a rounded white frame with an orange frame behind, the category, the three text lines and the icon (without a photo: the video-style card with the caricature). A finished header uploaded by hand always wins. Replaced automatic images are removed only when neither the published nor the latest draft version uses them.
