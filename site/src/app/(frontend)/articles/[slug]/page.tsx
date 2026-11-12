@@ -86,7 +86,7 @@ export default async function ArticlePage({ params }: Props) {
               </div>
             </div>
           ) : null}
-          {manualAds ? null : <AdSlot slot="article-end" />}
+          {manualAds ? null : <AdSlot slot="article-end" full />}
         </div>
       </article>
       {more.docs.length ? (

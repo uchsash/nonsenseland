@@ -232,6 +232,7 @@ function ChapterText({
               <AdSlot
                 key={i}
                 slot="article-inline"
+                full
                 adId={typeof ad === 'object' && ad ? ad.id : (ad ?? undefined)}
               />
             )

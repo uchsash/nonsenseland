@@ -11,14 +11,14 @@ import { Img } from './Img'
  * One ad position. Shows nothing when ads are switched off or no ad is active,
  * so the page simply closes up.
  */
-export async function AdSlot({ slot, adId }: { slot: string; adId?: number }) {
+export async function AdSlot({ slot, adId, full = false }: { slot: string; adId?: number; full?: boolean }) {
   const t = await getT()
   const ad = await pickAd(slot, adId)
   if (!ad) return null
 
-  // Inside a text (e.g. after a book's last chapter) the reader has stopped, so the full ad
-  // fits; between sections or after an article a compact one keeps the page moving.
-  if (ad.mode === 'book') return <BookPromo ad={ad} label={t.ad.label} compact={slot !== 'article-inline'} />
+  // Full size only at the end of an article or book, where the reader has stopped;
+  // everywhere else (in the middle of a text, between sections) a compact one.
+  if (ad.mode === 'book') return <BookPromo ad={ad} label={t.ad.label} compact={!full} />
 
   if (ad.mode === 'house' && typeof ad.image === 'object' && ad.image) {
     const book = ad.book as Book | null

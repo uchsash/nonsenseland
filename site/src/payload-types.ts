@@ -720,7 +720,7 @@ export interface Ad {
   /**
    * Where this can appear.
    */
-  slots: ('home' | 'article-inline' | 'article-end' | 'book' | 'video')[];
+  slots: ('home' | 'article-inline' | 'article-end' | 'book' | 'video' | 'manual')[];
   mode: 'book' | 'house' | 'adsense' | 'custom';
   /**
    * Wide banner, e.g. 1200×300.

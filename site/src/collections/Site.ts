@@ -35,6 +35,7 @@ export const AD_SLOTS = [
   { label: 'Article — after the text', value: 'article-end' },
   { label: 'Book page', value: 'book' },
   { label: 'Video page', value: 'video' },
+  { label: 'Only where I place it in a text (e.g. the end of a book)', value: 'manual' },
 ] as const
 
 export const Ads: CollectionConfig = {
