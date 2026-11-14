@@ -2,7 +2,7 @@ import { createHash } from 'crypto'
 import path from 'path'
 
 import { convertHTMLToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
-import { JSDOM } from 'jsdom'
+import { JSDOM } from './dom'
 import JSZip from 'jszip'
 import mammoth from 'mammoth'
 import type { PayloadRequest } from 'payload'

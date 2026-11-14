@@ -3,6 +3,7 @@ import path from 'path'
 
 import type { PayloadRequest } from 'payload'
 
+import { onWorkers } from './cloudflare'
 import { renderTitleCard } from './title-card'
 import { idOf } from './video-thumbnail'
 
@@ -74,6 +75,8 @@ export async function fillArticleHeader(
     ])
   const needsNew = !current || photoAdded || (previousSource === 'template' && key(data) !== key(original))
   if (!needsNew || !data.title) return
+  // TODO(cloudflare): see video-thumbnail.ts; header images from the template need sharp.
+  if (onWorkers) return
 
   const categoryId = idOf(data.category)
   const category = categoryId

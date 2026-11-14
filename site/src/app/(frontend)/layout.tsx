@@ -11,6 +11,7 @@ import { UiTextProvider } from '@/i18n/client'
 import { getT } from '@/i18n/server'
 import { getSettings } from '@/lib/data'
 import type { Media } from '@/payload-types'
+import { imageSize } from '@/utilities/image-url'
 
 import './styles.css'
 
@@ -35,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: s.siteName,
       locale: 'bn_BD',
       type: 'website',
-      images: share?.sizes?.og?.url ? [share.sizes.og.url] : undefined,
+      images: share ? [imageSize(share, 'og')?.url ?? share.url ?? ''].filter(Boolean) : undefined,
     },
     icons: icon?.url ? { icon: icon.url } : undefined,
   }

@@ -1,4 +1,5 @@
 import type { Media } from '@/payload-types'
+import { imageSize } from '@/utilities/image-url'
 
 type Size = 'thumb' | 'card' | 'cover' | 'og' | 'square'
 
@@ -22,8 +23,8 @@ export function Img({
 }) {
   if (!media || typeof media === 'number') return <div className={`img-empty ${className ?? ''}`} />
   const variants = use
-    .map((name) => media.sizes?.[name])
-    .filter((s): s is NonNullable<typeof s> => Boolean(s?.url && s.width))
+    .map((name) => imageSize(media, name))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s))
   const srcSet = variants.map((v) => `${v.url} ${v.width}w`).join(', ')
   return (
     <img

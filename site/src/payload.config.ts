@@ -1,7 +1,7 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { BlocksFeature, lexicalEditor, TextStateFeature } from '@payloadcms/richtext-lexical'
-import { s3Storage } from '@payloadcms/storage-s3'
+import { r2Storage } from '@payloadcms/storage-r2'
 import path from 'path'
 import { buildConfig, type CollectionConfig } from 'payload'
 import sharp from 'sharp'
@@ -27,6 +27,7 @@ import {
 import { Authors, Categories, Topics } from './collections/Taxonomy'
 import { Users } from './collections/Users'
 import { Videos } from './collections/Videos'
+import { workerEnv } from './lib/cloudflare'
 import { AdBlock } from './blocks/AdBlock'
 import { LinesBlock } from './blocks/Lines'
 import { Bookmarks, Likes, Newsletters } from './collections/Readers'
@@ -50,21 +51,13 @@ const withRevalidation = (c: CollectionConfig): CollectionConfig => ({
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// Files go to Cloudflare R2 in production; local disk in development.
-const r2 = process.env.R2_BUCKET
+// On Cloudflare: the database through Hyperdrive, files in R2. In development: local
+// Postgres and the local upload folders.
+const cf = await workerEnv()
+const r2 = cf
   ? [
-      s3Storage({
-        collections: { media: true, 'book-files': true },
-        bucket: process.env.R2_BUCKET,
-        config: {
-          endpoint: process.env.R2_ENDPOINT,
-          region: 'auto',
-          credentials: {
-            accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
-            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
-          },
-        },
-      }),
+      r2Storage({ collections: { media: true }, bucket: cf.R2 as never }),
+      r2Storage({ collections: { 'book-files': true }, bucket: cf.R2_FILES as never }),
     ]
   : []
 
@@ -132,11 +125,19 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   db: postgresAdapter({
-    pool: { connectionString: process.env.DATABASE_URL || '' },
+    pool: cf
+      ? {
+          connectionString: cf.HYPERDRIVE.connectionString,
+          // A Worker cannot reuse a connection opened during another request, so each one is
+          // closed after use. Cheap: Hyperdrive keeps the real connections to Neon open.
+          maxUses: 1,
+        }
+      : { connectionString: process.env.DATABASE_URL || '' },
     // Schema changes go through migrations in production (npm run payload migrate).
     push: process.env.NODE_ENV !== 'production',
   }),
-  sharp,
+  // Not on Workers: there, image sizes come from Cloudflare Images (see /img).
+  sharp: cf ? undefined : sharp,
   plugins: [
     seoPlugin({
       collections: ['articles', 'videos', 'books', 'pages'],

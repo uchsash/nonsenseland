@@ -53,3 +53,7 @@ node_modules/
 
 # Licensed fonts: never in the public repository (see decision.md)
 /public/fonts/
+
+# Cloudflare build output
+/.open-next/
+/.wrangler/

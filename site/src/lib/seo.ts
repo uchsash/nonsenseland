@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import type { Media } from '@/payload-types'
+import { imageSize } from '@/utilities/image-url'
 
 type WithMeta = {
   title?: string | null
@@ -14,7 +15,7 @@ export function docMetadata(
 ): Metadata {
   if (!doc) return {}
   const img = (typeof doc.meta?.image === 'object' && doc.meta.image) || (typeof image === 'object' && image) || null
-  const ogUrl = img ? (img.sizes?.og?.url ?? img.url) : undefined
+  const ogUrl = img ? (imageSize(img, 'og')?.url ?? img.url) : undefined
   const desc = doc.meta?.description || description || undefined
   return {
     title: doc.meta?.title ? { absolute: doc.meta.title } : (doc.title ?? undefined),

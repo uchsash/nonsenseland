@@ -1,6 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
 import { detectPlatform, youtubeId } from '../utilities/video'
+import { onWorkers } from './cloudflare'
 import { renderTitleCard } from './title-card'
 
 export type ThumbnailSource = 'own' | 'youtube' | 'card'
@@ -61,6 +62,9 @@ export async function fillVideoThumbnail(
     file = await youtubeThumbnail(data.url)
     if (file) source = 'youtube'
   }
+  // TODO(cloudflare): title cards need sharp, which Workers lack; they will be drawn in the
+  // admin's browser. Until then a video without a YouTube thumbnail keeps no thumbnail.
+  if (!file && onWorkers) return
   if (!file) {
     const categoryId = idOf(data.category)
     const category = categoryId
