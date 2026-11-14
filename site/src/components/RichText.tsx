@@ -18,7 +18,7 @@ type Paragraph = {
   format?: string | number
   indent?: number
   /** Paragraph settings from the editor's ¶ menu. */
-  $?: { space?: 'none' | 'more'; noIndent?: boolean }
+  $?: { space?: 'none' | 'more'; noIndent?: boolean; signature?: boolean }
 }
 
 type InternalDoc = { relationTo?: string; value?: number | { slug?: string | null } | null } | null | undefined
@@ -65,6 +65,7 @@ const makeConverters =
         align && `al-${align}`,
         p.$?.space && `sp-${p.$.space}`,
         (p.$?.noIndent || (align && align !== 'justify')) && 'no-indent',
+        p.$?.signature && 'signature',
       ].filter(Boolean)
       return (
         <p

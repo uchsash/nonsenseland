@@ -8,7 +8,7 @@ Decisions and the roadmap are in [`../decision.md`](../decision.md).
 Needs Node 24.22+ (or 26 LTS) and Docker.
 
 ```bash
-docker compose up -d        # local PostgreSQL on port 5433
+docker compose up -d        # local PostgreSQL on port 15433
 cp .env.example .env        # then fill PAYLOAD_SECRET and DEV_ADMIN_PASSWORD
 npm install
 npm run seed                # categories, the published books, sample (নমুনা) content, test admin

@@ -25,6 +25,9 @@ const spaceState = createState('space', {
 const noIndentState = createState('noIndent', {
   parse: (value) => (value === true ? true : undefined),
 })
+const signatureState = createState('signature', {
+  parse: (value) => (value === true ? true : undefined),
+})
 
 /** The paragraphs touched by the selection. */
 const selectedParagraphs = (selection: BaseSelection | null): ElementNode[] => {
@@ -47,6 +50,13 @@ const toggleNoIndent = (editor: LexicalEditor) =>
     paragraphs.forEach((p) => $setState(p, noIndentState, allOn ? undefined : true))
   })
 
+const toggleSignature = (editor: LexicalEditor) =>
+  editor.update(() => {
+    const paragraphs = selectedParagraphs($getSelection())
+    const allOn = paragraphs.length > 0 && paragraphs.every((p) => $getState(p, signatureState))
+    paragraphs.forEach((p) => $setState(p, signatureState, allOn ? undefined : true))
+  })
+
 const spaceIs = (value: Space | undefined) => ({ selection }: { selection: BaseSelection }) => {
   const paragraphs = selectedParagraphs(selection)
   return paragraphs.length > 0 && paragraphs.every((p) => $getState(p, spaceState) === value)
@@ -67,6 +77,9 @@ function ParagraphStylePlugin() {
             const space = $getState(node, spaceState)
             dom.style.marginTop = space === 'none' ? '-0.6em' : space === 'more' ? '1.6em' : ''
             dom.toggleAttribute('data-nl-noindent', Boolean($getState(node, noIndentState)))
+            const signature = Boolean($getState(node, signatureState))
+            dom.style.fontFamily = signature ? "'Li Mainak Signature', serif" : ''
+            dom.style.fontSize = signature ? '1.5em' : ''
           }
         })
       }),
@@ -118,6 +131,16 @@ const groups = [
         },
         onSelect: ({ editor }: { editor: LexicalEditor }) => toggleNoIndent(editor),
         order: 4,
+      },
+      {
+        key: 'signature',
+        label: 'Signature (মৈনাক সিগনেচার)',
+        isActive: ({ selection }: { selection: BaseSelection }) => {
+          const paragraphs = selectedParagraphs(selection)
+          return paragraphs.length > 0 && paragraphs.every((p) => $getState(p, signatureState))
+        },
+        onSelect: ({ editor }: { editor: LexicalEditor }) => toggleSignature(editor),
+        order: 5,
       },
     ],
   },

@@ -15,7 +15,7 @@ import { parseStored, setStored, useStored } from './useStored'
 type Theme = 'auto' | 'light' | 'sepia' | 'dark'
 type Settings = {
   theme: Theme
-  font: 'serif' | 'sans'
+  font: 'kalpurush' | 'subha'
   size: number
   spacing: 'tight' | 'normal' | 'loose'
   width: 'narrow' | 'normal' | 'wide'
@@ -25,7 +25,7 @@ type Settings = {
 
 const DEFAULTS: Settings = {
   theme: 'auto',
-  font: 'serif',
+  font: 'kalpurush',
   size: 19,
   spacing: 'normal',
   width: 'normal',
@@ -90,7 +90,12 @@ export function Reader({
   const t = useT()
   const router = useRouter()
   const raw = useStored(STORE)
-  const settings = useMemo<Settings>(() => ({ ...DEFAULTS, ...parseStored<Partial<Settings>>(raw, {}) }), [raw])
+  const settings = useMemo<Settings>(() => {
+    const s = { ...DEFAULTS, ...parseStored<Partial<Settings>>(raw, {}) }
+    // Older saved choices (serif / sans) fall back to the default font.
+    if (s.font !== 'kalpurush' && s.font !== 'subha') s.font = DEFAULTS.font
+    return s
+  }, [raw])
   const [panel, setPanel] = useState<'settings' | 'toc' | null>(null)
   const [progress, setProgress] = useState(0)
   const body = useRef<HTMLDivElement>(null)
@@ -212,7 +217,7 @@ export function Reader({
   }, [nextHref, prevHref, router])
 
   const style = {
-    '--r-font': settings.font === 'serif' ? 'var(--serif)' : 'var(--ui)',
+    '--r-font': settings.font === 'subha' ? 'var(--read-subha)' : 'var(--read-kalpurush)',
     '--r-size': `${settings.size}px`,
     '--r-line': LINE[settings.spacing],
     '--r-width': WIDTH[settings.width],
@@ -289,8 +294,8 @@ export function Reader({
                   value={settings.font}
                   onChange={(font) => update({ font })}
                   options={[
-                    { value: 'serif', label: t.reader.fonts.serif },
-                    { value: 'sans', label: t.reader.fonts.sans },
+                    { value: 'kalpurush', label: t.reader.fonts.kalpurush, className: 'font-kalpurush' },
+                    { value: 'subha', label: t.reader.fonts.subha, className: 'font-subha' },
                   ]}
                 />
               </div>

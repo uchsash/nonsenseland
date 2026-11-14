@@ -2351,13 +2351,13 @@ export interface InterfaceText {
     font?: string | null;
     fonts?: {
       /**
-       * Default: সেরিফ
+       * Default: কালপুরুষ
        */
-      serif?: string | null;
+      kalpurush?: string | null;
       /**
-       * Default: সাধারণ
+       * Default: শুভা
        */
-      sans?: string | null;
+      subha?: string | null;
     };
     /**
      * Default: অক্ষরের আকার
@@ -3104,8 +3104,8 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         fonts?:
           | T
           | {
-              serif?: T;
-              sans?: T;
+              kalpurush?: T;
+              subha?: T;
             };
         size?: T;
         spacing?: T;

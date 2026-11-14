@@ -431,3 +431,10 @@ Editable in admin like every other page. Planned content:
 - Print-book prices are set by Rokomari, so "offers" on print books are badges/banners only. Real discounts apply only to ebooks sold on the site.
 - Paid books are never downloadable or sent to Kindle.
 - Web addresses use English words (e.g. `/features/antimatter-review`) because Bangla addresses become unreadable when shared.
+
+## Fonts (2026-11-14)
+
+- Reading: Kalpurush (default) and Li Subha Letterpress, chosen by the reader in reading settings. Signatures: Li Mainak Signature, from the editor's ¶ menu → Signature.
+- The font files sit in `site/public/fonts/` and are **not in git** (the repository is public). Originals: `Fonts for Website/` (also ignored).
+- Licence: the Lipighor licences bought (desktop) do **not** allow web use: webfont use needs a separate Lipighor webfont licence (admin@lipighor.com). Kalpurush is free for personal use; commercial use needs the designer's permission. Settle both before launch, or switch to free fonts.
+- Local Postgres moved to port 15433: Windows reserved 5361–5560 after a restart, which blocked 5433.

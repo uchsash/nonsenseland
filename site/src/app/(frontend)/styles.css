@@ -1,3 +1,28 @@
+/* ---------- Fonts ----------
+   Reading: Kalpurush and Li Subha Letterpress. Signatures: Li Mainak Signature.
+   The files live in public/fonts and are kept out of git (licensed fonts). */
+@font-face {
+  font-family: 'Kalpurush';
+  src: url('/fonts/kalpurush.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Li Subha Letterpress';
+  src: url('/fonts/li-subha-letterpress.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Li Subha Letterpress';
+  src: url('/fonts/li-subha-letterpress-italic.ttf') format('truetype');
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Li Mainak Signature';
+  src: url('/fonts/li-mainak-signature.ttf') format('truetype');
+  font-display: swap;
+}
+
 /* ---------- Tokens ---------- */
 :root {
   --bg: #ffffff;
@@ -12,7 +37,10 @@
   --gutter: 16px;
   --max: 1120px;
   --ui: var(--font-ui), system-ui, sans-serif;
-  --serif: var(--font-serif), var(--font-ui), serif;
+  --read-kalpurush: 'Kalpurush', var(--font-ui), serif;
+  --read-subha: 'Li Subha Letterpress', 'Kalpurush', var(--font-ui), serif;
+  --serif: var(--read-kalpurush);
+  --signature: 'Li Mainak Signature', var(--serif);
   color-scheme: light;
 }
 
@@ -787,6 +815,16 @@ html {
 .reading[data-paragraph='indent'] .prose p.no-indent,
 .prose p.no-indent {
   text-indent: 0;
+}
+
+/* A signature line (¶ menu → Signature): handwritten font, never indented. */
+.prose p.signature,
+.reading[data-paragraph='indent'] .prose p.signature {
+  font-family: var(--signature);
+  font-size: 1.5em;
+  line-height: 1.4;
+  text-indent: 0;
+  margin-top: 0.8em;
 }
 
 /* Paragraph settings from the editor's ¶ menu (space above). */
@@ -2165,4 +2203,15 @@ html {
   .promo-compact .promo-actions {
     justify-content: flex-start;
   }
+}
+
+/* The font buttons in reader settings show each font. */
+.seg button.font-kalpurush {
+  font-family: var(--read-kalpurush);
+}
+.seg button.font-subha {
+  font-family: var(--read-subha);
+}
+.prose p.signature {
+  font-weight: 400;
 }
