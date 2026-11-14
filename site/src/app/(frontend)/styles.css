@@ -388,6 +388,7 @@ textarea.input {
 }
 .section-head h2 {
   font-size: 24px;
+  color: #f15a24; /* the logo's dark orange, in light and dark mode */
 }
 .section-head a {
   color: var(--muted);
@@ -469,7 +470,8 @@ html {
   flex-wrap: wrap;
   gap: 12px;
 }
-.intro-art img {
+/* The intro illustration (not the খুচরো আলাপ deck, whose images keep their square). */
+.intro-art:not(.intro-deck) img {
   width: 100%;
   max-width: 360px;
   margin-left: auto;
@@ -482,7 +484,7 @@ html {
   .intro-art {
     order: -1;
   }
-  .intro-art img {
+  .intro-art:not(.intro-deck) img {
     max-width: 200px;
     margin: 0;
   }
@@ -823,7 +825,7 @@ html {
 .prose p.signature,
 .reading[data-paragraph='indent'] .prose p.signature {
   font-family: var(--signature);
-  font-size: 1.5em;
+  font-size: 1.15em;
   line-height: 1.4;
   text-indent: 0;
   margin-top: 0.8em;
@@ -2222,4 +2224,22 @@ html {
 }
 .prose p.signature {
   font-weight: 400;
+}
+
+/* Reading width only changes anything on wide screens; on phones the text already fills
+   the screen, so the option is hidden there. */
+@media (max-width: 760px) {
+  .panel-row.wide-only {
+    display: none;
+  }
+}
+
+/* Phones: the welcome heading, text and buttons centred above the deck. */
+@media (max-width: 760px) {
+  .intro-main {
+    text-align: center;
+  }
+  .intro-main .actions {
+    justify-content: center;
+  }
 }

@@ -344,7 +344,7 @@ export function Reader({
                   ]}
                 />
               </div>
-              <div className="panel-row">
+              <div className="panel-row wide-only">
                 <span>{t.reader.width}</span>
                 <Seg
                   value={settings.width}

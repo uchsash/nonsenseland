@@ -79,7 +79,7 @@ function ParagraphStylePlugin() {
             dom.toggleAttribute('data-nl-noindent', Boolean($getState(node, noIndentState)))
             const signature = Boolean($getState(node, signatureState))
             dom.style.fontFamily = signature ? "'Li Mainak Signature', serif" : ''
-            dom.style.fontSize = signature ? '1.5em' : ''
+            dom.style.fontSize = signature ? '1.15em' : ''
           }
         })
       }),

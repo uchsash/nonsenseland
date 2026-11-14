@@ -135,7 +135,7 @@ async function Intro({ sections }: { sections: Section[] }) {
 
   return (
     <section className={`intro spacing-${s.introSpacing ?? 'normal'}`}>
-      <div>
+      <div className="intro-main">
         <h1 className={colorClass(s.introTitleColor)}>{s.introTitle}</h1>
         {s.introText ? (
           <div className="intro-text">

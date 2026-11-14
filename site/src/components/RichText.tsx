@@ -46,6 +46,27 @@ const isEmptyParagraph = (node: Paragraph) =>
   !node.children?.length || node.children.every((c) => c.type === 'text' && !c.text?.trim())
 
 /** Default rendering plus colours, paragraph settings, footnotes and “Lines without gaps”. */
+/** Splits a paragraph's children where two line breaks follow each other (blank text between is ignored). */
+function splitAtDoubleBreaks<T extends { type?: string; text?: string }>(children: T[]): T[][] {
+  const parts: T[][] = [[]]
+  for (let i = 0; i < children.length; i++) {
+    const node = children[i]
+    if (node.type === 'linebreak') {
+      let j = i + 1
+      while (j < children.length && children[j].type === 'text' && !children[j].text?.trim()) j++
+      if (children[j]?.type === 'linebreak') {
+        // Skip the whole run of breaks; start a new part.
+        while (j + 1 < children.length && (children[j + 1].type === 'linebreak' || (children[j + 1].type === 'text' && !children[j + 1].text?.trim()))) j++
+        parts.push([])
+        i = j
+        continue
+      }
+    }
+    parts[parts.length - 1].push(node)
+  }
+  return parts.filter((part) => part.some((n) => n.type !== 'linebreak' && (n.type !== 'text' || n.text?.trim())))
+}
+
 const makeConverters =
   (footnotes: FootnoteIndex): JSXConvertersFunction =>
   ({ defaultConverters }) => ({
@@ -67,11 +88,24 @@ const makeConverters =
         (p.$?.noIndent || (align && align !== 'justify')) && 'no-indent',
         p.$?.signature && 'signature',
       ].filter(Boolean)
+      const style = p.indent ? { paddingInlineStart: `${p.indent * 2}em` } : undefined
+      // Text pasted from Facebook and the like often marks paragraphs with two line breaks
+      // (Shift+Enter twice) inside one paragraph. Each part becomes its own paragraph, so
+      // indent and spacing work as for real paragraphs; single line breaks stay line breaks.
+      const parts = splitAtDoubleBreaks(node.children)
+      if (parts.length > 1) {
+        return (
+          <>
+            {parts.map((part, i) => (
+              <p key={i} className={classes.length ? classes.join(' ') : undefined} style={style}>
+                {nodesToJSX({ nodes: part })}
+              </p>
+            ))}
+          </>
+        )
+      }
       return (
-        <p
-          className={classes.length ? classes.join(' ') : undefined}
-          style={p.indent ? { paddingInlineStart: `${p.indent * 2}em` } : undefined}
-        >
+        <p className={classes.length ? classes.join(' ') : undefined} style={style}>
           {nodesToJSX({ nodes: node.children })}
         </p>
       )
