@@ -1,9 +1,10 @@
 import Script from 'next/script'
 
 import { getT } from '@/i18n/server'
-import { getAdSettings, pickAd } from '@/lib/data'
-import type { Book } from '@/payload-types'
+import { getAdSettings, getAdsFor } from '@/lib/data'
+import type { Ad, Book } from '@/payload-types'
 
+import { AdRotation } from './AdRotation'
 import { BookPromo } from './BookPromo'
 import { Img } from './Img'
 
@@ -13,11 +14,18 @@ import { Img } from './Img'
  */
 export async function AdSlot({ slot, adId, full = false }: { slot: string; adId?: number; full?: boolean }) {
   const t = await getT()
-  const ad = await pickAd(slot, adId, full)
-  if (!ad) return null
-
   // An end-of-text ad never shows anywhere but the end of an article or book.
-  if (ad.placement === 'end' && !full) return null
+  const ads = (await getAdsFor(slot, adId, full)).filter((ad) => ad.placement !== 'end' || full)
+  const shown = (await Promise.all(ads.map((ad) => renderAd(ad, full, t.ad.label)))).filter(Boolean)
+  if (shown.length === 0) return null
+  if (shown.length === 1) return shown[0]
+  // Pages are cached and served to everyone as they are, so the page carries every ad of the
+  // slot and the browser chooses one (AdRotation).
+  return <AdRotation>{shown}</AdRotation>
+}
+
+async function renderAd(ad: Ad, full: boolean, label: string) {
+  const t = { ad: { label } }
 
   // Full size only at the end of an article or book, where the reader has stopped;
   // everywhere else (in the middle of a text, between sections) a compact one.
@@ -63,7 +71,7 @@ export async function AdSlot({ slot, adId, full = false }: { slot: string; adId?
           data-full-width-responsive="true"
         />
         <Script id={`adsense-push-${ad.id}`} strategy="lazyOnload">
-          {'(adsbygoogle = window.adsbygoogle || []).push({});'}
+          {`document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status])').forEach((el)=>{if(el.offsetParent)(adsbygoogle=window.adsbygoogle||[]).push({})})`}
         </Script>
       </aside>
     )
