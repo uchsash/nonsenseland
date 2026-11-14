@@ -6,6 +6,7 @@ import { fillVideoThumbnail } from '../lib/video-thumbnail'
 import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
 import { detectPlatform } from '../utilities/video'
+import { templateImageField } from '../lib/drawn-card'
 
 const thumbnailCleanup = automaticImageCleanup({ collection: 'videos', field: 'thumbnail', source: 'thumbnailSource' })
 
@@ -22,6 +23,7 @@ export const Videos: CollectionConfig = {
   versions: { drafts: { schedulePublish: true }, maxPerDoc: 10 },
   access: { read: publishedOrStaff, create: staffOnly, update: staffOnly, delete: staffOnly },
   fields: [
+    templateImageField,
     { name: 'title', type: 'text', required: true },
     {
       name: 'url',
@@ -73,6 +75,11 @@ export const Videos: CollectionConfig = {
         { name: 'highlight', type: 'text', label: 'Headline (big, orange)', admin: { placeholder: 'হ্যারি পটার' } },
         { name: 'line2', type: 'text', label: 'Second line (dark, optional)', admin: { placeholder: 'এখন বাংলায়' } },
         { name: 'subline', type: 'text', label: 'Subheading (small line)', admin: { placeholder: 'রেগুলার ও ইলাস্ট্রেটেড এডিশন' } },
+        {
+          name: 'preview',
+          type: 'ui',
+          admin: { components: { Field: '/components/admin/TemplateCard#VideoTemplateCard' } },
+        },
       ],
     },
     { name: 'description', type: 'textarea' },

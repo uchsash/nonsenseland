@@ -6,6 +6,7 @@ import { automaticImageCleanup } from '../lib/template-media'
 import { readingMinutes } from '../utilities/lexical'
 import { previewAt } from '../utilities/preview'
 import { slugField } from '../utilities/slug'
+import { templateImageField } from '../lib/drawn-card'
 
 const headerCleanup = automaticImageCleanup({ collection: 'articles', field: 'cover', source: 'coverSource' })
 
@@ -46,8 +47,14 @@ export const Articles: CollectionConfig = {
         { name: 'highlight', type: 'text', label: 'Headline (big, orange)' },
         { name: 'line2', type: 'text', label: 'Second line (dark, optional)' },
         { name: 'subline', type: 'text', label: 'Subheading (small line)' },
+        {
+          name: 'preview',
+          type: 'ui',
+          admin: { components: { Field: '/components/admin/TemplateCard#HeaderTemplateCard' } },
+        },
       ],
     },
+    templateImageField,
     {
       name: 'cover',
       type: 'upload',

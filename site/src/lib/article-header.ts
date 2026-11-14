@@ -4,12 +4,14 @@ import path from 'path'
 import type { PayloadRequest } from 'payload'
 
 import { onWorkers } from './cloudflare'
+import { takeDrawnCard } from './drawn-card'
 import { renderTitleCard } from './title-card'
 import { idOf } from './video-thumbnail'
 
 export type HeaderSource = 'own' | 'template'
 
 type ArticleData = {
+  templateImage?: unknown
   title?: string
   category?: unknown
   cover?: unknown
@@ -74,16 +76,18 @@ export async function fillArticleHeader(
       d?.header?.focusY ?? null,
     ])
   const needsNew = !current || photoAdded || (previousSource === 'template' && key(data) !== key(original))
+  const drawn = takeDrawnCard(data)
   if (!needsNew || !data.title) return
-  // TODO(cloudflare): see video-thumbnail.ts; header images from the template need sharp.
-  if (onWorkers) return
+  // The browser's drawing is used when there is one; the server can only draw outside
+  // Cloudflare (sharp), e.g. in development or scripts.
+  if (!drawn && onWorkers) return
 
   const categoryId = idOf(data.category)
   const category = categoryId
     ? await req.payload.findByID({ collection: 'categories', id: categoryId, depth: 0, req }).catch(() => null)
     : null
   const photoId = idOf(data.header?.photo)
-  const file = await renderTitleCard({
+  const file = drawn ?? await renderTitleCard({
     title: data.title,
     category: category?.name,
     highlight: data.header?.highlight,

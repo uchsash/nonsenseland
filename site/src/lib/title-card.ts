@@ -3,6 +3,7 @@ import path from 'path'
 import sharp, { type OverlayOptions } from 'sharp'
 
 import { FRAME_INNER, type Framing, framePhoto } from '../utilities/photo-frame'
+import { splitTitle } from '../utilities/title-lines'
 
 /**
  * Template images (1280×720), in the style of the hand-made reel thumbnails. Video thumbnail:
@@ -53,20 +54,7 @@ async function fitLine(value: string, sizes: number[], color: string, width = TE
   return text(value, { size: sizes[sizes.length - 1], color, width })
 }
 
-/**
- * Splits a title into the three lines when the admin left them empty: anything after
- * “—”, “–” or “:” becomes the small line; a long main part is broken in two, the first
- * half going orange.
- */
-export function splitTitle(title: string): { highlight: string; line2: string; subline: string } {
-  const [main, ...rest] = title.split(/\s+[—–-]\s+|\s*[:।|]\s+|\n/)
-  const subline = rest.join(' ').trim()
-  const words = main.trim().split(/\s+/)
-  if (main.length <= 16 || words.length < 2) return { highlight: main.trim(), line2: '', subline }
-  let cut = 1
-  while (cut < words.length - 1 && words.slice(0, cut + 1).join(' ').length <= main.length / 2) cut++
-  return { highlight: words.slice(0, cut).join(' '), line2: words.slice(cut).join(' '), subline }
-}
+export { splitTitle }
 
 type CardInput = {
   title: string

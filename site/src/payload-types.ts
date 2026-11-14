@@ -204,6 +204,7 @@ export interface Article {
     line2?: string | null;
     subline?: string | null;
   };
+  templateImage?: string | null;
   /**
    * Made from the template above. To use a finished image of your own instead, remove this one and upload yours (16:9).
    */
@@ -571,6 +572,7 @@ export interface Chapter {
  */
 export interface Video {
   id: number;
+  templateImage?: string | null;
   title: string;
   /**
    * Facebook or YouTube link. Facebook videos must be Public.
@@ -1240,6 +1242,7 @@ export interface ArticlesSelect<T extends boolean = true> {
         line2?: T;
         subline?: T;
       };
+  templateImage?: T;
   cover?: T;
   coverSource?: T;
   excerpt?: T;
@@ -1268,6 +1271,7 @@ export interface ArticlesSelect<T extends boolean = true> {
  * via the `definition` "videos_select".
  */
 export interface VideosSelect<T extends boolean = true> {
+  templateImage?: T;
   title?: T;
   url?: T;
   platform?: T;

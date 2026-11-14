@@ -2,6 +2,7 @@ import type { PayloadRequest } from 'payload'
 
 import { detectPlatform, youtubeId } from '../utilities/video'
 import { onWorkers } from './cloudflare'
+import { takeDrawnCard } from './drawn-card'
 import { renderTitleCard } from './title-card'
 
 export type ThumbnailSource = 'own' | 'youtube' | 'card'
@@ -21,6 +22,7 @@ async function youtubeThumbnail(url: string): Promise<Buffer | null> {
 }
 
 type VideoData = {
+  templateImage?: unknown
   title?: string
   url?: string
   category?: unknown
@@ -54,6 +56,7 @@ export async function fillVideoThumbnail(
   const cardText = (d?: VideoData) => JSON.stringify([d?.title, idOf(d?.category), d?.card?.highlight, d?.card?.line2, d?.card?.subline])
   const titleOrCategoryChanged = cardText(data) !== cardText(original)
   const needsNew = !current || (previousSource === 'card' && titleOrCategoryChanged)
+  const drawn = takeDrawnCard(data)
   if (!needsNew || !data.title) return
 
   let file: Buffer | null = null
@@ -62,8 +65,8 @@ export async function fillVideoThumbnail(
     file = await youtubeThumbnail(data.url)
     if (file) source = 'youtube'
   }
-  // TODO(cloudflare): title cards need sharp, which Workers lack; they will be drawn in the
-  // admin's browser. Until then a video without a YouTube thumbnail keeps no thumbnail.
+  // Otherwise the title card drawn in the browser; the server can only draw outside Cloudflare.
+  if (!file && drawn) file = drawn
   if (!file && onWorkers) return
   if (!file) {
     const categoryId = idOf(data.category)
