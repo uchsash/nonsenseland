@@ -72,7 +72,7 @@ export default buildConfig({
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' · Nonsenseland admin' },
     components: {
-      afterNavLinks: ['/components/admin/Analytics#AnalyticsNavLink'],
+      afterNavLinks: ['/components/admin/Analytics#AnalyticsNavLink', '/components/admin/SignedInHint#SignedInHint'],
       views: {
         analytics: { Component: '/components/admin/Analytics#AnalyticsView', path: '/analytics' },
       },

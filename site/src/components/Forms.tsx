@@ -1,8 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import Script from 'next/script'
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 
 import { type FormState, sendMessage, sendToKindle, subscribe } from '@/app/(frontend)/actions'
 import { useT } from '@/i18n/client'
@@ -11,15 +10,69 @@ import { useAccount } from './AccountProvider'
 
 const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
-/** Invisible-by-default Cloudflare spam check; renders nothing until keys are set. */
-export function Human() {
+type Turnstile = {
+  render: (el: HTMLElement, options: Record<string, unknown>) => string
+  reset: (id: string) => void
+  remove: (id: string) => void
+}
+declare global {
+  interface Window {
+    turnstile?: Turnstile
+  }
+}
+
+/** The Turnstile script, loaded once for the whole visit (explicit rendering). */
+let turnstileReady: Promise<Turnstile> | null = null
+const loadTurnstile = () =>
+  (turnstileReady ??= new Promise((resolve, reject) => {
+    if (window.turnstile) return resolve(window.turnstile)
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+    script.async = true
+    script.onload = () => (window.turnstile ? resolve(window.turnstile) : reject(new Error('turnstile')))
+    script.onerror = () => {
+      turnstileReady = null
+      reject(new Error('turnstile'))
+    }
+    document.head.append(script)
+  }))
+
+/**
+ * Invisible-by-default Cloudflare spam check; renders nothing until keys are set.
+ * Rendered explicitly whenever a form appears (also after moving between pages inside the
+ * site, where the script's one-time page scan would miss it), renewed before it expires, and
+ * started afresh after each submission (`reset` changes), since a pass can be used only once.
+ */
+export function Human({ reset }: { reset?: unknown }) {
+  const box = useRef<HTMLDivElement>(null)
+  const widget = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!siteKey) return
+    let cancelled = false
+    loadTurnstile()
+      .then((turnstile) => {
+        if (cancelled || !box.current) return
+        widget.current = turnstile.render(box.current, {
+          sitekey: siteKey,
+          appearance: 'interaction-only',
+          'refresh-expired': 'auto',
+        })
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+      if (widget.current) window.turnstile?.remove(widget.current)
+      widget.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (reset !== undefined && widget.current) window.turnstile?.reset(widget.current)
+  }, [reset])
+
   if (!siteKey) return null
-  return (
-    <>
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-      <div className="cf-turnstile" data-sitekey={siteKey} data-appearance="interaction-only" />
-    </>
-  )
+  return <div ref={box} className="cf-turnstile" />
 }
 
 export const Note = ({ state }: { state: FormState }) =>
@@ -54,7 +107,7 @@ export function NewsletterForm() {
           {t.newsletter.button}
         </button>
       </div>
-      <Human />
+      <Human reset={state} />
       <Note state={state} />
     </form>
   )
@@ -80,7 +133,7 @@ export function ContactForm() {
         {t.contact.message}
         <textarea className="input" name="message" required />
       </label>
-      <Human />
+      <Human reset={state} />
       <div>
         <button className="btn" disabled={pending}>
           {t.contact.send}
@@ -144,7 +197,7 @@ export function KindleForm({ bookId, sender }: { bookId: number; sender: string 
           {pending ? t.kindle.sending : t.kindle.send}
         </button>
       </div>
-      <Human />
+      <Human reset={state} />
       <Note state={state} />
     </form>
   )

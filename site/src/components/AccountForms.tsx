@@ -54,7 +54,7 @@ export function LoginForm({ next }: { next: string }) {
         {t.account.password}
         <input className="input" type="password" name="password" required autoComplete="current-password" />
       </label>
-      <Human />
+      <Human reset={state} />
       <button className="btn" disabled={pending}>
         {t.account.login}
       </button>
@@ -90,7 +90,7 @@ export function SignupForm({ next }: { next: string }) {
         <input type="checkbox" name="newsletter" />
         {t.account.wantNewsletter}
       </label>
-      <Human />
+      <Human reset={state} />
       <button className="btn" disabled={pending}>
         {t.account.createAccount}
       </button>
@@ -112,7 +112,7 @@ export function ForgotForm() {
         {t.account.email}
         <input className="input" type="email" name="email" required autoComplete="email" />
       </label>
-      <Human />
+      <Human reset={state} />
       <button className="btn" disabled={pending}>
         {t.account.sendReset}
       </button>
