@@ -438,3 +438,21 @@ Editable in admin like every other page. Planned content:
 - The font files sit in `site/public/fonts/` and are **not in git** (the repository is public). Originals: `Fonts for Website/` (also ignored).
 - Licence: the Lipighor licences bought (desktop) do **not** allow web use: webfont use needs a separate Lipighor webfont licence (admin@lipighor.com). Kalpurush is free for personal use; commercial use needs the designer's permission. Settle both before launch, or switch to free fonts.
 - Local Postgres moved to port 15433: Windows reserved 5361–5560 after a restart, which blocked 5433.
+
+## Cloudflare deployment (2026-11-14)
+
+**Test site:** https://test.nonsenseland.com (Worker `nonsenseland`). nonsenseland.com itself is added after the owner approves the test site.
+
+- **Database:** Neon (Singapore) through Hyperdrive `nonsenseland-db`. The local database was copied to Neon on 2026-11-14; **from now on content is edited on the live admin** (test.nonsenseland.com/admin). The local Docker database is only for development and is no longer in sync.
+- **Files:** R2 `nonsenseland-media` (images, public), `nonsenseland-files` (EPUB/Word, private), `nonsenseland-cache` (page cache). Image sizes for new uploads are made on first view by `/img` with Cloudflare Images and kept in R2 (each size once; free allowance 5,000/month).
+- **Title cards / article headers:** drawn in the admin's browser (canvas) with a live preview, sent with the save. Workers cannot run sharp.
+- **Book import:** linkedom instead of jsdom (runs on Workers).
+- **Jobs:** hourly Cron Trigger (`worker.ts`) runs scheduled publishing; newsletters run immediately.
+- **Secrets** (Worker): PAYLOAD_SECRET (new for live), RESEND_API_KEY, EMAIL_FROM, KINDLE_FROM, CONTACT_TO, CRON_SECRET, TURNSTILE_SECRET_KEY. Copies in `site/.env.production.local` (never committed). Public build values in `site/.env.production`.
+- **Deploy:** `npm run cf:build` then `npm run cf:deploy` (needs Windows Developer Mode for symlinks).
+- **Schema changes:** `npx payload migrate:create <name>` locally, then run it on Neon: `DATABASE_URL=<DATABASE_URL_DIRECT> NODE_ENV=production npx payload migrate`.
+- **Backups of the live site:** `npm run backup:live` (Neon dump + R2 files mirrored in `G:\Nonsenseland Backups\live-files` + live.env).
+- **Accounts:** the live database's only account is the temporary test admin (password in `.env.production.local`). The owner creates their own admin, then that account is removed.
+- **Bundle size:** 9.0 MB of the 10 MB Worker limit (compressed). Watch it when adding libraries.
+- **Watch:** an occasional "This socket has been closed" log after a page (pages still load; database connections are closed after each use).
+- Local Postgres moved to port 15433 (Windows reserved 5433).

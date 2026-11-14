@@ -20,7 +20,8 @@
     "restore": "node scripts/restore.mjs",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/index.ts",
     "cf:build": "cross-env BUILD_TARGET=cloudflare NODE_OPTIONS=--no-deprecation opennextjs-cloudflare build",
-    "cf:deploy": "opennextjs-cloudflare deploy"
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "backup:live": "node scripts/backup-live.mjs"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.93.0",
