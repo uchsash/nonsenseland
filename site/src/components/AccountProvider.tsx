@@ -30,6 +30,29 @@ const rememberSignedIn = () => {
   if (!maybeSignedIn()) document.cookie = 'nl-in=1; path=/; max-age=604800; samesite=lax'
 }
 
+/**
+ * A like or bookmark pressed while logged out: remembered while the visitor logs in, then
+ * done on the way back, so the click is not lost.
+ */
+type Pending = { kind: 'like'; id: number } | { kind: 'bookmark'; type: string; target: number }
+const PENDING = 'nl-pending'
+const savePending = (p: Pending) => {
+  try {
+    sessionStorage.setItem(PENDING, JSON.stringify({ ...p, at: Date.now() }))
+  } catch {}
+}
+const takePending = (): Pending | null => {
+  try {
+    const raw = sessionStorage.getItem(PENDING)
+    sessionStorage.removeItem(PENDING)
+    const p = raw ? (JSON.parse(raw) as Pending & { at: number }) : null
+    // A login abandoned long ago does not count.
+    return p && Date.now() - p.at < 15 * 60_000 ? p : null
+  } catch {
+    return null
+  }
+}
+
 const post = (path: string, body: unknown) =>
   fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
 
@@ -57,8 +80,23 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
           return
         }
         setUser(state.user)
-        setLikes(new Set(state.likes))
-        setBookmarks(new Set(state.bookmarks))
+        const likes = new Set<number>(state.likes)
+        const bookmarks = new Set<string>(state.bookmarks)
+        // The like or bookmark pressed before logging in (never undone if it is already there).
+        const pending = takePending()
+        if (pending?.kind === 'like' && !likes.has(pending.id)) {
+          likes.add(pending.id)
+          post('/account/like', { alap: pending.id })
+            .then((r) => r.json())
+            .then((result) => setCounts((prev) => ({ ...prev, [pending.id]: result.count })))
+            .catch(() => {})
+        }
+        if (pending?.kind === 'bookmark' && !bookmarks.has(`${pending.type}:${pending.target}`)) {
+          bookmarks.add(`${pending.type}:${pending.target}`)
+          post('/account/bookmark', { kind: pending.type, target: pending.target }).catch(() => {})
+        }
+        setLikes(likes)
+        setBookmarks(bookmarks)
         mergeProgress(state.progress)
       })
       .catch(() => {})
@@ -89,7 +127,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         })
       }
       post('/account/like', { alap: id })
-        .then((r) => (r.status === 401 ? (toLogin(), null) : r.json()))
+        .then((r) => (r.status === 401 ? (savePending({ kind: 'like', id }), toLogin(), null) : r.json()))
         .then((result) => {
           if (!result) return
           rememberSignedIn()
@@ -119,7 +157,10 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       if (hinted) flip()
       post('/account/bookmark', { kind, target })
         .then((r) => {
-          if (r.status === 401) return toLogin()
+          if (r.status === 401) {
+            savePending({ kind: 'bookmark', type: kind, target })
+            return toLogin()
+          }
           if (!hinted && r.ok) flip()
           rememberSignedIn()
         })

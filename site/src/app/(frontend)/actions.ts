@@ -53,6 +53,9 @@ export async function sendToKindle(_: FormState, form: FormData): Promise<FormSt
   const t = await getT()
   const to = String(form.get('kindle') ?? '').trim()
   const bookId = Number(form.get('book'))
+  // Only for signed-in readers (a free account), like downloads.
+  const user = await currentUser()
+  if (!user) return { ok: false, message: t.kindle.failed }
   if (!KINDLE.test(to)) return { ok: false, message: t.kindle.invalid }
   if (!emailConfigured()) return { ok: false, message: t.kindle.notConfigured }
   if (!(await verifyHuman(form.get('cf-turnstile-response')))) return { ok: false, message: t.kindle.failed }
@@ -95,9 +98,8 @@ export async function sendToKindle(_: FormState, form: FormData): Promise<FormSt
       data: { book: book.id, ipHash, status: 'sent' },
       overrideAccess: true,
     })
-    // Signed-in readers get this address filled in next time.
-    const user = await currentUser()
-    if (user && user.kindleEmail !== to) {
+    // The address is filled in next time.
+    if (user.kindleEmail !== to) {
       await payload.update({ collection: 'users', id: user.id, data: { kindleEmail: to } }).catch(() => null)
     }
     return { ok: true, message: t.kindle.sent }

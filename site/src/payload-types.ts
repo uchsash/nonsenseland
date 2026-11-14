@@ -2331,6 +2331,14 @@ export interface InterfaceText {
      * Default: Kindle-এ পাঠানো এখনো চালু হয়নি।
      */
     notConfigured?: string | null;
+    /**
+     * Default: কিন্ডলে বই পাঠাতে প্রথমে লগইন করুন।
+     */
+    loginFirst?: string | null;
+    /**
+     * Default: লগইন করুন
+     */
+    loginButton?: string | null;
   };
   reader?: {
     /**
@@ -3105,6 +3113,8 @@ export interface InterfaceTextSelect<T extends boolean = true> {
         limited?: T;
         failed?: T;
         notConfigured?: T;
+        loginFirst?: T;
+        loginButton?: T;
       };
   reader?:
     | T

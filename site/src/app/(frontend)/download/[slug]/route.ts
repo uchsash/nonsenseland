@@ -1,9 +1,14 @@
+import { currentUser } from '@/lib/account'
 import { payloadClient } from '@/lib/data'
 import { readStoredFile } from '@/lib/files'
 import type { BookFile } from '@/payload-types'
 
-/** EPUB download. Only for published, free books with downloads allowed. */
-export async function GET(_: Request, { params }: { params: Promise<{ slug: string }> }) {
+/**
+ * EPUB download. Only for published, free books with downloads allowed, and only for signed-in
+ * readers (a free account): every download brings a reader the site can reach again. Visitors
+ * who are not signed in go to the login page and come straight back here afterwards.
+ */
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const payload = await payloadClient()
   const { docs } = await payload.find({
@@ -19,13 +24,19 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
   if (!book || !free || !book.ebook?.allowDownload || !file?.filename) {
     return new Response('Not found', { status: 404 })
   }
+  if (!(await currentUser())) {
+    const login = new URL('/login', request.url)
+    // Back to the book page, which then starts the download (components/DownloadAfterLogin).
+    login.searchParams.set('next', `/books/${book.slug}?download=1`)
+    return Response.redirect(login, 303)
+  }
 
   const content = await readStoredFile('book-files', file.filename)
   return new Response(new Uint8Array(content), {
     headers: {
       'Content-Type': 'application/epub+zip',
       'Content-Disposition': `attachment; filename="${book.slug}.epub"`,
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'private, no-store',
     },
   })
 }

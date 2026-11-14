@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { BookmarkButton } from '@/components/AccountButtons'
 import { AdSlot } from '@/components/AdSlot'
 import { ContinueReading } from '@/components/ContinueReading'
+import { DownloadAfterLogin } from '@/components/DownloadAfterLogin'
 import { KindleForm } from '@/components/Forms'
 import { Img } from '@/components/Img'
 import { RichText } from '@/components/RichText'
@@ -108,10 +109,12 @@ export default async function BookPage({ params }: Props) {
               </Link>
             ) : null}
             {canDownload ? (
-              <a href={`/download/${book.slug}`} className="btn ghost" download>
+              // No `download` attribute: a visitor who is not signed in is sent to the login page.
+              <a href={`/download/${book.slug}`} className="btn ghost">
                 {t.book.download}
               </a>
             ) : null}
+            {canDownload ? <DownloadAfterLogin slug={book.slug!} /> : null}
           </div>
 
           {canKindle ? (

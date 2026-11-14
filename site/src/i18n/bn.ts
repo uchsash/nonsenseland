@@ -91,6 +91,8 @@ export const defaults = {
     limited: 'অনেকবার চেষ্টা করা হয়েছে। এক ঘণ্টা পর আবার চেষ্টা করুন।',
     failed: 'পাঠানো যায়নি। একটু পরে আবার চেষ্টা করুন।',
     notConfigured: 'Kindle-এ পাঠানো এখনো চালু হয়নি।',
+    loginFirst: 'কিন্ডলে বই পাঠাতে প্রথমে লগইন করুন।',
+    loginButton: 'লগইন করুন',
   },
   reader: {
     settings: 'পড়ার সেটিংস',

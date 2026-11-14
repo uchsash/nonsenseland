@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import Script from 'next/script'
 import { useActionState } from 'react'
 
@@ -31,6 +32,7 @@ export const Note = ({ state }: { state: FormState }) =>
 export function NewsletterForm() {
   const t = useT()
   const [state, action, pending] = useActionState(subscribe, {})
+  const { user } = useAccount()
   return (
     <form action={action}>
       <div className="inline-form">
@@ -43,6 +45,8 @@ export function NewsletterForm() {
           type="email"
           name="email"
           required
+          key={user?.email ?? ''}
+          defaultValue={user?.email ?? ''}
           placeholder={t.newsletter.placeholder}
           autoComplete="email"
         />
@@ -59,16 +63,18 @@ export function NewsletterForm() {
 export function ContactForm() {
   const t = useT()
   const [state, action, pending] = useActionState(sendMessage, {})
+  // Signed-in readers find their name and email already filled in.
+  const { user } = useAccount()
   if (state.ok) return <Note state={state} />
   return (
     <form action={action} style={{ display: 'grid', gap: 16, maxWidth: 520 }}>
       <label className="field">
         {t.contact.name}
-        <input className="input" name="name" required autoComplete="name" />
+        <input className="input" name="name" required autoComplete="name" key={`n${user?.id ?? ''}`} defaultValue={user?.name ?? ''} />
       </label>
       <label className="field">
         {t.contact.email}
-        <input className="input" type="email" name="email" required autoComplete="email" />
+        <input className="input" type="email" name="email" required autoComplete="email" key={`e${user?.id ?? ''}`} defaultValue={user?.email ?? ''} />
       </label>
       <label className="field">
         {t.contact.message}
@@ -89,6 +95,22 @@ export function KindleForm({ bookId, sender }: { bookId: number; sender: string 
   const t = useT()
   const [state, action, pending] = useActionState(sendToKindle, {})
   const { user } = useAccount()
+  const pathname = usePathname()
+  // Sending to Kindle needs a free account, like downloading.
+  if (!user) {
+    const next = `?next=${encodeURIComponent(pathname)}`
+    return (
+      <div className="kindle-box">
+        <strong>{t.kindle.title}</strong>
+        <p className="muted" style={{ margin: '8px 0' }}>
+          {t.kindle.loginFirst}
+        </p>
+        <a href={`/login${next}`} className="btn">
+          {t.kindle.loginButton}
+        </a>
+      </div>
+    )
+  }
   return (
     <form action={action} className="kindle-box">
       <strong>{t.kindle.title}</strong>
