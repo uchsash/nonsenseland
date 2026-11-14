@@ -672,6 +672,7 @@ export interface Alap {
 export interface Page {
   id: number;
   title: string;
+  titleColor?: ('default' | 'dark-orange' | 'orange' | 'golden') | null;
   /**
    * Optional photo or sketch.
    */
@@ -1362,6 +1363,7 @@ export interface AuthorsSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  titleColor?: T;
   image?: T;
   content?: T;
   showContactForm?: T;

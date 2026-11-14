@@ -456,3 +456,23 @@ Editable in admin like every other page. Planned content:
 - **Bundle size:** 9.0 MB of the 10 MB Worker limit (compressed). Watch it when adding libraries.
 - **Watch:** an occasional "This socket has been closed" log after a page (pages still load; database connections are closed after each use).
 - Local Postgres moved to port 15433 (Windows reserved 5433).
+
+## Analytics (2026-11-14)
+
+- **Choice:** Cloudflare Web Analytics, shown inside the admin (Admin → Analytics).
+  - It's free, uses no cookies (so no consent banner) and the site already runs on Cloudflare.
+  - Google Analytics was rejected: it needs cookies and a consent banner, and showing it in the admin needs a Google service account.
+  - Counting views in our own database was rejected: a database write on every page view would keep Neon awake and cost money.
+- **What the Analytics page shows:**
+  - Visitors: page views, visits, views per day, most-read pages, referrers, countries, devices.
+  - The site's own numbers: reader accounts, newsletter subscribers, messages, Kindle sends, books being read, most-liked খুচরো আলাপ.
+- **Setup:**
+  1. Cloudflare → Analytics & Logs → Web Analytics → Add a site → the site's host name. Choose the manual JS snippet.
+  2. The snippet's token is public and goes in `.env.production` as `NEXT_PUBLIC_CF_BEACON_TOKEN`. The site tag goes in `wrangler.jsonc` vars as `CF_WEB_ANALYTICS_SITE_TAG`, and `CF_ACCOUNT_ID` goes there too.
+  3. Create an API token: My Profile → API Tokens → Custom → Account · Account Analytics · Read. Then run `npx wrangler secret put CF_ANALYTICS_TOKEN`; the owner runs this themselves.
+
+## Caching (2026-11-14)
+
+- **Problem:** cached pages (home, books) stayed stale after an admin save, because `revalidatePath` does nothing on Cloudflare without a tag cache.
+- **Fix:** a D1 tag cache was added (D1 database `nonsenseland-tags`, binding `NEXT_TAG_CACHE_D1`). Its usage stays within the Workers Paid allowance.
+- **Fix:** page addresses now show only published documents, except in admin preview. Before this, a draft could be opened by its address.

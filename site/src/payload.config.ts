@@ -71,6 +71,12 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' · Nonsenseland admin' },
+    components: {
+      afterNavLinks: ['/components/admin/Analytics#AnalyticsNavLink'],
+      views: {
+        analytics: { Component: '/components/admin/Analytics#AnalyticsView', path: '/analytics' },
+      },
+    },
   },
   collections: [
     ...[Articles, Videos, Alap, Categories, Topics, Authors, Pages, Books, Chapters, Media, Ads].map(withRevalidation),

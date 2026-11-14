@@ -65,9 +65,11 @@ type ListArgs = { category?: number; topic?: number; limit?: number; page?: numb
 
 const bySlug = async <T extends 'articles' | 'videos' | 'books' | 'pages' | 'topics'>(collection: T, slug: string) => {
   const draft = collection === 'topics' ? false : await isDraft()
+  // Unpublished documents only while the admin is previewing (topics have no drafts).
+  const where: Where = collection === 'topics' ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, await published()] }
   const res = await (await payloadClient()).find({
     collection,
-    where: { slug: { equals: slug } },
+    where,
     limit: 1,
     depth: 2,
     draft,

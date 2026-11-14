@@ -36,6 +36,8 @@ import { ColorPicker as ColorPicker_ac8d8918ba8653d4240c4de6aececaba } from '../
 import { PaidNote as PaidNote_9310b1533b7f7fb1a3c073c95a2446eb } from '../../../components/admin/Note'
 import { BackToBook as BackToBook_fb2088a566d9e117de3345a93965bb4d } from '../../../components/admin/BackToBook'
 import { SectionSelect as SectionSelect_e297580632d1530e099098dd4ab827d3 } from '../../../components/admin/SectionSelect'
+import { AnalyticsNavLink as AnalyticsNavLink_1f6a64c0ab3f4f1e5c9fb34fe2be6495 } from '../../../components/admin/Analytics'
+import { AnalyticsView as AnalyticsView_1f6a64c0ab3f4f1e5c9fb34fe2be6495 } from '../../../components/admin/Analytics'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -78,5 +80,7 @@ export const importMap = {
   "/components/admin/Note#PaidNote": PaidNote_9310b1533b7f7fb1a3c073c95a2446eb,
   "/components/admin/BackToBook#BackToBook": BackToBook_fb2088a566d9e117de3345a93965bb4d,
   "/components/admin/SectionSelect#SectionSelect": SectionSelect_e297580632d1530e099098dd4ab827d3,
+  "/components/admin/Analytics#AnalyticsNavLink": AnalyticsNavLink_1f6a64c0ab3f4f1e5c9fb34fe2be6495,
+  "/components/admin/Analytics#AnalyticsView": AnalyticsView_1f6a64c0ab3f4f1e5c9fb34fe2be6495,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

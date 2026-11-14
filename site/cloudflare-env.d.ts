@@ -24,6 +24,7 @@ interface CloudflareEnv {
   R2: R2BucketLike
   R2_FILES: R2BucketLike
   NEXT_INC_CACHE_R2_BUCKET: R2BucketLike
+  NEXT_TAG_CACHE_D1: unknown
   IMAGES: ImagesBindingLike
   ASSETS: { fetch(request: Request): Promise<Response> }
   NEXT_PUBLIC_SERVER_URL: string

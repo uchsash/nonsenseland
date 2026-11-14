@@ -130,6 +130,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </footer>
         </UiTextProvider>
+        {/* Cloudflare Web Analytics: free, no cookies (so no consent banner). */}
+        {process.env.NEXT_PUBLIC_CF_BEACON_TOKEN ? (
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({ token: process.env.NEXT_PUBLIC_CF_BEACON_TOKEN })}
+            strategy="afterInteractive"
+          />
+        ) : null}
       </body>
     </html>
   )

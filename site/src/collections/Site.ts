@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone, publishedOrStaff, staffOnly } from '../access'
 import { previewAt } from '../utilities/preview'
+import { colorField } from '../utilities/palette'
 import { slugField } from '../utilities/slug'
 
 export const Pages: CollectionConfig = {
@@ -17,6 +18,7 @@ export const Pages: CollectionConfig = {
   access: { read: publishedOrStaff, create: staffOnly, update: staffOnly, delete: staffOnly },
   fields: [
     { name: 'title', type: 'text', required: true },
+    colorField('titleColor', 'Title colour'),
     { name: 'image', type: 'upload', relationTo: 'media', admin: { description: 'Optional photo or sketch.' } },
     { name: 'content', type: 'richText', required: true },
     {

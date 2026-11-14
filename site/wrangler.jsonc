@@ -27,6 +27,10 @@
   ],
   // Image resizing (sizes are made once and kept in R2).
   "images": { "binding": "IMAGES" },
+  // Tag cache: lets an admin save refresh the cached pages (revalidatePath).
+  "d1_databases": [
+    { "binding": "NEXT_TAG_CACHE_D1", "database_name": "nonsenseland-tags", "database_id": "d12dff6c-a2e0-48b3-97e6-de9bc80e46f4" }
+  ],
   "vars": {
     "NEXT_PUBLIC_SERVER_URL": "https://test.nonsenseland.com"
   },
