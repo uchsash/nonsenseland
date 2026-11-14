@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, staffOnly } from '../access'
+import { objectKeyField } from '../fields/objectKey'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -15,6 +16,7 @@ export const Media: CollectionConfig = {
       label: 'Description (alt text)',
       admin: { description: 'Short Bangla description of the image, for accessibility and Google.' },
     },
+    objectKeyField,
   ],
   upload: {
     mimeTypes: ['image/*'],

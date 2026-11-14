@@ -54,6 +54,7 @@ const dirname = path.dirname(filename)
 // On Cloudflare: the database through Hyperdrive, files in R2. In development: local
 // Postgres and the local upload folders.
 const cf = await workerEnv()
+// (The plugin's _objectKey column is declared on the collections, so the schema matches.)
 const r2 = cf
   ? [
       r2Storage({ collections: { media: true }, bucket: cf.R2 as never }),
@@ -87,10 +88,15 @@ export default buildConfig({
     ...g,
     hooks: { ...g.hooks, afterChange: [...(g.hooks?.afterChange ?? []), revalidateGlobal] },
   })),
-  // Runs scheduled publishing every minute while the server runs.
-  // On Cloudflare a Cron Trigger calls /api/payload-jobs/run instead (set up at deployment).
+  // Development: runs queued jobs (scheduled publishing) every minute while the server runs.
+  // Cloudflare: the hourly Cron Trigger in worker.ts calls /api/payload-jobs/run with CRON_SECRET.
   jobs: {
-    autoRun: [{ cron: '* * * * *', queue: 'default' }],
+    autoRun: cf ? undefined : [{ cron: '* * * * *', queue: 'default' }],
+    access: {
+      run: ({ req }) =>
+        Boolean(req.user) ||
+        (Boolean(process.env.CRON_SECRET) && req.headers.get('authorization') === `Bearer ${process.env.CRON_SECRET}`),
+    },
     tasks: [
       {
         slug: 'sendNewsletter',

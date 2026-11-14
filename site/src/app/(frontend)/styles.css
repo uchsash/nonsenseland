@@ -39,6 +39,8 @@
   --ui: var(--font-ui), system-ui, sans-serif;
   --read-kalpurush: 'Kalpurush', var(--font-ui), serif;
   --read-subha: 'Li Subha Letterpress', 'Kalpurush', var(--font-ui), serif;
+  --read-noto: var(--font-serif), var(--font-ui), serif;
+  --read-hind: var(--font-ui), system-ui, sans-serif;
   --serif: var(--read-kalpurush);
   --signature: 'Li Mainak Signature', var(--serif);
   color-scheme: light;
@@ -2211,6 +2213,12 @@ html {
 }
 .seg button.font-subha {
   font-family: var(--read-subha);
+}
+.seg button.font-noto {
+  font-family: var(--read-noto);
+}
+.seg button.font-hind {
+  font-family: var(--read-hind);
 }
 .prose p.signature {
   font-weight: 400;

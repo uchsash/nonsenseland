@@ -272,6 +272,7 @@ export interface Media {
    * Short Bangla description of the image, for accessibility and Google.
    */
   alt: string;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -522,6 +523,7 @@ export interface Book {
 export interface BookFile {
   id: number;
   note?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1470,6 +1472,7 @@ export interface ChaptersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1566,6 +1569,7 @@ export interface AdsSelect<T extends boolean = true> {
  */
 export interface BookFilesSelect<T extends boolean = true> {
   note?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2358,6 +2362,14 @@ export interface InterfaceText {
        * Default: শুভা
        */
       subha?: string | null;
+      /**
+       * Default: নোটো সেরিফ
+       */
+      noto?: string | null;
+      /**
+       * Default: হিন্দ শিলিগুড়ি
+       */
+      hind?: string | null;
     };
     /**
      * Default: অক্ষরের আকার
@@ -3106,6 +3118,8 @@ export interface InterfaceTextSelect<T extends boolean = true> {
           | {
               kalpurush?: T;
               subha?: T;
+              noto?: T;
+              hind?: T;
             };
         size?: T;
         spacing?: T;

@@ -13,6 +13,7 @@ import {
 import type { CollectionConfig } from 'payload'
 
 import { adminOnly, staffOnly } from '../access'
+import { onWorkers } from '../lib/cloudflare'
 import { sendNewsletterTest } from '../lib/newsletter'
 
 const staffAccess = { read: staffOnly, create: staffOnly, update: staffOnly, delete: staffOnly }
@@ -127,7 +128,9 @@ export const Newsletters: CollectionConfig = {
     afterChange: [
       async ({ doc, previousDoc, req }) => {
         if (doc.status === 'queued' && previousDoc?.status !== 'queued') {
-          await req.payload.jobs.queue({ task: 'sendNewsletter', input: { newsletter: doc.id }, req })
+          const job = await req.payload.jobs.queue({ task: 'sendNewsletter', input: { newsletter: doc.id }, req })
+          // On Cloudflare jobs otherwise wait for the hourly run; a newsletter goes out now.
+          if (onWorkers) await req.payload.jobs.runByID({ id: job.id, req })
         }
       },
     ],

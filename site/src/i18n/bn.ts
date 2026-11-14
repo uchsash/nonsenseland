@@ -97,7 +97,7 @@ export const defaults = {
     theme: 'পটভূমি',
     themes: { light: 'সাদা', sepia: 'সেপিয়া', dark: 'কালো' },
     font: 'হরফ',
-    fonts: { kalpurush: 'কালপুরুষ', subha: 'শুভা' },
+    fonts: { kalpurush: 'কালপুরুষ', subha: 'শুভা', noto: 'নোটো সেরিফ', hind: 'হিন্দ শিলিগুড়ি' },
     size: 'অক্ষরের আকার',
     spacing: 'লাইনের ফাঁক',
     spacings: { tight: 'কম', normal: 'মাঝারি', loose: 'বেশি' },

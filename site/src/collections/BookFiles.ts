@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { objectKeyField } from '../fields/objectKey'
 
 import { staffOnly } from '../access'
 
@@ -11,7 +12,7 @@ export const BookFiles: CollectionConfig = {
   labels: { singular: 'Book file', plural: 'Book files' },
   admin: { group: 'Library', description: 'EPUB and Word files for books.' },
   access: { read: staffOnly, create: staffOnly, update: staffOnly, delete: staffOnly },
-  fields: [{ name: 'note', type: 'text' }],
+  fields: [{ name: 'note', type: 'text' }, objectKeyField],
   upload: {
     mimeTypes: [
       'application/epub+zip',

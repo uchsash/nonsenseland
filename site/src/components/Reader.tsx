@@ -15,7 +15,7 @@ import { parseStored, setStored, useStored } from './useStored'
 type Theme = 'auto' | 'light' | 'sepia' | 'dark'
 type Settings = {
   theme: Theme
-  font: 'kalpurush' | 'subha'
+  font: 'kalpurush' | 'subha' | 'noto' | 'hind'
   size: number
   spacing: 'tight' | 'normal' | 'loose'
   width: 'narrow' | 'normal' | 'wide'
@@ -33,6 +33,12 @@ const DEFAULTS: Settings = {
   align: 'justify',
 }
 const LINE = { tight: 1.6, normal: 1.85, loose: 2.1 }
+const FONTS: Record<Settings['font'], string> = {
+  kalpurush: 'var(--read-kalpurush)',
+  subha: 'var(--read-subha)',
+  noto: 'var(--read-noto)',
+  hind: 'var(--read-hind)',
+}
 const WIDTH = { narrow: '580px', normal: '680px', wide: '820px' }
 const STORE = 'nl-reader'
 
@@ -93,7 +99,11 @@ export function Reader({
   const settings = useMemo<Settings>(() => {
     const s = { ...DEFAULTS, ...parseStored<Partial<Settings>>(raw, {}) }
     // Older saved choices (serif / sans) fall back to the default font.
-    if (s.font !== 'kalpurush' && s.font !== 'subha') s.font = DEFAULTS.font
+    // Older saved choices: serif → Noto Serif, sans → Hind Siliguri.
+    const old = s.font as string
+    if (old === 'serif') s.font = 'noto'
+    else if (old === 'sans') s.font = 'hind'
+    else if (!(s.font in FONTS)) s.font = DEFAULTS.font
     return s
   }, [raw])
   const [panel, setPanel] = useState<'settings' | 'toc' | null>(null)
@@ -217,7 +227,7 @@ export function Reader({
   }, [nextHref, prevHref, router])
 
   const style = {
-    '--r-font': settings.font === 'subha' ? 'var(--read-subha)' : 'var(--read-kalpurush)',
+    '--r-font': FONTS[settings.font],
     '--r-size': `${settings.size}px`,
     '--r-line': LINE[settings.spacing],
     '--r-width': WIDTH[settings.width],
@@ -296,6 +306,8 @@ export function Reader({
                   options={[
                     { value: 'kalpurush', label: t.reader.fonts.kalpurush, className: 'font-kalpurush' },
                     { value: 'subha', label: t.reader.fonts.subha, className: 'font-subha' },
+                    { value: 'noto', label: t.reader.fonts.noto, className: 'font-noto' },
+                    { value: 'hind', label: t.reader.fonts.hind, className: 'font-hind' },
                   ]}
                 />
               </div>

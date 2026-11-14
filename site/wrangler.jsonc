@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "nonsenseland",
-  "main": ".open-next/worker.js",
+  "main": "worker.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
@@ -9,7 +9,14 @@
   // Same Worker calling itself (OpenNext page cache).
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "nonsenseland" }],
   // Postgres on Neon, through Hyperdrive's connection pool.
-  "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "0385d4c58c1e4711aa429273052521f0" }],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "0385d4c58c1e4711aa429273052521f0",
+      // Used only by local tools (wrangler dev, deploy checks): the Docker database.
+      "localConnectionString": "postgres://nonsense:nonsense@localhost:15433/nonsenseland"
+    }
+  ],
   "r2_buckets": [
     // Uploaded images (public).
     { "binding": "R2", "bucket_name": "nonsenseland-media" },
@@ -25,6 +32,8 @@
   },
   // The test site. nonsenseland.com itself is added after the owner approves it.
   "workers_dev": false,
+  // Hourly: queued jobs such as scheduled publishing (see worker.ts).
+  "triggers": { "crons": ["0 * * * *"] },
   "routes": [{ "pattern": "test.nonsenseland.com", "custom_domain": true }]
   // Secrets (wrangler secret put): PAYLOAD_SECRET, RESEND_API_KEY, EMAIL_FROM, KINDLE_FROM,
   // CONTACT_TO, TURNSTILE_SECRET_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET.

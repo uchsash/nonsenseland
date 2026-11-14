@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Hind_Siliguri } from 'next/font/google'
+import { Hind_Siliguri, Noto_Serif_Bengali } from 'next/font/google'
 import Link from 'next/link'
 import Script from 'next/script'
 import React, { Suspense } from 'react'
@@ -19,6 +19,14 @@ const ui = Hind_Siliguri({
   subsets: ['bengali', 'latin'],
   weight: ['400', '500', '600'],
   variable: '--font-ui',
+  display: 'swap',
+})
+
+// One of the reading fonts (reader settings).
+const serif = Noto_Serif_Bengali({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '600'],
+  variable: '--font-serif',
   display: 'swap',
 })
 
@@ -58,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const social = s.social ?? []
 
   return (
-    <html lang="bn" className={ui.variable} suppressHydrationWarning>
+    <html lang="bn" className={`${ui.variable} ${serif.variable}`} suppressHydrationWarning>
       <head>
         <Script id="theme" strategy="beforeInteractive">
           {themeScript}
