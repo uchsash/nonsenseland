@@ -64,6 +64,9 @@ const r2 = cf
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
+  // Cloudflare Workers allow at most 100,000 PBKDF2 iterations; the same everywhere, so a
+  // password set locally also works on the live site.
+  auth: { passwordHashIterations: 100000 },
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
